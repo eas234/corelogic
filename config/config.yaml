@@ -1,3 +1,9 @@
+raw_path: '$OAK/proptax/raw/'
+
+raw_filename: 'corelogic.csv'
+
+out_path: '$OAK/proptax/results/'
+
 rand_state: 42
 
 test_size: 0.25
