@@ -63,6 +63,16 @@ def impute_and_normalize(X: pd.DataFrame,
 
     return X_processed
 
+def get_data_splitter(X, y, test_size=0.2, random_state=42):
+    # Split happens here ONCE
+    x_train, x_test, y_train, y_test = train_test_split(X,y, test_size=test_size, random_state=random_state)
+    
+    # Closure: inner function remembers variables from the outer scope
+    def get_split():
+        return x_train, x_test, y_train, y_test
+
+    return get_split
+
 def mpe2_loss(y_true, 
               y_pred):
     '''
@@ -112,9 +122,8 @@ def rf_reg_objective(trial,
     }
 
     # Split into train and test sets
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=test_size, random_state=random_state
-    )
+    split_fn = get_data_splitter(X,y)
+    X_train, X_test, y_train, y_test = split_fn()
     
     model = RandomForestRegressor(random_state=random_state, **params)
     scorer = make_scorer(loss_func)
@@ -131,8 +140,7 @@ def tune_model(objective,
             sampler_path='sampler.pkl', #.pkl file
             params_path='best_params.pkl', #.pkl file
             trials_path='trials.csv', #.csv file
-            n_trials=20
-              ):
+            n_trials=20):
 
     '''
     Model tuner
@@ -173,3 +181,27 @@ def tune_model(objective,
     df.to_csv(trials_path)
                 
     return df
+
+def train_test_write(X, y, params_path='params_path.pkl', outdir='outdir'):
+
+    """
+    to do tomorrow: add meta features
+    """
+    X_train, X_test, y_train, y_test = split_fn()
+
+    with open('params_path.pkl', rb) as f:
+         hyperparams=pickle.load(f)
+
+    model = RandomForestRegressor(**hyperparams)
+    model.fit(X_train, y_train)
+
+    y_pred = model.predict(X_test)
+
+    results_df = pd.DataFrame({
+    "y_true": y_test.reset_index(drop=True),
+    "y_pred": y_pred
+    })
+  
+    results_df.to_csv(outdir+"predictions.csv", index=False)
+
+    return results_df
