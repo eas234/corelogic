@@ -1,4 +1,5 @@
 import logging
+import miceforest as mf
 import numpy as np
 import os
 import pandas as pd
@@ -13,9 +14,54 @@ from sklearn.metrics import classification_report
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import make_scorer
+from sklearn.preprocessing import StandardScaler
 
 import optuna
 from optuna.samplers import TPESampler, RandomSampler
+
+def impute_and_normalize(X: pd.DataFrame, 
+                         features_to_preprocess: list, 
+                         random_state: int = 42) -> pd.DataFrame:
+    """
+    Imputes and normalizes selected features in a DataFrame using miceforest and StandardScaler.
+
+    Parameters:
+    - X: pd.DataFrame — input features.
+    - features_to_preprocess: list of column names to impute and normalize.
+    - random_state: int — for reproducibility.
+
+    Returns:
+    - pd.DataFrame with imputed and normalized features.
+    """
+
+    # Copy the DataFrame to avoid modifying original
+    X_processed = X.copy()
+
+    # Subset the data to be imputed
+    subset = X_processed[features_to_preprocess]
+
+    # Create miceforest kernel
+    kernel = mf.ImputationKernel(
+        subset,
+        datasets=1,
+        save_all_iterations=False,
+        random_state=random_state
+    )
+
+    # Perform imputation (e.g., 3 iterations of MICE)
+    kernel.mice(3)
+
+    # Extract the imputed dataset
+    imputed_subset = kernel.complete_data(0)
+
+    # Normalize using StandardScaler
+    scaler = StandardScaler()
+    normalized_array = scaler.fit_transform(imputed_subset)
+
+    # Replace in original DataFrame
+    X_processed[features_to_preprocess] = normalized_array
+
+    return X_processed
 
 def mpe2_loss(y_true, 
               y_pred):
@@ -125,3 +171,5 @@ def tune_model(objective,
     # Output trials DataFrame
     df = study.trials_dataframe(attrs=("number", "value", "params", "state"))
     df.to_csv(trials_path)
+                
+    return df
