@@ -19,9 +19,10 @@ from sklearn.preprocessing import StandardScaler
 import optuna
 from optuna.samplers import TPESampler, RandomSampler
 
-def impute_and_normalize(X: pd.DataFrame, 
-                         features_to_preprocess: list, 
-                         random_state: int = 42) -> pd.DataFrame:
+def impute_and_normalize(X, 
+                         features_to_preprocess, 
+                         random_state=42,
+                         mice_iters=3):
     """
     Imputes and normalizes selected features in a DataFrame using miceforest and StandardScaler.
 
@@ -48,8 +49,8 @@ def impute_and_normalize(X: pd.DataFrame,
         random_state=random_state
     )
 
-    # Perform imputation (e.g., 3 iterations of MICE)
-    kernel.mice(3)
+    # Perform imputation
+    kernel.mice(mice_iters)
 
     # Extract the imputed dataset
     imputed_subset = kernel.complete_data(0)
@@ -63,13 +64,13 @@ def impute_and_normalize(X: pd.DataFrame,
 
     return X_processed
 
-def get_data_splitter(X, y, test_size=0.2, random_state=42):
+def get_data_splitter(X, y, meta, test_size=0.2, random_state=42):
     # Split happens here ONCE
-    x_train, x_test, y_train, y_test = train_test_split(X,y, test_size=test_size, random_state=random_state)
+    X_train, X_test, y_train, y_test, meta_train, meta_test = train_test_split(X, y, meta, test_size=test_size, random_state=random_state)
     
     # Closure: inner function remembers variables from the outer scope
     def get_split():
-        return x_train, x_test, y_train, y_test
+        return X_train, X_test, y_train, y_test, meta_train, meta_test
 
     return get_split
 
@@ -84,9 +85,18 @@ def mpe2_loss(y_true,
                   
     return loss
 
+def mse_loss(y_true, y_pred):
+    '''
+    Mean squared error loss function for use in model dev
+    '''
+
+    loss = ((y_true - y_pred)**2)/len(y_true)
+
+    return loss
+
 def rf_reg_objective(trial, 
-              X, 
-              y, 
+              X_train, 
+              y_train,
               test_size=0.2, 
               random_state=42, 
               loss_func=mpe2_loss, 
@@ -121,10 +131,7 @@ def rf_reg_objective(trial,
         "min_samples_leaf": min_samples_leaf
     }
 
-    # Split into train and test sets
-    split_fn = get_data_splitter(X,y)
-    X_train, X_test, y_train, y_test = split_fn()
-    
+    # build model and scorer            
     model = RandomForestRegressor(random_state=random_state, **params)
     scorer = make_scorer(loss_func)
     cv_score = cross_val_score(model, X_train, y_train, scoring=scorer, n_jobs=n_jobs, cv=cv_folds)
@@ -182,12 +189,12 @@ def tune_model(objective,
                 
     return df
 
-def train_test_write(X, y, params_path='params_path.pkl', outdir='outdir'):
+def rf_train_test_write(X_train, X_test, y_train, y_test, meta_train, meta_test, params_path='params_path.pkl', outdir='outdir'):
 
     """
-    to do tomorrow: add meta features
+    Train model using optimal hyperparams
+    Write out predictions along with ground truth and metadata to specified directory
     """
-    X_train, X_test, y_train, y_test = split_fn()
 
     with open('params_path.pkl', rb) as f:
          hyperparams=pickle.load(f)
@@ -197,11 +204,10 @@ def train_test_write(X, y, params_path='params_path.pkl', outdir='outdir'):
 
     y_pred = model.predict(X_test)
 
-    results_df = pd.DataFrame({
-    "y_true": y_test.reset_index(drop=True),
-    "y_pred": y_pred
-    })
-  
+    results_df = meta_test
+    results_df['y_true'] = y_test.reset_index(drop=True),
+    results_df['y_pred'] = y_pred
+
     results_df.to_csv(outdir+"predictions.csv", index=False)
 
     return results_df
