@@ -162,7 +162,7 @@ def tune_model(X_train,
               
     # check if sampler is saved from a previous run and load if it is
     if os.path.isfile(sampler_path):
-        with open(sampler.path, "rb") as f:
+        with open(sampler_path, "rb") as f:
             restored_sampler = pickle.load(f)
         study = optuna.create_study(
             study_name=study_name,
@@ -203,7 +203,7 @@ def rf_train_test_write(X_train, X_test, y_train, y_test, meta_train, meta_test,
     Write out predictions along with ground truth and metadata to specified directory
     """
 
-    with open('params_path.pkl', rb) as f:
+    with open(params_path, 'rb') as f:
          hyperparams=pickle.load(f)
 
     model = RandomForestRegressor(**hyperparams)
@@ -211,10 +211,10 @@ def rf_train_test_write(X_train, X_test, y_train, y_test, meta_train, meta_test,
 
     y_pred = model.predict(X_test)
 
-    results_df = meta_test
-    results_df['y_true'] = y_test.reset_index(drop=True),
+    results_df = pd.DataFrame(meta_test)
+    results_df['y_true'] = y_test
     results_df['y_pred'] = y_pred
 
-    results_df.to_csv(outdir+"predictions.csv", index=False)
+    results_df.to_csv(os.path.join(outdir,"predictions.csv"), index=False)
 
     return results_df

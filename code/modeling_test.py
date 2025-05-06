@@ -55,7 +55,6 @@ print('tuning model hyperparams')
 tune_model(X_train, 
            y_train,
             study_name="runs/modeling-test",
-            storage_name="sqlite:///{}.db".format(study_name),
             load_if_exists=True,
             sampler=TPESampler(seed=42),
             sampler_path='runs/sampler.pkl', #.pkl file
