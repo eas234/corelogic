@@ -37,19 +37,10 @@ meta = np.ones(len(y))
 
 print('data loaded; simulating missing data')
 
-# Create miceforest kernel
-kernel = mf.ImputationKernel(
-    X,
-    datasets=1,
-    save_all_iterations=True,
-    random_state=42
-)
-
 # ampute columns to simulate missing data
-amputed_df = kernel.ampute(
-    mechanism='MAR',           # or 'MCAR'
-    prop=0.3,                  # Proportion of cells to make missing
-    random_state=42
+amputed_df = mf.ampute_data(X,
+    		perc=0.3,                  # Proportion of cells to make missing
+    		random_state=42
 )
 
 print('missing data simulated; preprocessing')

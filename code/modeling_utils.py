@@ -44,8 +44,8 @@ def impute_and_normalize(X,
     # Create miceforest kernel
     kernel = mf.ImputationKernel(
         subset,
-        datasets=1,
-        save_all_iterations=False,
+        num_datasets=1,
+        save_all_iterations_data=False,
         random_state=random_state
     )
 
