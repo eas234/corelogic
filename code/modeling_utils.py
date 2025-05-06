@@ -104,7 +104,7 @@ def rf_reg_objective(trial,
               cv_folds=5):
 
     '''
-    Ranndom forest regressor objective for use in optuna 
+    Random forest regressor objective for use in optuna 
     bayesian hyperparameter tuning pipeline
     '''
                   
@@ -139,16 +139,18 @@ def rf_reg_objective(trial,
                   
     return mean_cv_accuracy
 
-def tune_model(X_train, y_train, study_name="example-study",
-            load_if_exists=True,
-            sampler=TPESampler(seed=42),
-            sampler_path='sampler.pkl', #.pkl file
-            params_path='best_params.pkl', #.pkl file
-            trials_path='trials.csv', #.csv file
-            n_trials=20,
+def tune_model(X_train, 
+	    y_train, 
+	    study_name="example-study",
+	    load_if_exists=True,
+	    sampler=TPESampler(seed=42),
+	    sampler_path='sampler.pkl', #.pkl file
+	    params_path='best_params.pkl', #.pkl file
+	    trials_path='trials.csv', #.csv file
+	    n_trials=20,
 	    test_size=0.2,
 	    random_state=42,
- 	    loss_func=mpe2_loss,
+	    loss_func=mpe2_loss,
 	    n_jobs=4,
 	    cv_folds=5):
 
