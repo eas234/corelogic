@@ -141,7 +141,6 @@ def rf_reg_objective(trial,
 
 def tune_model(objective, 
             study_name="example-study",
-            storage_name="sqlite:///{}.db".format(study_name),
             load_if_exists=True,
             sampler=TPESampler(seed=42),
             sampler_path='sampler.pkl', #.pkl file
@@ -152,7 +151,9 @@ def tune_model(objective,
     '''
     Model tuner
     '''
-
+    # define storage name
+    storage_name="sqlite:///{}.db".format(study_name)
+              
     # check if sampler is saved from a previous run and load if it is
     if os.path.isfile(sampler_path):
         with open(sampler.path, "rb") as f:
