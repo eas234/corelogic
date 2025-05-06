@@ -139,14 +139,18 @@ def rf_reg_objective(trial,
                   
     return mean_cv_accuracy
 
-def tune_model(objective, 
-            study_name="example-study",
+def tune_model(X_train, y_train, study_name="example-study",
             load_if_exists=True,
             sampler=TPESampler(seed=42),
             sampler_path='sampler.pkl', #.pkl file
             params_path='best_params.pkl', #.pkl file
             trials_path='trials.csv', #.csv file
-            n_trials=20):
+            n_trials=20,
+	    test_size=0.2,
+	    random_state=42,
+ 	    loss_func=mpe2_loss,
+	    n_jobs=4,
+	    cv_folds=5):
 
     '''
     Model tuner
@@ -174,7 +178,7 @@ def tune_model(objective,
         )
 
     # Run optimization
-    study.optimize(objective, n_trials=n_trials)
+    study.optimize(lambda trial: rf_reg_objective(trial, X_train, y_train, test_size=test_size, random_state=random_state,loss_func=loss_func, n_jobs=n_jobs, cv_folds=cv_folds), n_trials=n_trials)
 
     # Save the sampler
     with open(sampler_path, "wb") as fout:

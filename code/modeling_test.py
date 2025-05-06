@@ -45,24 +45,14 @@ amputed_df = mf.ampute_data(X,
 
 print('missing data simulated; preprocessing')
 
-X = impute_and_normalize(X, X.columns.tolist(), random_state=42, mice_iters=3)
+X = impute_and_normalize(amputed_df, amputed_df.columns.tolist(), random_state=42, mice_iters=3)
 
 print('data preprocessed; creating train-test splits')
 split_fn = get_data_splitter(X, y, meta, test_size=0.2, random_state=42)
 X_train, X_test, y_train, y_test, meta_train, meta_test = split_fn()
 
-loss_func = mpe2_loss()
-objective = rf_reg_objective(trial, 
-              X_train, 
-              y_train,
-              test_size=0.2, 
-              random_state=42, 
-              loss_func=loss_func, 
-              n_jobs=4,
-              cv_folds=5)
-
 print('tuning model hyperparams')
-tune_model(objective, 
+tune_model(rf_reg_objective(trial, X_train, y_train, test_size=0.2, random_state=42, loss_func=mpe2_loss, n_jobs=4, cv_folds=5), 
             study_name="runs/modeling-test",
             storage_name="sqlite:///{}.db".format(study_name),
             load_if_exists=True,
