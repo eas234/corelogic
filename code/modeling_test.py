@@ -52,7 +52,8 @@ split_fn = get_data_splitter(X, y, meta, test_size=0.2, random_state=42)
 X_train, X_test, y_train, y_test, meta_train, meta_test = split_fn()
 
 print('tuning model hyperparams')
-tune_model(rf_reg_objective(trial, X_train, y_train, test_size=0.2, random_state=42, loss_func=mpe2_loss, n_jobs=4, cv_folds=5), 
+tune_model(X_train, 
+           y_train,
             study_name="runs/modeling-test",
             storage_name="sqlite:///{}.db".format(study_name),
             load_if_exists=True,
@@ -60,7 +61,12 @@ tune_model(rf_reg_objective(trial, X_train, y_train, test_size=0.2, random_state
             sampler_path='runs/sampler.pkl', #.pkl file
             params_path='runs/modeling_test_best_params.pkl', #.pkl file
             trials_path='runs/trials.csv', #.csv file
-            n_trials=20)
+            n_trials=20,
+            test_size=0.2,
+	        random_state=42,
+	        loss_func=mpe2_loss,
+	        n_jobs=4,
+	        cv_folds=5)
 
 print('optimal params selected; training and testing model')
 
