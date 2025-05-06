@@ -35,23 +35,28 @@ y = pd.Series(diabetes.target, name="target")
 # Meta as series
 meta = np.ones(len(y))
 
+print('data loaded; simulating missing data')
+
 # Create miceforest kernel
 kernel = mf.ImputationKernel(
-    df,
+    X,
     datasets=1,
     save_all_iterations=True,
     random_state=42
 )
 
-# Only ampute 'bmi' and 'bp' columns
+# ampute columns to simulate missing data
 amputed_df = kernel.ampute(
     mechanism='MAR',           # or 'MCAR'
-    prop=0.3,                  # Proportion of cells in selected columns to make missing
+    prop=0.3,                  # Proportion of cells to make missing
     random_state=42
 )
 
+print('missing data simulated; preprocessing')
+
 X = impute_and_normalize(X, X.columns.tolist(), random_state=42, mice_iters=3)
 
+print('data preprocessed; creating train-test splits')
 split_fn = get_data_splitter(X, y, meta, test_size=0.2, random_state=42)
 X_train, X_test, y_train, y_test, meta_train, meta_test = split_fn()
 
@@ -65,6 +70,7 @@ objective = rf_reg_objective(trial,
               n_jobs=4,
               cv_folds=5)
 
+print('tuning model hyperparams')
 tune_model(objective, 
             study_name="runs/modeling-test",
             storage_name="sqlite:///{}.db".format(study_name),
@@ -74,6 +80,8 @@ tune_model(objective,
             params_path='runs/modeling_test_best_params.pkl', #.pkl file
             trials_path='runs/trials.csv', #.csv file
             n_trials=20)
+
+print('optimal params selected; training and testing model')
 
 rf_train_test_write(X_train, 
                     X_test, 
