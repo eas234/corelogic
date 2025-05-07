@@ -61,11 +61,26 @@ print('subsetting to county ' + str(fips))
 df = df.loc[df.fips == fips]
 print(str(df.shape[0]) + ' rows remaining after county-level subset')
 
-# define features, label
-X = df[features]
-y = df[label]
+# define features, label, meta
+X = df[features].reset_index(drop=True)
+y = df[label].reset_index(drop=True)
+meta = df[meta].reset_index(drop=True)
 
 print('Labels, features defined. Imputing missing values and normalizing continuous variables.')
+# first: drop columns with all missings
+X = X.dropna(axis=1, how='all')
+
+# next: drop columns whose values are all identical
+drop_cols = [col for col in X.columns if X[col].nunique(dropna=True) <= 1]
+if drop_cols:
+    print('Warning: ' + str(len(drop_cols)) + ' columns have only one value. Dropping these columns:')
+    print(drop_cols)
+    X = X.drop(columns=drop_cols)
+    X = X.reset_index(drop=True)
+
+# update feature list
+continuous = [var for var in continuous if var in X.columns]
+
 # preproc: impute missings, normalize continuous vars
 X = impute_and_normalize(X, continuous, random_state=rand_state, mice_iters=mice_iters)
 

@@ -24,7 +24,9 @@ trials_path: '/oak/stanford/groups/deho/proptax/modeling/rf/trials/rf-baseline-t
 
 out_path: '/oak/stanford/groups/deho/proptax/results/labeled_data/rf-baseline-labels.csv'
 
-fips: 17031 # cook county
+#fips: 17031 # cook county
+
+fips: 48201
 
 meta: ['meta_sfh']
 
