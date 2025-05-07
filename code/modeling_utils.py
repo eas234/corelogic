@@ -19,6 +19,30 @@ from sklearn.preprocessing import StandardScaler
 import optuna
 from optuna.samplers import TPESampler, RandomSampler
 
+def subset_cols(X, n_non_null=10):
+	
+    """
+    Subset inputs to features that meet the following conditions:
+    1. Contain more than 1 unique value (not including nans)
+    2. Contain at least n non-null values
+    """
+	
+    drop_cols = [col for col in X.columns if X[col].nunique(dropna=True) <= 1]
+    if drop_cols:
+        print('Warning: ' + str(len(drop_cols)) + ' columns have only one value. Dropping these columns:')
+        print(drop_cols)
+        X = X.drop(columns=drop_cols) 
+
+    mostly_null_cols = [col for col in X.columns if X[col].notnull().sum() <= n_not_null]
+    if mostly_null_cols:
+        print('Warning: ' + str(len(mostly_null_cols)) + ' columns have fewer than ' + str(n_non_null) + ' non-null values. Dropping these columns:')
+	print(mostly_null_cols)
+	X = X.drop(columns=mostly_null_cols)
+
+    X = X.reset_index(drop=True)
+
+    return X
+
 def impute_and_normalize(X, 
                          features_to_preprocess, 
                          random_state=42,
@@ -39,6 +63,7 @@ def impute_and_normalize(X,
     X_processed = X.copy()
 
     # Subset the data to be imputed
+    features_to_preprocess = [col for col in features_to_preprocess if col in X_processed.columns]
     subset = X_processed[features_to_preprocess]
 
     # Create miceforest kernel
