@@ -12,6 +12,8 @@ n_trials: 20
 
 raw_path: '$OAK/proptax/raw/sales_assessments_2023.csv'
 
+study_name: '$OAK/proptax/modeling/rf/studies/rf-baseline'
+
 sampler_path: '$OAK/proptax/modeling/rf/samplers/rf-baseline-sampler.pkl'
 
 params_path: '$OAK/proptax/modeling/rf/params/rf-baseline-best-params.pkl'
