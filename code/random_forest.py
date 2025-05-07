@@ -6,6 +6,7 @@ import pandas as pd
 import pickle
 import random
 import sys
+import yaml
 
 import optuna
 from optuna.samplers import TPESampler, RandomSampler

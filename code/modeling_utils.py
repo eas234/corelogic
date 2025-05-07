@@ -215,6 +215,6 @@ def rf_train_test_write(X_train, X_test, y_train, y_test, meta_train, meta_test,
     results_df['y_true'] = y_test.reset_index(drop=True)
     results_df['y_pred'] = y_pred
 
-    results_df.to_csv(out_path), index=False)
+    results_df.to_csv(out_path, index=False)
 
     return results_df
