@@ -12,17 +12,17 @@ n_trials: 20
 
 n_jobs: 5
 
-raw_path: 'oak/stanford/groups/deho/proptax/raw/sales_assessments_2023.csv'
+raw_path: '/oak/stanford/groups/deho/proptax/raw/sales_assessments_2023.csv'
 
-study_name: 'oak/stanford/groups/deho/proptax/modeling/rf/studies/rf-baseline'
+study_name: '/oak/stanford/groups/deho/proptax/modeling/rf/studies/rf-baseline'
 
-sampler_path: 'oak/stanford/groups/deho/proptax/modeling/rf/samplers/rf-baseline-sampler.pkl'
+sampler_path: '/oak/stanford/groups/deho/proptax/modeling/rf/samplers/rf-baseline-sampler.pkl'
 
-params_path: 'oak/stanford/groups/deho/proptax/modeling/rf/params/rf-baseline-best-params.pkl'
+params_path: '/oak/stanford/groups/deho/proptax/modeling/rf/params/rf-baseline-best-params.pkl'
 
-trials_path: 'oak/stanford/groups/deho/proptax/modeling/rf/trials/rf-baseline-trials.pkl'
+trials_path: '/oak/stanford/groups/deho/proptax/modeling/rf/trials/rf-baseline-trials.pkl'
 
-out_path: 'oak/stanford/groups/deho/proptax/results/labeled_data/rf-baseline-labels.csv'
+out_path: '/oak/stanford/groups/deho/proptax/results/labeled_data/rf-baseline-labels.csv'
 
 fips: 17031 # cook county
 
