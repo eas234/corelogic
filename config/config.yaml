@@ -1,12 +1,22 @@
-raw_path: '$OAK/proptax/raw/'
-
-raw_filename: 'corelogic.csv'
-
-out_path: '$OAK/proptax/results/'
-
 rand_state: 42
 
 test_size: 0.25
+
+cv_folds: 5
+
+mice_iters: 3
+
+n_trials: 20
+
+raw_filename: '$OAK/proptax/raw/sales_assessments_2023.csv'
+
+sampler_path: '$OAK/proptax/modeling/rf/samplers/rf-baseline-sampler.pkl'
+
+params_path: '$OAK/proptax/modeling/rf/params/rf-baseline-best-params.pkl'
+
+trials_path: '$OAK/proptax/modeling/rf/trials/rf-baseline-trials.pkl'
+
+out_path: '$OAK/proptax/results/labeled_data/rf-baseline-labels.csv'
 
 max_iters: 1000
 
