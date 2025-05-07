@@ -36,6 +36,7 @@ test_size = out['test_size']
 cv_folds = out['cv_folds']
 mice_iters = out['mice_iters']
 n_trials = out['n_trials']
+n_jobs = out['n_jobs']
 study_name = out['study_name']
 sampler_path = out['sampler_path']
 params_path = out['params_path']
@@ -72,17 +73,25 @@ X_train, X_test, y_train, y_test, meta_train, meta_test = split_fn()
 print('tuning model hyperparams')
 tune_model(X_train, 
            y_train,
-            study_name="runs/modeling-test",
+            study_name=study_name,
             load_if_exists=True,
-            sampler=TPESampler(seed=42),
-            sampler_path='runs/sampler.pkl', #.pkl file
-            params_path='runs/modeling_test_best_params.pkl', #.pkl file
-            trials_path='runs/trials.csv', #.csv file
-            n_trials=20,
-            test_size=0.2,
-	        random_state=42,
-	        loss_func=mpe2_loss,
-	        n_jobs=4,
-	        cv_folds=5)
+            sampler=TPESampler(seed=rand_state),
+            sampler_path=sampler_path, #.pkl file
+            params_path=params_path, #.pkl file
+            trials_path=trials_path, #.csv file
+            n_trials=n_trials,
+            test_size=test_size,
+	    random_state=rand_state,
+	    loss_func=mpe2_loss,
+            n_jobs=n_jobs,
+	    cv_folds=cv_folds)
 
-
+print('optimal params selected; training and testing model')
+rf_train_test_write(X_train, 
+                    X_test, 
+                    y_train, 
+                    y_test, 
+                    meta_train, 
+                    meta_test, 
+                    params_path=params_path, 
+                    out_path=out_path)
