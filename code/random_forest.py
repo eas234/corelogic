@@ -46,10 +46,6 @@ params_path = out['params_path']
 raw_path = out['raw_path']
 out_path = out['out_path']
 
-# expand environment vars in paths
-for path in [raw_path, study_name, sampler_path, params_path, trials_path, out_path]:
-	path = os.path.expandvars(path)
-
 fips = out['fips']
 label = out['label']
 continuous = out['continuous']
