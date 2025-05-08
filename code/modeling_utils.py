@@ -18,6 +18,7 @@ from sklearn.preprocessing import StandardScaler
 
 import optuna
 from optuna.samplers import TPESampler, RandomSampler
+from optuna.trial import TrialState
 
 def subset_cols(X, n_non_null=10):
 	
@@ -192,12 +193,15 @@ def tune_model(X_train,
     if os.path.isfile(sampler_path):
         with open(sampler_path, "rb") as f:
             restored_sampler = pickle.load(f)
-        study = optuna.create_study(
+        
+            study = optuna.create_study(
             study_name=study_name,
             storage=storage_name,
             load_if_exists=load_if_exists,
             sampler=restored_sampler
         )
+        completed_trials = [x for x in study.trials if x.state == TrialState.COMPLETE]
+        prev_trials = len(completed_trials) 
     
     else:
         study = optuna.create_study(
@@ -206,10 +210,12 @@ def tune_model(X_train,
             load_if_exists=load_if_exists, 
             sampler=sampler
         )
+        prev_trials = 0
 
     # Run optimization
     y_train = np.ravel(y_train)
-    study.optimize(lambda trial: rf_reg_objective(trial, X_train, y_train, test_size=test_size, random_state=random_state,loss_func=loss_func, n_jobs=n_jobs, cv_folds=cv_folds), n_trials=n_trials)
+    if prev_trials < n_trials:
+        study.optimize(lambda trial: rf_reg_objective(trial, X_train, y_train, test_size=test_size, random_state=random_state,loss_func=loss_func, n_jobs=n_jobs, cv_folds=cv_folds), n_trials=(n_trials-prev_trials))
 
     # Save the sampler
     with open(sampler_path, "wb") as fout:
@@ -240,8 +246,12 @@ def rf_train_test_write(X_train, X_test, y_train, y_test, meta_train, meta_test,
 
     y_pred = model.predict(X_test)
 
+    # align indices
+    meta_test = meta_test.reset_index(drop=True)
+    y_test = y_test.reset_index(drop=True)
+
     results_df = pd.DataFrame(meta_test)
-    results_df['y_true'] = y_test.reset_index(drop=True)
+    results_df['y_true'] = y_test
     results_df['y_pred'] = y_pred
 
     results_df.to_csv(out_path, index=False)
