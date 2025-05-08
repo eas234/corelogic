@@ -33,11 +33,11 @@ def subset_cols(X, n_non_null=10):
         print(drop_cols)
         X = X.drop(columns=drop_cols) 
 
-    mostly_null_cols = [col for col in X.columns if X[col].notnull().sum() <= n_not_null]
+    mostly_null_cols = [col for col in X.columns if X[col].notnull().sum() <= n_non_null]
     if mostly_null_cols:
         print('Warning: ' + str(len(mostly_null_cols)) + ' columns have fewer than ' + str(n_non_null) + ' non-null values. Dropping these columns:')
-	print(mostly_null_cols)
-	X = X.drop(columns=mostly_null_cols)
+        print(mostly_null_cols)
+        X = X.drop(columns=mostly_null_cols)
 
     X = X.reset_index(drop=True)
 
@@ -105,7 +105,9 @@ def mpe2_loss(y_true,
     Mean Percentage Error Squared loss function
     for use as alternative to MSE in model dev.
     '''
-                  
+
+    y_true = np.ravel(y_true)
+    y_pred = np.ravel(y_pred)
     loss = (((y_true - y_pred)**2 / (y_true)**2).sum())/len(y_true)
                   
     return loss
@@ -114,7 +116,8 @@ def mse_loss(y_true, y_pred):
     '''
     Mean squared error loss function for use in model dev
     '''
-
+    y_true = np.ravel(y_true)
+    y_pred = np.ravel(y_pred)
     loss = ((y_true - y_pred)**2)/len(y_true)
 
     return loss
@@ -205,6 +208,7 @@ def tune_model(X_train,
         )
 
     # Run optimization
+    y_train = np.ravel(y_train)
     study.optimize(lambda trial: rf_reg_objective(trial, X_train, y_train, test_size=test_size, random_state=random_state,loss_func=loss_func, n_jobs=n_jobs, cv_folds=cv_folds), n_trials=n_trials)
 
     # Save the sampler

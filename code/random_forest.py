@@ -45,6 +45,7 @@ sampler_path = out['sampler_path']
 params_path = out['params_path']
 raw_path = out['raw_path']
 out_path = out['out_path']
+trials_path = out['trials_path']
 
 fips = out['fips']
 label = out['label']
@@ -68,7 +69,7 @@ meta = df[meta].reset_index(drop=True)
 
 print('Labels, features defined. Imputing missing values and normalizing continuous variables.')
 # first: drop cols with high numbers of nulls, missings
-X = subset_cols(X, n_not_null=100)
+X = subset_cols(X, n_non_null=100)
 
 # preproc: impute missings, normalize continuous vars
 X = impute_and_normalize(X, continuous, random_state=rand_state, mice_iters=mice_iters)
