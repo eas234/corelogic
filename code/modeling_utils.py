@@ -119,7 +119,7 @@ def mse_loss(y_true, y_pred):
     '''
     y_true = np.ravel(y_true)
     y_pred = np.ravel(y_pred)
-    loss = ((y_true - y_pred)**2)/len(y_true)
+    loss = (((y_true - y_pred)**2).sum())/len(y_true)
 
     return loss
 
