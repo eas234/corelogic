@@ -397,7 +397,7 @@ class Preprocess:
         Helper method that validates that self._data has no single value columns or 
         mostly null columns before applying impute_missings_with_mice().
         """
-
+        check_cols = [x for x in self._data.columns if x not in self._meta_columns]
         if any(self._data[col].nunique(dropna=True) <= 1 for col in self._data.columns):
             self.logger.error("Data contains single-value columns. Apply drop_single_value_cols() before impute_missings_with_mice().")
             raise ValueError("Data contains single-value columns. Apply drop_single_value_cols() before impute_missings_with_mice().")
