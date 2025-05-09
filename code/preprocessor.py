@@ -29,6 +29,7 @@ class Preprocess:
                  continuous_cols: list=None, # list of continuous features
                  binary_cols: list=None, # list of binary features
                  categorical_cols: list=None, # list of categorical features
+                 meta_cols: list=None, # columns of metadata that methods should not modify
                  n_non_null: int=0, # minimum number of non-null values required in each column
                  random_state: int=42, # for reproducibility
                  wins_pctile: int=1, # percentile at which data are winsorized (symmetric)
@@ -138,6 +139,19 @@ class Preprocess:
             self.logger.error("categorical_cols must be a list")
             raise ValueError("categorical_cols must be a list")
 
+    # meta features
+    @property
+    def meta_cols(self):
+        return self._meta_cols
+
+    @meta_cols.setter
+    def meta_cols(self, new_meta):
+        if isinstance(new_meta, list):
+            self._meta_cols = new_meta
+        else:
+            self.logger.error("meta_cols must be a list")
+            raise ValueError("meta_cols must be a list")
+    
     # min non-null values
     @property
     def n_non_null(self):
@@ -230,7 +244,7 @@ class Preprocess:
         """
 
         # identify single-value columns
-        drop_cols = [col for col in self._data.columns if self._data[col].nunique(dropna=True) <= 1]
+        drop_cols = [col for col in self._data.columns if self._data[col].nunique(dropna=True) <= 1 and col not in self._meta_cols]
 
         # drop single-value columns if found
         if drop_cols:
@@ -240,8 +254,8 @@ class Preprocess:
             pass
 
         if inplace==True:
-            self._data.drop(columns=drop_cols, inplace=True)
-            self._data.reset_index(drop=True, inplace=True)
+            self._data = self._data.drop(columns=drop_cols)
+            self._data = self._data.reset_index(drop=True)
             self.logger.info("Updating cols attributes to reflect drops")
             for attr in [self._continuous_cols, self._binary_cols, self._categorical_cols]:
                 attr = [x for x in attr if x in self.data.columns]
@@ -264,7 +278,7 @@ class Preprocess:
         """
 
         # identify mostly null cols
-        drop_cols = [col for col in self._data.columns if self._data[col].notnull().sum() <= self.__n_non_null]
+        drop_cols = [col for col in self._data.columns if self._data[col].notnull().sum() <= self.__n_non_null and col not in self._meta_cols]
 
         if drop_cols:
             self.logger.warning(f'Warning: {len(drop_cols)} columns have fewer than {self.__n_non_null} non-null values. Dropping {drop_cols}')
