@@ -32,7 +32,7 @@ log_dir: '/oak/stanford/groups/deho/proptax/modeling/rf/logs'
 
 fips: 48201
 
-meta: ['meta_sfh']
+meta: ['meta_sfh', 'ASSESSED_YEAR', 'SALE_YEAR', 'CLIP', 'tract_id', 'fips', 'MARKET_TOTAL_VALUE']
 
 id: ['CLIP']
 
