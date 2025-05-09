@@ -528,3 +528,5 @@ class Preprocess:
         self.normalize_continuous_cols()
         if normalize_binary:
             self.normalize_binary_cols()
+
+        return self._data
