@@ -86,12 +86,12 @@ class Preprocess:
     def data(self, new_data):
         self._data = new_data
 
-    # labels 
+    # label
     @property
     def label(self):
         return self._label
     
-    @continuous_cols.setter
+    @label.setter
     def labels(self, new_label):
         if isinstance(new_label, str):
             self._labels = label
