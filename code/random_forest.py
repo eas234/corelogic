@@ -33,7 +33,7 @@ with open('../config/config.yaml', 'r') as stream:
         out = yaml.safe_load(stream)
 
 # assign parameters, paths, and feature names according to config
-rand_state = out['rand_state']
+random_state = out['rand_state']
 test_size = out['test_size']
 cv_folds = out['cv_folds']
 mice_iters = out['mice_iters']
@@ -54,9 +54,9 @@ fips = out['fips']
 label = out['label']
 continuous = out['continuous']
 binary = out['binary'] + out['missing_ind']
-categorical = out['cagetorical']
+categorical = out['categorical']
 features = out['continuous'] + out['missing_ind'] + out['binary']
-meta = out['id'] + out['benchmark']
+meta = out['meta']
 
 # load raw data
 df = pd.read_csv(raw_path)

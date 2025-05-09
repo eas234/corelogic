@@ -47,7 +47,7 @@ ignore: [ 'WARRANTY_GRANT_IND',
 
 benchmark: ['MARKET_TOTAL_VALUE']
 
-label: ['SALE_AMOUNT']
+label: 'SALE_AMOUNT'
 
 missing_ind: ['char_yrblt_miss',
  'char_air_miss',
