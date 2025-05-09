@@ -257,8 +257,10 @@ class Preprocess:
             self._data = self._data.drop(columns=drop_cols)
             self._data = self._data.reset_index(drop=True)
             self.logger.info("Updating cols attributes to reflect drops")
-            for attr in [self._continuous_cols, self._binary_cols, self._categorical_cols]:
-                attr = [x for x in attr if x in self._data.columns]
+            self._continuous_cols = [x for x in self._continuous_cols if x in self._data.columns]
+            self._binary_cols = [x for x in self._binary_cols if x in self._data.columns]
+            self._categorical_cols = [x for x in self._categorical_cols if x in self._data.columns]
+            
         else:
             processed_data = self._data.copy()
             processed_data = processed_data.drop(columns=drop_cols)
@@ -290,8 +292,9 @@ class Preprocess:
             self._data.drop(columns=drop_cols, inplace=True)
             self._data.reset_index(drop=True, inplace=True)
             self.logger.info("Updating cols attributes to reflect drops")
-            for attr in [self._continuous_cols, self._binary_cols, self._categorical_cols]:
-                attr = [x for x in attr if x in self._data.columns]
+            self._continuous_cols = [x for x in self._continuous_cols if x in self._data.columns]
+            self._binary_cols = [x for x in self._binary_cols if x in self._data.columns]
+            self._categorical_cols = [x for x in self._categorical_cols if x in self._data.columns]
 
         else:
             processed_data = self._data.copy()
