@@ -21,6 +21,7 @@ from sklearn.metrics import make_scorer
 from sklearn.preprocessing import StandardScaler
 
 from modeling_utils import *
+from preprocessor import *
 
 # change working directory to this script's location
 abspath = os.path.abspath(__file__)
@@ -38,6 +39,7 @@ cv_folds = out['cv_folds']
 mice_iters = out['mice_iters']
 n_trials = out['n_trials']
 n_jobs = out['n_jobs']
+n_non_null = out['n_non_null']
 
 # paths
 study_name = out['study_name']
@@ -46,10 +48,13 @@ params_path = out['params_path']
 raw_path = out['raw_path']
 out_path = out['out_path']
 trials_path = out['trials_path']
+log_dir = out['log_dir']
 
 fips = out['fips']
 label = out['label']
 continuous = out['continuous']
+binary = out['binary'] + out['missing_ind']
+categorical = out['cagetorical']
 features = out['continuous'] + out['missing_ind'] + out['binary']
 meta = out['id'] + out['benchmark']
 
@@ -62,6 +67,20 @@ print('subsetting to county ' + str(fips))
 df = df.loc[df.fips == fips]
 print(str(df.shape[0]) + ' rows remaining after county-level subset')
 
+preproc = Preprocess(df.copy(),
+		    label,
+		    continuous,
+		    binary,
+		    categorical,
+		    n_non_null=n_non_null,
+		    random_state=random_state,
+		    wins_pctile=1,
+		    mice_iters=mice_iters,
+		    log_dir=log_dir)
+
+df_clean = preproc.run()
+print(df_clean.head())
+'''
 # define features, label, meta
 X = df[features].reset_index(drop=True)
 y = df[label].reset_index(drop=True)
@@ -103,3 +122,4 @@ rf_train_test_write(X_train,
                     meta_test, 
                     params_path=params_path, 
                     out_path=out_path)
+'''
