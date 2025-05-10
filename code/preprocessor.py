@@ -95,9 +95,9 @@ class Preprocess:
         return self._label
     
     @label.setter
-    def labels(self, new_label):
+    def label(self, new_label):
         if isinstance(new_label, str):
-            self._labels = label
+            self._label = label
         else:
             self.logger.error("label must be a string")
             raise ValueError("label must be a string")
