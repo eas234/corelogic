@@ -5,6 +5,8 @@ import numpy as np
 import os
 import pandas as pd
 
+from sklearn.preprocessing import StandardScaler
+
 class Preprocess:
     """
     Class which contains methods to preprocess data.
@@ -397,11 +399,11 @@ class Preprocess:
         Helper method that validates that self._data has no single value columns or 
         mostly null columns before applying impute_missings_with_mice().
         """
-        check_cols = [x for x in self._data.columns if x not in self._meta_columns]
-        if any(self._data[col].nunique(dropna=True) <= 1 for col in self._data.columns):
+        check_cols = [x for x in self._data.columns if x not in self._meta_cols]
+        if any(self._data[col].nunique(dropna=True) <= 1 for col in check_cols):
             self.logger.error("Data contains single-value columns. Apply drop_single_value_cols() before impute_missings_with_mice().")
             raise ValueError("Data contains single-value columns. Apply drop_single_value_cols() before impute_missings_with_mice().")
-        if any(self._data[col].notnull().sum() <= self._n_non_null for col in self._data.columns):
+        if any(self._data[col].notnull().sum() <= self.__n_non_null for col in check_cols):
             self.logger.error("Data contains mostly null columns. Apply drop_mostly_null_cols() before impute_missings_with_mice().")
             raise ValueError("Data contains mostly null columns. Apply drop_mostly_null_cols() before impute_missings_with_mice().")
         if self._data[self._label].isnull().sum() > 0:
@@ -433,7 +435,7 @@ class Preprocess:
 
         # subset to binary and continuous columns that are still 
         # present in the dataframe after drops from other methods.
-        features_to_process = [x for x in processed_data.columns if x in self._continuous_cols or x in self._binary_cols]
+        features_to_process = [x for x in self._data.columns if x in self._continuous_cols or x in self._binary_cols]
 
         subset = self._data[features_to_process].copy()
         if all(subset[col].isnull().sum() == 0 for col in subset.columns):
