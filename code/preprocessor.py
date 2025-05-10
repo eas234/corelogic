@@ -444,6 +444,7 @@ class Preprocess:
 
         else:
             # Create miceforest kernel
+            self.logger.info("Imputing missings with miceforest")
             kernel = mf.ImputationKernel(
                         subset,
                         num_datasets=1,
@@ -456,6 +457,7 @@ class Preprocess:
 
             # Extract the imputed dataset
             imputed_subset = kernel.complete_data(0)
+            self.logger.info("Impute complete")
 
             # Substitute imputed features into data
             if inplace==True:
@@ -482,9 +484,10 @@ class Preprocess:
         features_to_process = [x for x in self._data.columns if x in self._continuous_cols]
 
         if not features_to_process:
-            self.logger.info('Data has no continuous columns; normalize() not applied.')
+            self.logger.info('Data has no continuous columns; normalize_continuous_cols() not applied.')
             return
-        
+            
+        self.logger.info("Normalizing continuous columns")
         subset = self._data[features_to_process].copy()
         
         scaler = StandardScaler()
@@ -508,9 +511,10 @@ class Preprocess:
         features_to_process = [x for x in self._data.columns if x in self._binary_cols]
 
         if not features_to_process:
-            self.logger.info('Data has no binary columns; normalize() not applied.')
+            self.logger.info('Data has no binary columns; normalize_binary_cols() not applied.')
             return
-        
+
+        self.logger.info("Normalizing continuous columns")
         subset = self._data[features_to_process].copy()
         
         scaler = StandardScaler()
@@ -530,9 +534,16 @@ class Preprocess:
         It's da wrapper
 
         Note: method as currently written only accommodates inplace modifications.
+        Recommended usage: create a copy of whatever data you want to preprocess and 
+        set self._data as the copy.
 
         Inputs:
-        - inplace: bool, 
+        - inplace: bool, determines whether modifications are made in place. current version only supports inplace modifications.
+        - one_hot: bool. If True, wrapper calls one_hot() to encode categoricals. Default is False.
+        - normalize_binary: bool. If True, wrapper calls normalize_binary_cols() to normalize binary columns. Default is False.
+
+        Returns: 
+        - self._data, modified inplace.
         """
 
         if inplace == False:
@@ -552,5 +563,6 @@ class Preprocess:
         self.normalize_continuous_cols()
         if normalize_binary:
             self.normalize_binary_cols()
+        self.logger.info("Preprocessing complete, returning self._data")
 
         return self._data
