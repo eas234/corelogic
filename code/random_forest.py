@@ -79,7 +79,7 @@ preproc = Preprocess(df.copy(),
 		    mice_iters=mice_iters,
 		    log_dir=log_dir)
 
-df_clean = preproc.run()
+df_clean, continuous, binary, categorical = preproc.run()
 print(df_clean.head())
 '''
 # define features, label, meta
