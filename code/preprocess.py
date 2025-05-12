@@ -563,6 +563,6 @@ class Preprocess:
         self.normalize_continuous_cols()
         if normalize_binary:
             self.normalize_binary_cols()
-        self.logger.info("Preprocessing complete, returning self._data")
+        self.logger.info("Preprocessing complete, returning self._data, self._continuous_cols, self._binary_cols, and self._categorical_cols")
 
-        return self._data
+        return self._data, self._continuous_cols, self._binary_cols, self._categorical_cols
