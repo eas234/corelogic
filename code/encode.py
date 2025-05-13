@@ -1,3 +1,5 @@
+import datetime
+import logging
 import numpy as np
 import os
 import pandas as pd
@@ -25,8 +27,6 @@ class Encode:
                  test_size: float=0.2,
                  log_dir: str='logs' # filepath for logger
                  ):
-        
-        self._data
 
         # set log filename
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M")
@@ -108,7 +108,7 @@ class Encode:
         
         self.logger.info("X_train, X_test, y_train, y_test, meta_train, meta_test now stored as attributes of Encode() object")
     
-        if return_items=True:
+        if return_items:
             return self.X_train, self.X_test, self.y_train, self.y_test, self.meta_train, self.meta_test
 
     def target_encode(self, 
@@ -154,11 +154,14 @@ class Encode:
         """
 
         self.logger.info("Encoding categoricals using target_encode()")
-        enc = TargetEncoder(cols=[self._categorical_cols],
+        enc = TargetEncoder(cols=self._categorical_cols,
                              min_samples_leaf=min_samples_leaf, 
                              smoothing=smoothing).fit(self.X_train, self.y_train)
         self.logger.info("Encoder fitted")
 
+        if write_encoding_dict and not encoding_path:
+            self.logger.warning("encoding_path must be provided if write_encoding_dict = True.")
+            raise ValueError("encoding_path must be provided if write_encoding_dict = True.")
         if write_encoding_dict:
             encoding_dicts={}
 
@@ -175,7 +178,7 @@ class Encode:
                 encoding_dicts[col]=combined_dict
 
             with open(os.path.join(encoding_path, 'encodings.yaml'), 'w') as f:
-                yaml.dump(combined_dict, f)
+                yaml.dump(encoding_dicts, f)
             
             self.logger.info(f'Encodings written to {encoding_path} as encodings.yaml')
         
@@ -194,4 +197,35 @@ class Encode:
         """
         Will develop later.
         """
-        pass
+        raise NotImplementedError("kmeans_encode() is not yet implemented")
+
+    def run(self, 
+            method: str=None, # encoding method to run
+            return_items: bool=False, # whether to return test/train sets
+            **kwargs
+            ):
+
+        """
+        Wrapper.
+
+        Inputs: 
+        - method: encoder to use
+        - return_items: bool, indicates whether to return test/train objects
+        - **kwargs: keyword arguments for chosen method
+        """
+
+        if method == "target_encode":
+            method_to_call = self.target_encode
+        elif method == "kmeans_encode":
+            method_to_call = self.kmeans_encode
+        else:
+            raise ValueError(f"Unknown method: {method}")
+    
+        method_to_call(**kwargs)
+        
+        if return_items == True:
+            return self.X_train, self.X_test, self.y_train, self.y_test, self.meta_train, self.meta_test
+            
+
+
+
