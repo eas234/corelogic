@@ -5,6 +5,7 @@ import numpy as np
 import os
 import pandas as pd
 
+from sklearn.model_select import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 class Preprocess:
@@ -36,7 +37,12 @@ class Preprocess:
                  random_state: int=42, # for reproducibility
                  wins_pctile: int=1, # percentile at which data are winsorized (symmetric)
                  mice_iters: int=3, # n_iters for miceforest imputer
-                 log_dir: str='logs' # logger filepath
+                 test_size: float=0.2, # desired size of test set
+                 log_dir: str='logs', # logger filepath
+                 min_samples_leaf: int=20, # param for target_encode()
+                 smoothing: int=10, # param for target_encode()
+                 write_encoding_dict: bool=False, # whether to write encoding dict from target_encode()
+                 encoding_path: str=None # file location of encoding dict from target_encode()
                  ):
         
         """
@@ -62,19 +68,36 @@ class Preprocess:
 
         self.logger.info("Logger initialized.")
         
-        # public attributes
+        # private attributes
         self._data = data
         self._label = label or ''
         self._continuous_cols = continuous_cols or []
         self._binary_cols = binary_cols or []
         self._categorical_cols = categorical_cols or []
         self._meta_cols = meta_cols or []
-
-        # private attributes
+        
+        
+        # protected attributes
         self.__n_non_null = n_non_null
         self.__random_state = random_state
         self.__wins_pctile = wins_pctile
         self.__mice_iters = mice_iters
+        self.__test_size = test_size
+
+        if isinstance(min_samples_leaf, int) and min_samples_leaf > 0:
+            self.__min_samples_leaf = min_samples_leaf
+        else:
+            self.logger.warning("min_samples_leaf must be positive integer")
+            raise TypeError("min_samples_leaf must be positive integer")
+        
+        if isinstance(smoothing, int) and smoothing > 0:
+            self.__smothing = smoothing
+        else:
+            self.logger.warning("smoothing must be positive integer")
+            raise TypeError("smoothing must be positive integer")
+        
+        self.__write_ecoding_dict = write_encoding_dict
+        self.__encoding_path = encoding_path or ""
 
         self.logger.info("Preprocess class initialized.")
 
@@ -341,6 +364,115 @@ class Preprocess:
             processed_data = self._data.drop(columns=categorical_cols, inplace=False)
             processed_data[dummies.columns] = dummies
             return processed_data
+        
+    def train_test_split(self, return_items: bool=False):
+
+        """
+        Generates train-test split attributes
+        using sklearn's train_test_split.
+
+        Inputs:
+        - self.__random_state: for repoducibility
+        - self.__test_size: desired size of test set as fraction of self_data
+        - self._data: full dataset including features, labels, and meta cols
+        - self._features: features to include in X_train, X_test
+        - self._label: label to include in y_train, y_test
+        - self._meta_cols: meta features like property ids that should be 
+            split using same indices as X and y but which are not used in 
+            model development
+        - return_items: if true, returns test-train split 
+
+        Returns:
+        self.X_train, self.X_test, self.y_train, self.y_test, self.meta_train, self.meta_test
+        as attributes of Encode() object.
+        """
+
+        self.X_train, self.X_test, self.y_train, self.y_test, self.meta_train, self.meta_test = train_test_split(self._data[self._features], 
+                                                                                                self._data[self._label], 
+                                                                                                self._data[self._meta_cols], 
+                                                                                                test_size=self.__test_size, 
+                                                                                                random_state=self.__random_state)
+        
+        self.logger.info("X_train, X_test, y_train, y_test, meta_train, meta_test now stored as attributes of preprocess() object")
+
+    def target_encode(self):
+
+        """
+        TODO: update self._continuous_cols to include encoded cols after encoding; empty out categorical cols
+
+        Encodes categorical variables specified in self._categorical_cols
+        using category_encoder's TargetEncoder().
+
+        For each value v of a categorical variable c, the model outputs a
+        weighted average between the the prior and posterior of the outcome y.
+        The prior is the average of y across the entire training set, while 
+        the posterior is the average of y among observations with c=v.
+
+        Formally:
+
+        v_encoded = lambda(n)*posterior + (1-lambda(n))*prior
+
+        Smoothing is governed by the following sigmoid function:
+
+        lambda(n) = 1 / (1 + e ^ ( (n-k) / f ))
+
+        When k=n, lambda(n) = 0.5
+        As f approaches infinity, lambda(n) --> 1 and v_encoded --> posterior
+
+        Inputs:
+        -cols=self._categorical_cols, columns to encode
+        -self.__min_samples_leaf: k
+        -self.__smoothing: f
+        -self.__write_encoding_dict: boolean governing whether method writes encoding dictionary
+        mapping encodings to category values as .yaml file
+        -self.__encoding_path: path where encoding dict is written 
+
+        Outputs:
+        - if inplace, updates self._X_test and self._X_train with encoded categorical vars
+        - if not inplace, returns copies of X_test and X_train with encoded categorical vars
+
+        """
+
+        self.logger.info("Encoding categoricals using target_encode()")
+        enc = TargetEncoder(cols=[self._categorical_cols],
+                             min_samples_leaf=self.__min_samples_leaf, 
+                             smoothing=self.__smoothing).fit(self.X_train, self.y_train)
+        self.logger.info("Encoder fitted")
+
+        if self.__write_encoding_dict:
+            encoding_dicts={}
+
+            for i in range(len(enc.ordinal_encoder.mapping)):
+                col = enc.ordinal_encoder.cols[i]
+                mapping_series = enc.ordinal_encoder.mapping[i]['mapping']
+            
+            # Create the combined dictionary
+                combined_dict = {
+                    category: enc.mapping[col][code]
+                    for category, code in mapping_series.items()
+                }
+                combined_dict['UNSEEN'] = enc.mapping[col][-1]
+                encoding_dicts[col]=combined_dict
+
+            with open(os.path.join(self.__encoding_path, 'encodings.yaml'), 'w') as f:
+                yaml.dump(combined_dict, f)
+            
+            self.logger.info(f'Encodings written to {self.__encoding_path} as encodings.yaml')
+        
+        if inplace:
+            self.logger.info("Encoding categoricals inplace")
+            self.X_train = enc.transform(self.X_train)
+            self.X_test = enc.transform(self.X_test)
+            
+            self.logger.info("Updating categorical and continuous col lists to reflect encoding")
+            self._continuous_cols += self._categorical_cols
+            self._categorical_cols = 0
+
+        else:
+            self.logger.info("Encoding categoricals on copies of X_train, X_test")
+            X_train = enc.transform(self.X_train.copy())
+            X_test = enc.transform(self.X_test.copy())
+            return X_train, X_test
 
     def winsorize_continuous(self, inplace: bool=True):
 
@@ -356,17 +488,23 @@ class Preprocess:
         Otherwise, method returns a winsorized copy of the continuous
         features in the dataframe.
         """
+
         self.logger.info(f"Winsorizing continuous columns at {self.__wins_pctile} and {100-self.__wins_pctile} percentiles")
-        lower = np.percentile(self._data[self._continuous_cols], self.__wins_pctile, axis=0)
-        upper = np.percentile(self._data[self._continuous_cols], 100-self.__wins_pctile, axis=0)
+        lower = np.percentile(self.X_train[self._continuous_cols], self.__wins_pctile, axis=0)
+        upper = np.percentile(self.X_train[self._continuous_cols], 100-self.__wins_pctile, axis=0)
 
         if inplace==True:
-            self._data[self._continuous_cols] = np.clip(self._data[self._continuous_cols], lower, upper)
+            self.X_train[self._continuous_cols] = np.clip(self.X_train[self._continuous_cols], lower, upper)
+            self.X_test[self._continuous_cols] = np.clip(self.X_train[self._continuous_cols], lower, upper)
 
         else:
-            processed_data = self._data[self._continuous_cols].copy()
-            processed_data = np.clip(processed_data, lower, upper)
-            return processed_data
+            processed_train = self.X_train[self._continuous_cols].copy()
+            processed_train = np.clip(processed_train, lower, upper)
+
+            processed_test = self.X_test[self._continuous_cols].copy()
+            processed_test = np.clip(processed_test, lower, upper)
+            
+            return processed_train, processed_test
         
     def winsorize_label(self, inplace: bool=True):
 
@@ -381,32 +519,35 @@ class Preprocess:
         
         Otherwise, method returns a winsorized copy of the label.
         """
-        self.logger.info(f"Winsorizing label at {self.__wins_pctile} and {100-self.__wins_pctile} percentiles")
-        lower = np.percentile(self._data[self._label], self.__wins_pctile, axis=0)
-        upper = np.percentile(self._data[self._label], 100-self.__wins_pctile, axis=0)
+        self.logger.info(f"Winsorizing label {self._label} at {self.__wins_pctile} and {100-self.__wins_pctile} percentiles")
+        lower = np.percentile(self.y_train, self.__wins_pctile, axis=0)
+        upper = np.percentile(self.y_train, 100-self.__wins_pctile, axis=0)
 
         if inplace==True:
-            self._data[self._label] = np.clip(self._data[self._label], lower, upper)
+            self.y_train = np.clip(self.y_train, lower, upper)
+            self.y_test = np.clip(self.y_test, lower, upper)
 
         else:
-            processed_data = self._data[self._label].copy()
-            processed_data = np.clip(processed_data, lower, upper)
+            processed_train = self.y_train.copy()
+            processed_train= np.clip(processed_train, lower, upper)
+            processed_test = self.y_test.copy()
+            processed_test= np.clip(processed_test, lower, upper)
             return processed_data
 
     def _validate_data_for_imputation(self):
 
         """
-        Helper method that validates that self._data has no single value columns or 
+        Helper method that validates that self.X_train has no single value columns or 
         mostly null columns before applying impute_missings_with_mice().
         """
-        check_cols = [x for x in self._data.columns if x not in self._meta_cols]
-        if any(self._data[col].nunique(dropna=True) <= 1 for col in check_cols):
-            self.logger.error("Data contains single-value columns. Apply drop_single_value_cols() before impute_missings_with_mice().")
-            raise ValueError("Data contains single-value columns. Apply drop_single_value_cols() before impute_missings_with_mice().")
-        if any(self._data[col].notnull().sum() <= self.__n_non_null for col in check_cols):
-            self.logger.error("Data contains mostly null columns. Apply drop_mostly_null_cols() before impute_missings_with_mice().")
-            raise ValueError("Data contains mostly null columns. Apply drop_mostly_null_cols() before impute_missings_with_mice().")
-        if self._data[self._label].isnull().sum() > 0:
+        check_cols = [x for x in self.X_train.columns if x not in self._meta_cols]
+        if any(self.X_train[col].nunique(dropna=True) <= 1 for col in check_cols):
+            self.logger.error("X_train contains single-value columns. Apply drop_single_value_cols() before impute_missings_with_mice().")
+            raise ValueError("X_train contains single-value columns. Apply drop_single_value_cols() before impute_missings_with_mice().")
+        if any(self.X_train[col].notnull().sum() <= self.__n_non_null for col in check_cols):
+            self.logger.error("X_train contains mostly null columns. Apply drop_mostly_null_cols() before impute_missings_with_mice().")
+            raise ValueError("X_train contains mostly null columns. Apply drop_mostly_null_cols() before impute_missings_with_mice().")
+        if self.y_train.isnull().sum() > 0 or self.y_test.isnull().sum() > 0:
             self.logger.error("Label contains null values. Apply drop_null_labels() before impute_missings_with_mice().")
             raise ValueError("Label contains null values. Apply drop_null_labels() before impute_missings_with_mice().")
         
@@ -437,8 +578,10 @@ class Preprocess:
         # present in the dataframe after drops from other methods.
         features_to_process = [x for x in self._data.columns if x in self._continuous_cols or x in self._binary_cols]
 
-        subset = self._data[features_to_process].copy()
-        if all(subset[col].isnull().sum() == 0 for col in subset.columns):
+        train = self.X_train[features_to_process].copy()
+        test = self.X_test[features_to_process].copy()
+
+        if all(train[col].isnull().sum() == 0 for col in train.columns):
             self.logger.info("There are no missing values for impute_missings_with_mice() to impute. Skipping imputation.")
             return
 
@@ -446,24 +589,33 @@ class Preprocess:
             # Create miceforest kernel
             self.logger.info("Imputing missings with miceforest")
             kernel = mf.ImputationKernel(
-                        subset,
+                        train,
                         num_datasets=1,
                         save_all_iterations_data=False,
                         random_state=self.__random_state
                     )
             
-            # Perform imputation using kernel
+            # Perform imputation on train set using kernel
             kernel.mice(self.__mice_iters)
 
-            # Extract the imputed dataset
-            imputed_subset = kernel.complete_data(0)
+            # Extract the imputed train set
+            imputed_train = kernel.complete_data(0)
+
+            # Apply fitted imputation to test set
+            if any(test[col].isnull().sum() > 0 for col in test.columns):
+                imputed_test = kernel.impute_new_data(test)
+                self.logger.info("No missing values in test set.")
+            else:
+                imputed_test = test
             self.logger.info("Impute complete")
 
-            # Substitute imputed features into data
+            # Substitute imputed features into train and test sets
             if inplace==True:
-                self._data[features_to_process] = imputed_subset
+                self.X_train[features_to_process] = imputed_train
+                self.X_test[features_to_process] = imputed_test
+
             else:
-                return imputed_subset
+                return imputed_train, imputed_test
 
     def normalize_continuous_cols(self, inplace: bool=True):
 
@@ -559,10 +711,11 @@ class Preprocess:
         if self.__wins_pctile > 0:
             self.winsorize_continuous()
             self.winsorize_label()
+        self.target_encode()
         self.impute_missings_with_mice()
         self.normalize_continuous_cols()
         if normalize_binary:
             self.normalize_binary_cols()
-        self.logger.info("Preprocessing complete, returning self._data, self._continuous_cols, self._binary_cols, and self._categorical_cols")
+        self.logger.info("Preprocessing complete, returning self.X_train, self.X_test, self.y_train, self.y_test, self.meta_train, self.meta_test, self._continuous_cols, self._binary_cols, and self._categorical_cols")
 
-        return self._data, self._continuous_cols, self._binary_cols, self._categorical_cols
+        return self.X_train, self.X_test, self.y_train, self.y_test, self.meta_train, self.meta_test, self._continuous_cols, self._binary_cols, self._categorical_cols
