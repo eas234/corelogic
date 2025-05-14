@@ -20,6 +20,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import make_scorer
 from sklearn.preprocessing import StandardScaler
 
+sys.path.insert(0, '..')
 from modeling_utils import *
 from preprocess import *
 
