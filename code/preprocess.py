@@ -710,7 +710,7 @@ class Preprocess:
         if inplace==True:
             # scale X_train, X_test inplace
             self.X_train[features_to_process] = pd.DataFrame(
-                scaler.transform(self.X_test[features_to_process]),
+                scaler.transform(self.X_train[features_to_process]),
                 columns=features_to_process,
                 index=self.X_train.index
             )
@@ -718,7 +718,7 @@ class Preprocess:
             self.X_test[features_to_process] = pd.DataFrame(
                 scaler.transform(self.X_test[features_to_process]),
                 columns=features_to_process,
-                index=self.X_train.index
+                index=self.X_test.index
             )
         else:
             return scaler.transform(self.X_train[features_to_process]), scaler.transform(self.X_test[features_to_process])
