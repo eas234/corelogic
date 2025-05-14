@@ -4,8 +4,10 @@ import miceforest as mf
 import numpy as np
 import os
 import pandas as pd
+import yaml
 
-from sklearn.model_select import train_test_split
+from category_encoders import *
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 class Preprocess:
@@ -91,12 +93,12 @@ class Preprocess:
             raise TypeError("min_samples_leaf must be positive integer")
         
         if isinstance(smoothing, int) and smoothing > 0:
-            self.__smothing = smoothing
+            self.__smoothing = smoothing
         else:
             self.logger.warning("smoothing must be positive integer")
             raise TypeError("smoothing must be positive integer")
         
-        self.__write_ecoding_dict = write_encoding_dict
+        self.__write_encoding_dict = write_encoding_dict
         self.__encoding_path = encoding_path or ""
 
         self.logger.info("Preprocess class initialized.")
@@ -387,7 +389,7 @@ class Preprocess:
         as attributes of Encode() object.
         """
 
-        self.X_train, self.X_test, self.y_train, self.y_test, self.meta_train, self.meta_test = train_test_split(self._data[self._features], 
+        self.X_train, self.X_test, self.y_train, self.y_test, self.meta_train, self.meta_test = train_test_split(self._data[self._binary_cols + self._categorical_cols + self._continuous_cols], 
                                                                                                 self._data[self._label], 
                                                                                                 self._data[self._meta_cols], 
                                                                                                 test_size=self.__test_size, 
@@ -395,7 +397,7 @@ class Preprocess:
         
         self.logger.info("X_train, X_test, y_train, y_test, meta_train, meta_test now stored as attributes of preprocess() object")
 
-    def target_encode(self):
+    def target_encode(self, inplace: bool=True):
 
         """
         TODO: update self._continuous_cols to include encoded cols after encoding; empty out categorical cols
@@ -434,7 +436,7 @@ class Preprocess:
         """
 
         self.logger.info("Encoding categoricals using target_encode()")
-        enc = TargetEncoder(cols=[self._categorical_cols],
+        enc = TargetEncoder(cols=tuple(self.X_train[self._categorical_cols].columns),
                              min_samples_leaf=self.__min_samples_leaf, 
                              smoothing=self.__smoothing).fit(self.X_train, self.y_train)
         self.logger.info("Encoder fitted")
@@ -468,6 +470,9 @@ class Preprocess:
             self._continuous_cols += self._categorical_cols
             self._categorical_cols = 0
 
+            self.logger.info("Resetting dataframe indices")
+            self.X_train.reset_index(drop=True, inplace=True)
+            self.X_test.reset_index(drop=True, inplace=True)
         else:
             self.logger.info("Encoding categoricals on copies of X_train, X_test")
             X_train = enc.transform(self.X_train.copy())
@@ -591,7 +596,7 @@ class Preprocess:
             kernel = mf.ImputationKernel(
                         train,
                         num_datasets=1,
-                        save_all_iterations_data=False,
+                        save_all_iterations_data=True,
                         random_state=self.__random_state
                     )
             
@@ -603,10 +608,12 @@ class Preprocess:
 
             # Apply fitted imputation to test set
             if any(test[col].isnull().sum() > 0 for col in test.columns):
+                print(test.info())
+                print(train.info())
                 imputed_test = kernel.impute_new_data(test)
-                self.logger.info("No missing values in test set.")
             else:
                 imputed_test = test
+                self.logger.info("no missing values in test set")
             self.logger.info("Impute complete")
 
             # Substitute imputed features into train and test sets
@@ -666,7 +673,7 @@ class Preprocess:
             self.logger.info('Data has no binary columns; normalize_binary_cols() not applied.')
             return
 
-        self.logger.info("Normalizing continuous columns")
+        self.logger.info("Normalizing binary columns")
         subset = self._data[features_to_process].copy()
         
         scaler = StandardScaler()
@@ -706,6 +713,7 @@ class Preprocess:
         self.drop_null_labels()
         self.drop_single_value_cols()
         self.drop_mostly_null_cols()
+        self.train_test_split()
         if one_hot:
             self.one_hot()
         if self.__wins_pctile > 0:

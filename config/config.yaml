@@ -34,7 +34,7 @@ out_path: '/oak/stanford/groups/deho/proptax/results/labeled_data/rf-baseline-la
 
 log_dir: '/oak/stanford/groups/deho/proptax/modeling/rf/logs'
 
-encoding_path: '/oak/stanford/groups/deho/proptax/rf/encoders'
+encoding_path: '/oak/stanford/groups/deho/proptax/modeling/rf/encoders'
 
 #fips: 17031 # cook county
 

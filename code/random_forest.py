@@ -21,7 +21,7 @@ from sklearn.metrics import make_scorer
 from sklearn.preprocessing import StandardScaler
 
 from modeling_utils import *
-from preprocessor import *
+from preprocess import *
 
 # change working directory to this script's location
 abspath = os.path.abspath(__file__)
