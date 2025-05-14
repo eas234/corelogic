@@ -39,7 +39,7 @@ cv_folds = out['cv_folds']
 mice_iters = out['mice_iters']
 n_trials = out['n_trials']
 n_jobs = out['n_jobs']
-n_non_null = out['n_non_null']
+#n_non_null = out['n_non_null']
 min_samples_leaf = out['min_samples_leaf']
 smoothing = out['smoothing']
 write_encoding_dict=out['write_encoding_dict']
@@ -72,6 +72,9 @@ print('subsetting to county ' + str(fips))
 # subset to single county
 df = df.loc[df.fips == fips]
 print(str(df.shape[0]) + ' rows remaining after county-level subset')
+
+# only use columns where at least half of the values are non-missing.
+n_non_null = int(np.floor(df.shape[0])*0.5)
 
 preproc = Preprocess(df.copy(),
 		    label,
