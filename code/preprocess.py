@@ -745,6 +745,7 @@ class Preprocess:
     def run(self, 
             inplace: bool=True,
             one_hot: bool=False,
+            target_encode: bool=False,
             normalize_binary: bool=False):
 
         """
@@ -757,6 +758,7 @@ class Preprocess:
         Inputs:
         - inplace: bool, determines whether modifications are made in place. current version only supports inplace modifications.
         - one_hot: bool. If True, wrapper calls one_hot() to encode categoricals. Default is False.
+        - target_encode: bool. If True, wrapper calls target_encode to encode categorical variables.
         - normalize_binary: bool. If True, wrapper calls normalize_binary_cols() to normalize binary columns. Default is False.
 
         Returns: 
@@ -767,38 +769,35 @@ class Preprocess:
             self.logger.info("Wrapper run() only supports inplace modifications. Set inplace=True or run methods individually with inplace=False.")
             return
 
-        self.logger.info("Running full preprocessing pipeline.")
+        self.logger.info("Running preprocessing pipeline.")
+                
         self.drop_null_labels()
+        
         self.drop_single_value_cols()
+        
         self.drop_mostly_null_cols()
+        
         self.train_test_split()
-        print("Right after test train split")
-        print(self.X_train.info())
-        print(self.X_test.info())
+        
         self._drop_problematic_cols_from_splits()
-        print("After drop problematic cols")
-        print(self.X_train.info())
-        print(self.X_test.info())
+        
         if one_hot:
             self.one_hot()
+        
         if self.__wins_pctile > 0:
             self.winsorize_continuous()
             self.winsorize_label()
-        print("After winsorizing")
-        print(self.X_train.info())
-        print(self.X_test.info())
-        self.target_encode()
-        print("After target_encode")
-        print(self.X_train.info())
-        print(self.X_test.info())
+        
+        if target_encode:
+            self.target_encode()
+        
         self.impute_missings_with_mice()
-        print("After impute missings with mice:")
-        print(self.X_train.info())
-        print(self.X_test.info())
-        print(self.X_test.head())
+        
         self.normalize_continuous_cols()
+        
         if normalize_binary:
             self.normalize_binary_cols()
+        
         self.logger.info("Preprocessing complete, returning self.X_train, self.X_test, self.y_train, self.y_test, self.meta_train, self.meta_test, self._continuous_cols, self._binary_cols, and self._categorical_cols")
 
         return self.X_train, self.X_test, self.y_train, self.y_test, self.meta_train, self.meta_test, self._continuous_cols, self._binary_cols, self._categorical_cols
