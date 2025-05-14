@@ -14,6 +14,12 @@ n_jobs: 5
 
 n_non_null: 100
 
+min_samples_leaf: 20
+
+smoothing: 10
+
+write_encoding_dict: True
+
 raw_path: '/oak/stanford/groups/deho/proptax/raw/sales_assessments_2023.csv'
 
 study_name: '/oak/stanford/groups/deho/proptax/modeling/rf/studies/rf-baseline'
@@ -27,6 +33,8 @@ trials_path: '/oak/stanford/groups/deho/proptax/modeling/rf/trials/rf-baseline-t
 out_path: '/oak/stanford/groups/deho/proptax/results/labeled_data/rf-baseline-labels.csv'
 
 log_dir: '/oak/stanford/groups/deho/proptax/modeling/rf/logs'
+
+encoding_path: '/oak/stanford/groups/deho/proptax/rf/encoders'
 
 #fips: 17031 # cook county
 
