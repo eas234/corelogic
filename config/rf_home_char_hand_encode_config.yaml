@@ -1,0 +1,179 @@
+rand_state: 42
+
+test_size: 0.25
+
+cv_folds: 5
+
+mice_iters: 3
+
+max_iters: 1000
+
+n_trials: 20
+
+n_jobs: 5
+
+share_non_null: 0.5
+
+min_samples_leaf: 20
+
+smoothing: 10
+
+write_encoding_dict: True
+
+raw_path: '/oak/stanford/groups/deho/proptax/raw/sales_assessments_2023.csv'
+
+study_dir: '/oak/stanford/groups/deho/proptax/models/rf_house_char_hand_encode/hyperparams/studies'
+
+sampler_path: '/oak/stanford/groups/deho/proptax/models/rf_house_char_hand_encode/hyperparams/samplers/sampler.pkl'
+
+params_path: '/oak/stanford/groups/deho/proptax/models/rf_house_char_hand_encode/hyperparams/best_params/best-params.pkl'
+
+trials_path: '/oak/stanford/groups/deho/proptax/models/rf_house_char_hand_encode/hyperparams/trials/trials.pkl'
+
+proc_data_dir: '/oak/stanford/groups/deho/proptax/models/rf_house_char_hand_encode/data'
+
+log_dir: '/oak/stanford/groups/deho/proptax/models/rf_house_char_hand_encode/logs'
+
+encoding_path: '/oak/stanford/groups/deho/proptax/models/rf_house_char_hand_encode/encoders'
+
+#fips: 17031 # cook county
+
+fips: 48201
+
+meta: ['meta_sfh', 'ASSESSED_YEAR', 'SALE_YEAR', 'CLIP', 'tract_id', 'fips', 'MARKET_TOTAL_VALUE']
+
+id: ['CLIP']
+
+geo: ['tract_id',
+    'fips']
+ 
+time: ['ASSESSED_YEAR',
+       'SALE_YEAR']
+
+ignore: [ 'WARRANTY_GRANT_IND',
+        'FORE_QC_PROB_IND']
+
+benchmark: ['MARKET_TOTAL_VALUE']
+
+label: 'SALE_AMOUNT'
+
+binary: ['char_air_central', 
+    'char_no_bsmt', 
+    'char_bsmt_cel', 
+    'char_bsmt_crawl', 
+    'char_bsmt_full', 
+    'char_bsmt_garage', 
+    'char_bsmt_partial', 
+    'char_bsmt_slab', 
+    'char_bsmt_fin_bedr', 
+    'char_bsmt_fin_rec', 
+    'char_bsmt_fin', 
+    'char_bsmt_fin_par', 
+    'char_ext_wall_alum',
+    'char_ext_wal_asb', #misspelled, fixed in next pull. should be char_ext_wall_asb
+    'char_ext_wall_block', 
+    'char_ext_wall_brick', 
+    'char_ext_wall_frame', 
+    'char_ext_wall_stone', 
+    'char_ext_wall_stucco', 
+    'char_ext_wall_vinyl', 
+    'char_ext_wall_wood', 
+    'char_has_frpl', 
+    'char_gar1_att', 
+    'char_gar1_cnst_frame', 
+    'char_gar1_cnst_builtin', 
+    'char_gar1_cnst_bsmt', 
+    'char_gar1_cnst_finshed', # misspelled, fixed in next pull. should be char_gar1_cnst_finished 
+    'char_gar1_cnst_stucco', 
+    'char_gar1_cnst_wood', 
+    'char_gar1_cnst_brick', 
+    'char_gar1_cnst_masonry', 
+    'char_gar1_cnst_carport', 
+    'char_has_pool', 
+    'char_bq_avg', 
+    'char_bq_blavg', 
+    'char_bq_econ', 
+    'char_bq_exc', 
+    'char_bq_fa', 
+    'char_bq_go', 
+    'char_bq_lo', 
+    'char_bq_lux', 
+    'char_bq_po', 
+    'char_bq_abavg', 
+    'char_heat_base', 
+    'char_heat_pump', 
+    'char_heat_fa', 
+    'char_heat_grav', 
+    'char_heat_rad', 
+    'char_heat_floor', 
+    'char_heat_stove_space', 
+    'char_heat_wall', 
+    'char_roof_flat', 
+    'char_roof_gable', 
+    'char_roof_hip', 
+    'char_roof_mansard', 
+    'char_roof_gambrel', 
+    'char_roof_pitched', 
+    'char_roof_shed', 
+    'char_roof_custom', 
+    'char_roof_cathedral', 
+    'char_style_ranch', 
+    'char_style_conv', 
+    'char_style_col', 
+    'char_style_tra', 
+    'char_style_twn', 
+    'char_style_old', 
+    'char_style_cnt', 
+    'char_style_spl', 
+    'char_style_cap', 
+    'char_style_mob', 
+    'char_style_bun', 
+    'char_style_man', 
+    'char_found_pilings', 
+    'char_found_stem_wall', 
+    'char_found_rb', 
+    'char_found_concrete', 
+    'char_found_crs', 
+    'char_found_pier', 
+    'char_found_stone', 
+    'char_found_std', 
+    'char_found_cnw', 
+    'char_fuel_typ_solar', 
+    'char_fuel_typ_coal', 
+    'char_fuel_typ_wood', 
+    'char_fuel_typ_gas', 
+    'char_fuel_typ_elec', 
+    'char_sewer_cess', 
+    'char_sewer_comm', 
+    'char_sewer_priv', 
+    'char_sewer_pub', 
+    'char_sewer_sep', 
+    'char_sewer_sto', 
+    'char_water_cis', 
+    'char_water_comm', 
+    'char_water_priv', 
+    'char_water_pub', 
+    'char_water_pubwell', 
+    'char_water_spr', 
+    'char_water_well']
+
+continuous: ['char_yrblt', 
+    'char_beds', 
+    'char_bldg_sf', 
+    'char_ground_sf', 
+    'char_second_sf', 
+    'char_base_fin_sf', 
+    'char_base_unfin_sf', 
+    'char_stories', 
+    'char_nbath', 
+    'char_fbath', 
+    'char_hbath', 
+    'char_n_frpl', 
+    'char_gar1_size', 
+    'char_gar1_sf', 
+    'char_bq_ordinal', 
+    'char_land_sf', 
+    'char_frontage_sf', 
+    'char_depth_sf']
+
+categorical: None
