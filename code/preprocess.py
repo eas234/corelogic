@@ -19,7 +19,7 @@ class Preprocess:
     - Setters and getters for all class attributes
     - drop_null_labels(): drops rows where label is null
     - drop_single_value_cols(): drops columns that have only one value
-    - drop_mostly_null_cols(): drops columns that have fewer than n_non_null non-null values
+    - drop_mostly_null_cols(): drops columns that have fewer than share_non_null non-null values
     - winsorize_continuous(): winsorizes continuous features at wins_pctile and 100-wins_pctile
     - winsorize_labels(): winsorizes labels at wins_pctile and 100-wins_pctile
     - one_hot(): one-hot encodes categorical variables
@@ -35,7 +35,7 @@ class Preprocess:
                  binary_cols: list=None, # list of binary features
                  categorical_cols: list=None, # list of categorical features
                  meta_cols: list=None, # columns of metadata that methods should not modify
-                 n_non_null: int=0, # minimum number of non-null values required in each column
+                 share_non_null: float=0.25, # minimum share of non-null values required in each column
                  random_state: int=42, # for reproducibility
                  wins_pctile: int=1, # percentile at which data are winsorized (symmetric)
                  mice_iters: int=3, # n_iters for miceforest imputer
@@ -80,7 +80,7 @@ class Preprocess:
         
         
         # protected attributes
-        self.__n_non_null = n_non_null
+        self.__share_non_null = share_non_null
         self.__random_state = random_state
         self.__wins_pctile = wins_pctile
         self.__mice_iters = mice_iters
@@ -181,16 +181,16 @@ class Preprocess:
     
     # min non-null values
     @property
-    def n_non_null(self):
-        return self.__n_non_null
+    def share_non_null(self):
+        return self.__share_non_null
     
-    @n_non_null.setter
-    def n_non_null(self, new_n):
-        if new_n >= 0 and isinstance(new_n, int):
-            self.__n_non_null = new_n
+    @share_non_null.setter
+    def share_non_null(self, new_n):
+        if new_n >= 0 and new_n <= 1 and isinstance(new_n, float):
+            self.__share_non_null = new_n
         else:
-            self.logger.error("n_non_null must be a positive integer")
-            raise ValueError("n_non_null must be a positive integer")
+            self.logger.error("share_non_null must be a float between 0 and 1")
+            raise ValueError("share_non_null must be a float between 0 and 1")
 
     # random state
     @property
@@ -297,7 +297,7 @@ class Preprocess:
     def drop_mostly_null_cols(self, inplace: bool=True):
 
         """
-        Drop columns in input data that have fewer than n_non_null 
+        Drop columns in input data that have fewer than share_non_null 
         non-null values. 
 
         If inplace==True, columns are dropped in place and self._data indices are reset after drop.
@@ -307,10 +307,10 @@ class Preprocess:
         """
 
         # identify mostly null cols
-        drop_cols = [col for col in self._data.columns if self._data[col].notnull().sum() <= self.__n_non_null and col not in self._meta_cols]
+        drop_cols = [col for col in self._data.columns if self._data[col].notnull().sum() <= int(np.floor(self.__share_non_null*self._data.shape[0])) and col not in self._meta_cols]
 
         if drop_cols:
-            self.logger.warning(f'Warning: {len(drop_cols)} columns have fewer than {self.__n_non_null} non-null values. Dropping {drop_cols}')
+            self.logger.warning(f'Warning: {len(drop_cols)} columns have fewer than {self.__share_non_null*100} percent non-null values. Dropping {drop_cols}')
         else:
             self.logger.info('No mostly null columns to drop.')
             pass
@@ -423,7 +423,7 @@ class Preprocess:
         return [
             col for col in df.columns
             if (df[col].nunique(dropna=True) <= 1) or  # Single-value columns
-               (df[col].notnull().sum() < max(1, self.__n_non_null))  # Mostly null columns
+               (df[col].notnull().sum() < max(1, int(np.floor(self.__share_non_null*df.shape[0])))  # Mostly null columns
         ]
     
     def _update_column_attributes(self):
@@ -587,7 +587,7 @@ class Preprocess:
         if any(self.X_train[col].nunique(dropna=True) <= 1 for col in check_cols):
             self.logger.error("X_train contains single-value columns. Apply drop_single_value_cols() before impute_missings_with_mice().")
             raise ValueError("X_train contains single-value columns. Apply drop_single_value_cols() before impute_missings_with_mice().")
-        if any(self.X_train[col].notnull().sum() <= self.__n_non_null for col in check_cols):
+        if any(self.X_train[col].notnull().sum() <= int(np.floor(self.__share_non_null*self.X_train.shape[0])) for col in check_cols):
             self.logger.error("X_train contains mostly null columns. Apply drop_mostly_null_cols() before impute_missings_with_mice().")
             raise ValueError("X_train contains mostly null columns. Apply drop_mostly_null_cols() before impute_missings_with_mice().")
         if self.y_train.isnull().sum() > 0 or self.y_test.isnull().sum() > 0:
