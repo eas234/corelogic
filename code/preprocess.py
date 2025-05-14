@@ -757,6 +757,7 @@ class Preprocess:
         self.drop_single_value_cols()
         self.drop_mostly_null_cols()
         self.train_test_split()
+        self._drop_problematic_cols_from_splits()
         if one_hot:
             self.one_hot()
         if self.__wins_pctile > 0:
