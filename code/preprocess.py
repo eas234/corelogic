@@ -617,6 +617,14 @@ class Preprocess:
         # make sure user has run drop_single_value_cols() and drop_mostly_null_cols()
         self._validate_data_for_imputation()
 
+        # reset indices
+        self.X_train = self.X_train.reset_index(drop=True)
+        self.X_test = self.X_test.reset_index(drop=True)
+        self.y_train = self.y_train.reset_index(drop=True)
+        self.y_test = self.y_test.reset_index(drop=True)
+        self.meta_train = self.meta_train.reset_index(drop=True)
+        self.meta_test = self.meta_test.reset_index(drop=True)
+        
         # subset to binary and continuous columns that are still 
         # present in the dataframe after drops from other methods.
         features_to_process = [x for x in self._data.columns if x in self._continuous_cols or x in self._binary_cols]
@@ -631,6 +639,7 @@ class Preprocess:
         else:
             # Create miceforest kernel
             self.logger.info("Imputing missings with miceforest")
+            
             kernel = mf.ImputationKernel(
                         train,
                         num_datasets=1,
