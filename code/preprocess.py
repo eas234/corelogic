@@ -795,6 +795,7 @@ class Preprocess:
         print("After impute missings with mice:")
         print(self.X_train.info())
         print(self.X_test.info())
+        print(self.X_test.head())
         self.normalize_continuous_cols()
         if normalize_binary:
             self.normalize_binary_cols()
