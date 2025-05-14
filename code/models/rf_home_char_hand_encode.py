@@ -92,7 +92,7 @@ X_train, X_test, y_train, y_test, meta_train, meta_test, continuous, binary, cat
 
 # write pre-processed train and test sets
 for key, value in {'X_train': X_train, 'X_test': X_test, 'y_train': y_train, 'y_test': y_test, 'meta_train': meta_train, 'meta_test': meta_test}:
-    value.to_csv(os.path.join(proc_data_dir, f'{key}.csv'"))
+    value.to_csv(os.path.join(proc_data_dir, f'{key}.csv'))
 				  
 # tune model hyperparams
 tune_model(X_train, 
