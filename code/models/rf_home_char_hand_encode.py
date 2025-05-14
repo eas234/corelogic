@@ -20,14 +20,14 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import make_scorer
 from sklearn.preprocessing import StandardScaler
 
-sys.path.insert(0, '..')
-from modeling_utils import *
-from preprocess import *
-
 # change working directory to this script's location
 abspath = os.path.abspath(__file__)
 dname = os.path.dirname(abspath)
 os.chdir(dname)
+
+sys.path.insert(0, '..')
+from modeling_utils import *
+from preprocess import *
 
 # load config
 with open('../../config/rf_home_char_hand_encode_config.yaml', 'r') as stream:
