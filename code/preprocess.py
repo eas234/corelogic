@@ -397,6 +397,44 @@ class Preprocess:
         
         self.logger.info("X_train, X_test, y_train, y_test, meta_train, meta_test now stored as attributes of preprocess() object")
 
+    def _drop_problematic_cols_from_splits(self):
+        """
+        Drops columns that become problematic after train-test split.
+        """
+        
+        # First identify columns that are bad in either split
+        train_problem_cols = self._find_bad_columns(self.X_train)
+        test_problem_cols = self._find_bad_columns(self.X_test)
+        
+        # Union of problematic columns across splits
+        all_problem_cols = list(set(train_problem_cols) | set(test_problem_cols))
+        
+        if all_problem_cols:
+            self.logger.warning(
+                f"Dropping {len(all_problem_cols)} columns that became problematic after splitting: "
+                f"{all_problem_cols}"
+            )
+            self.X_train = self.X_train.drop(columns=all_problem_cols)
+            self.X_test = self.X_test.drop(columns=all_problem_cols)
+            self._update_column_attributes()
+    
+    def _find_bad_columns(self, df):
+        """Identifies columns that should be dropped from a dataframe"""
+        return [
+            col for col in df.columns
+            if (df[col].nunique(dropna=True) <= 1) or  # Single-value columns
+               (df[col].notnull().sum() < max(1, self.__n_non_null))  # Mostly null columns
+        ]
+    
+    def _update_column_attributes(self):
+        """Updates the column-type tracking attributes after dropping columns"""
+        remaining_cols = set(self.X_train.columns)
+        
+        self._continuous_cols = [col for col in self._continuous_cols if col in remaining_cols]
+        self._binary_cols = [col for col in self._binary_cols if col in remaining_cols]
+        self._categorical_cols = [col for col in self._categorical_cols if col in remaining_cols]
+        
+        
     def target_encode(self, inplace: bool=True):
 
         """
@@ -603,14 +641,19 @@ class Preprocess:
             # Perform imputation on train set using kernel
             kernel.mice(self.__mice_iters)
 
+            #
+            print('test/train column info before imputation:')
+            print(test.info())
+            print(train.info())
+
             # Extract the imputed train set
             imputed_train = kernel.complete_data(0)
 
             # Apply fitted imputation to test set
             if any(test[col].isnull().sum() > 0 for col in test.columns):
+                imputed_test = kernel.impute_new_data(test)
                 print(test.info())
                 print(train.info())
-                imputed_test = kernel.impute_new_data(test)
             else:
                 imputed_test = test
                 self.logger.info("no missing values in test set")
