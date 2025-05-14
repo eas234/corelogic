@@ -651,7 +651,7 @@ class Preprocess:
 
             # Apply fitted imputation to test set
             if any(test[col].isnull().sum() > 0 for col in test.columns):
-                imputed_test = kernel.impute_new_data(test)
+                imputed_test = kernel.impute_new_data(test).complete_data()
                 print(test.info())
                 print(train.info())
             else:
