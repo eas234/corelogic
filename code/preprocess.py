@@ -538,7 +538,7 @@ class Preprocess:
 
         if inplace==True:
             self.X_train[self._continuous_cols] = np.clip(self.X_train[self._continuous_cols], lower, upper)
-            self.X_test[self._continuous_cols] = np.clip(self.X_train[self._continuous_cols], lower, upper)
+            self.X_test[self._continuous_cols] = np.clip(self.X_test[self._continuous_cols], lower, upper)
 
         else:
             processed_train = self.X_train[self._continuous_cols].copy()
