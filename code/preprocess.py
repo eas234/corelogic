@@ -683,22 +683,27 @@ class Preprocess:
         If inplace==False, method is applied to a copy of self._data.
         Method returns normalized copy of continuous features in self._data.
         """
-        features_to_process = [x for x in self._data.columns if x in self._continuous_cols]
+        features_to_process = [x for x in self._X_train.columns if x in self._continuous_cols]
 
         if not features_to_process:
             self.logger.info('Data has no continuous columns; normalize_continuous_cols() not applied.')
             return
             
         self.logger.info("Normalizing continuous columns")
-        subset = self._data[features_to_process].copy()
-        
+        train_subset = self.X_train[features_to_process].copy()
+
+        # define scaler
         scaler = StandardScaler()
-        normalized = scaler.fit_transform(subset)
+
+        # fit scaler on train set
+        scaler.fit(train_subset)
 
         if inplace==True:
-            self._data[features_to_process] = normalized
+            # scale X_train, X_test inplace
+            self.X_train = scaler.transform(self.X_train[features_to_process])
+            self.X_test = scaler.transform(self.X_test[features_to_process])
         else:
-            return normalized
+            return scaler.transform(self.X_train[features_to_process]), scaler.transform(self.X_test[features_to_process])
         
     def normalize_binary_cols(self, inplace: bool=True):
 
@@ -717,15 +722,16 @@ class Preprocess:
             return
 
         self.logger.info("Normalizing binary columns")
-        subset = self._data[features_to_process].copy()
+        train_subset = self.X_train[features_to_process].copy()
         
         scaler = StandardScaler()
-        normalized = scaler.fit_transform(subset)
+        scaler.fit(train_subset)
 
         if inplace==True:
-            self._data[features_to_process] = normalized
+            self.X_train = scaler.transform(self.X_train[features_to_process])
+            self.X_test = scaler.transform(self.X_test[features_to_process])
         else:
-            return normalized
+            return scaler.transform(self.X_train[features_to_process]), scaler.transform(self.X_test[features_to_process])
         
     def run(self, 
             inplace: bool=True,
