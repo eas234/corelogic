@@ -92,7 +92,7 @@ preproc = Preprocess(df.copy(),
 X_train, X_test, y_train, y_test, meta_train, meta_test, continuous, binary, categorical = preproc.run(target_encode=False)
 
 # write pre-processed train and test sets
-for key, value in {'X_train': X_train, 'X_test': X_test, 'y_train': y_train, 'y_test': y_test, 'meta_train': meta_train, 'meta_test': meta_test}:
+for key, value in {'X_train': X_train, 'X_test': X_test, 'y_train': y_train, 'y_test': y_test, 'meta_train': meta_train, 'meta_test': meta_test}.items():
     value.to_csv(os.path.join(proc_data_dir, f'{key}.csv'))
 				  
 # tune model hyperparams
