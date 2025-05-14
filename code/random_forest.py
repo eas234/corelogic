@@ -57,9 +57,11 @@ encoding_path = out['encoding_path']
 fips = out['fips']
 label = out['label']
 continuous = out['continuous']
-binary = out['binary'] + out['missing_ind']
+#binary = out['binary'] + out['missing_ind']
+binary = out['binary']
 categorical = out['categorical']
-features = out['continuous'] + out['missing_ind'] + out['binary']
+#features = out['continuous'] + out['missing_ind'] + out['binary']
+features = out['continuous'] + out['binary']
 meta = out['meta']
 
 # load raw data
