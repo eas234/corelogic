@@ -423,7 +423,7 @@ class Preprocess:
         return [
             col for col in df.columns
             if (df[col].nunique(dropna=True) <= 1) or  # Single-value columns
-               (df[col].notnull().sum() < max(1, int(np.floor(self.__share_non_null*df.shape[0])))  # Mostly null columns
+               (df[col].notnull().sum() < max(1, int(np.floor(self.__share_non_null*df.shape[0]))))  # Mostly null columns
         ]
     
     def _update_column_attributes(self):
