@@ -757,7 +757,7 @@ class Preprocess:
         self.drop_single_value_cols()
         self.drop_mostly_null_cols()
         self.train_test_split()
-        print("Right after test train split"):
+        print("Right after test train split")
         print(self.X_train.info())
         print(self.X_test.info())
         self._drop_problematic_cols_from_splits()
