@@ -30,7 +30,7 @@ os.chdir(dname)
 
 # load config
 with open('../../config/rf_home_char_hand_encode_config.yaml', 'r') as stream:
-        out = yaml.safe_load(stream)
+    out = yaml.safe_load(stream)
 
 # assign parameters, paths, and feature names according to config
 random_state = out['rand_state']
@@ -45,11 +45,11 @@ smoothing = out['smoothing']
 write_encoding_dict=out['write_encoding_dict']
 
 # paths
-study_name = out['study_name']
+study_dir = out['study_dir']
 sampler_path = out['sampler_path']
 params_path = out['params_path']
 raw_path = out['raw_path']
-out_path = out['out_path']
+proc_data_dir = out['proc_data_dir']
 trials_path = out['trials_path']
 log_dir = out['log_dir']
 encoding_path = out['encoding_path']
@@ -57,11 +57,9 @@ encoding_path = out['encoding_path']
 fips = out['fips']
 label = out['label']
 continuous = out['continuous']
-#binary = out['binary'] + out['missing_ind']
 binary = out['binary']
 categorical = out['categorical']
-#features = out['continuous'] + out['missing_ind'] + out['binary']
-features = out['continuous'] + out['binary']
+features = out['continuous'] + out['binary'] + out['categorical']
 meta = out['meta']
 
 # load raw data
@@ -89,33 +87,14 @@ preproc = Preprocess(df.copy(),
 		    write_encoding_dict=write_encoding_dict,
 		    encoding_path=encoding_path)
 
-X_train, X_test, y_train, y_test, meta_train, meta_test, continuous, binary, categorical = preproc.run()
-print(f'continuous_cols: {continuous}')
-print(f'binary_cols: {binary}')
-print(f'categorical_cols: {categorical}')
+# run preprocessor
+X_train, X_test, y_train, y_test, meta_train, meta_test, continuous, binary, categorical = preproc.run(target_encode=False)
 
-X_train.to_csv('/oak/stanford/groups/deho/proptax/results/processed_data/X_train.csv')
-X_test.to_csv('/oak/stanford/groups/deho/proptax/results/processed_data/X_test.csv')
-y_train.to_csv('/oak/stanford/groups/deho/proptax/results/processed_data/y_train.csv')
-y_test.to_csv('/oak/stanford/groups/deho/proptax/results/processed_data/y_test.csv')
-'''
-# define features, label, meta
-X = df[features].reset_index(drop=True)
-y = df[label].reset_index(drop=True)
-meta = df[meta].reset_index(drop=True)
-
-print('Labels, features defined. Imputing missing values and normalizing continuous variables.')
-# first: drop cols with high numbers of nulls, missings
-X = subset_cols(X, n_non_null=100)
-
-# preproc: impute missings, normalize continuous vars
-X = impute_and_normalize(X, continuous, random_state=rand_state, mice_iters=mice_iters)
-
-print('data preprocessed; creating train-test splits')
-split_fn = get_data_splitter(X, y, meta, test_size=0.2, random_state=42)
-X_train, X_test, y_train, y_test, meta_train, meta_test = split_fn()
-
-print('tuning model hyperparams')
+# write pre-processed train and test sets
+for key, value in {'X_train': X_train, 'X_test': X_test, 'y_train': y_train, 'y_test': y_test, 'meta_train': meta_train, 'meta_test': meta_test}:
+    value.to_csv(os.path.join(proc_data_dir, f'{key}.csv'"))
+				  
+# tune model hyperparams
 tune_model(X_train, 
            y_train,
             study_name=study_name,
@@ -139,5 +118,4 @@ rf_train_test_write(X_train,
                     meta_train, 
                     meta_test, 
                     params_path=params_path, 
-                    out_path=out_path)
-'''
+                    proc_data_dir=proc_data_dir)
