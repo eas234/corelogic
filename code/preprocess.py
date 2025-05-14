@@ -683,7 +683,7 @@ class Preprocess:
         If inplace==False, method is applied to a copy of self._data.
         Method returns normalized copy of continuous features in self._data.
         """
-        features_to_process = [x for x in self._X_train.columns if x in self._continuous_cols]
+        features_to_process = [x for x in self.X_train.columns if x in self._continuous_cols]
 
         if not features_to_process:
             self.logger.info('Data has no continuous columns; normalize_continuous_cols() not applied.')
@@ -700,8 +700,17 @@ class Preprocess:
 
         if inplace==True:
             # scale X_train, X_test inplace
-            self.X_train = scaler.transform(self.X_train[features_to_process])
-            self.X_test = scaler.transform(self.X_test[features_to_process])
+            self.X_train[features_to_process] = pd.DataFrame(
+                scaler.transform(self.X_test[features_to_process]),
+                columns=features_to_process,
+                index=self.X_train.index
+            )
+
+            self.X_test[features_to_process] = pd.DataFrame(
+                scaler.transform(self.X_test[features_to_process]),
+                columns=features_to_process,
+                index=self.X_train.index
+            )
         else:
             return scaler.transform(self.X_train[features_to_process]), scaler.transform(self.X_test[features_to_process])
         
