@@ -98,7 +98,7 @@ for key, value in {'X_train': X_train, 'X_test': X_test, 'y_train': y_train, 'y_
 # tune model hyperparams
 tune_model(X_train, 
            y_train,
-            study_name=study_name,
+            study_name=study_dir, # todo - need to update tune_model to reflect changes in config setup
             load_if_exists=True,
             sampler=TPESampler(seed=rand_state),
             sampler_path=sampler_path, #.pkl file
