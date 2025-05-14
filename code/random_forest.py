@@ -40,6 +40,9 @@ mice_iters = out['mice_iters']
 n_trials = out['n_trials']
 n_jobs = out['n_jobs']
 n_non_null = out['n_non_null']
+min_samples_leaf = out['min_samples_leaf']
+smoothing = out['smoothing']
+write_encoding_dict=out['write_encoding_dict']
 
 # paths
 study_name = out['study_name']
@@ -49,6 +52,7 @@ raw_path = out['raw_path']
 out_path = out['out_path']
 trials_path = out['trials_path']
 log_dir = out['log_dir']
+encoding_path = out['encoding_path']
 
 fips = out['fips']
 label = out['label']
@@ -77,10 +81,21 @@ preproc = Preprocess(df.copy(),
 		    random_state=random_state,
 		    wins_pctile=1,
 		    mice_iters=mice_iters,
-		    log_dir=log_dir)
+		    log_dir=log_dir,
+		    min_samples_leaf=min_samples_leaf,
+		    smoothing=smoothing,
+		    write_encoding_dict=write_encoding_dict,
+		    encoding_path=encoding_path)
 
-df_clean, continuous, binary, categorical = preproc.run()
-print(df_clean.head())
+X_train, X_test, y_train, y_test, meta_train, meta_test, continuous, binary, categorical = preproc.run()
+print(f'continuous_cols: {continuous}')
+print(f'binary_cols: {binary}')
+print(f'categorical_cols: {categorical}')
+
+X_train.to_csv('/oak/stanford/groups/deho/proptax/results/processed_data/X_train.csv')
+X_test.to_csv('/oak/stanford/groups/deho/proptax/results/processed_data/X_test.csv')
+y_train.to_csv('/oak/stanford/groups/deho/proptax/results/processed_data/y_train.csv')
+y_test.to_csv('/oak/stanford/groups/deho/proptax/results/processed_data/y_test.csv')
 '''
 # define features, label, meta
 X = df[features].reset_index(drop=True)
