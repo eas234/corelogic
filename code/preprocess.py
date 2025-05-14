@@ -761,15 +761,21 @@ class Preprocess:
         print(self.X_train.info())
         print(self.X_test.info())
         self._drop_problematic_cols_from_splits()
+        print("After drop problematic cols")
         print(self.X_train.info())
         print(self.X_test.info())
-        print("after drop_problematic_cols()")
         if one_hot:
             self.one_hot()
         if self.__wins_pctile > 0:
             self.winsorize_continuous()
             self.winsorize_label()
+        print("After winsorizing")
+        print(self.X_train.info())
+        print(self.X_test.info())
         self.target_encode()
+        print("After target_encode")
+        print(self.X_train.info())
+        print(self.X_test.info())
         self.impute_missings_with_mice()
         self.normalize_continuous_cols()
         if normalize_binary:
