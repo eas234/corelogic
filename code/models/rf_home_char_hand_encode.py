@@ -100,13 +100,13 @@ tune_model(X_train,
            y_train,
             study_name=study_dir, # todo - need to update tune_model to reflect changes in config setup
             load_if_exists=True,
-            sampler=TPESampler(seed=rand_state),
+            sampler=TPESampler(seed=random_state),
             sampler_path=sampler_path, #.pkl file
             params_path=params_path, #.pkl file
             trials_path=trials_path, #.csv file
             n_trials=n_trials,
             test_size=test_size,
-	    random_state=rand_state,
+	    random_state=random_state,
 	    loss_func=mpe2_loss,
             n_jobs=n_jobs,
 	    cv_folds=cv_folds)
@@ -119,4 +119,4 @@ rf_train_test_write(X_train,
                     meta_train, 
                     meta_test, 
                     params_path=params_path, 
-                    proc_data_dir=proc_data_dir)
+                    out_path=proc_data_dir)
