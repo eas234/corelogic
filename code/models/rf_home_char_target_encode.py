@@ -89,36 +89,17 @@ preproc = Preprocess(df.copy(),
 		    write_encoding_dict=write_encoding_dict,
 		    encoding_path=encoding_path)
 
-X_train, X_test, y_train, y_test, meta_train, meta_test, continuous, binary, categorical = preproc.run()
-print(f'continuous_cols: {continuous}')
-print(f'binary_cols: {binary}')
-print(f'categorical_cols: {categorical}')
+# run preprocessor
+X_train, X_test, y_train, y_test, meta_train, meta_test, continuous, binary, categorical = preproc.run(target_encode=True)
 
-X_train.to_csv('/oak/stanford/groups/deho/proptax/results/processed_data/X_train.csv')
-X_test.to_csv('/oak/stanford/groups/deho/proptax/results/processed_data/X_test.csv')
-y_train.to_csv('/oak/stanford/groups/deho/proptax/results/processed_data/y_train.csv')
-y_test.to_csv('/oak/stanford/groups/deho/proptax/results/processed_data/y_test.csv')
-'''
-# define features, label, meta
-X = df[features].reset_index(drop=True)
-y = df[label].reset_index(drop=True)
-meta = df[meta].reset_index(drop=True)
-
-print('Labels, features defined. Imputing missing values and normalizing continuous variables.')
-# first: drop cols with high numbers of nulls, missings
-X = subset_cols(X, n_non_null=100)
-
-# preproc: impute missings, normalize continuous vars
-X = impute_and_normalize(X, continuous, random_state=rand_state, mice_iters=mice_iters)
-
-print('data preprocessed; creating train-test splits')
-split_fn = get_data_splitter(X, y, meta, test_size=0.2, random_state=42)
-X_train, X_test, y_train, y_test, meta_train, meta_test = split_fn()
-
-print('tuning model hyperparams')
+# write pre-processed train and test sets
+for key, value in {'X_train': X_train, 'X_test': X_test, 'y_train': y_train, 'y_test': y_test, 'meta_train': meta_train, 'meta_test': meta_test}.items():
+    value.to_csv(os.path.join(proc_data_dir, f'{key}.csv'))
+				  
+# tune model hyperparams
 tune_model(X_train, 
            y_train,
-            study_name=study_name,
+            study_name=study_dir, # todo - need to update tune_model to reflect changes in config setup
             load_if_exists=True,
             sampler=TPESampler(seed=rand_state),
             sampler_path=sampler_path, #.pkl file
@@ -139,5 +120,4 @@ rf_train_test_write(X_train,
                     meta_train, 
                     meta_test, 
                     params_path=params_path, 
-                    out_path=out_path)
-'''
+                    proc_data_dir=proc_data_dir)
