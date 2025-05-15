@@ -1,4 +1,3 @@
-
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 import math
@@ -145,6 +144,7 @@ def binnedDotPlotMultiY(df,
                 grouped[center][:-1],
                 yerr=[grouped['lowerErr'][:-1], grouped['upperErr'][:-1]],
                 fmt='o-',
+                fillstyle='none',
                 capsize=5,
                 label=label,
                 color=color,
@@ -156,6 +156,7 @@ def binnedDotPlotMultiY(df,
             grouped[center],
             yerr=[grouped['lowerErr'], grouped['upperErr']],
             fmt='o-',
+            fillstyle='none',
             capsize=5,
             label=label,
             color=color,
@@ -199,7 +200,7 @@ def cod(ratios):
 
     cod = (100/(len(diff)*median))*(sum(diff))
 
-    return cod
+    return f"{cod:,.4f}"
 
 def prd(ratio, assessed, sale):
     """
@@ -212,7 +213,7 @@ def prd(ratio, assessed, sale):
 
     prd = median_ratio/(median_assessed/median_sale)
 
-    return prd
+    return f"{prd:,.4f}"
 
 def log_coef(assessed, sale):
     
@@ -227,8 +228,9 @@ def log_coef(assessed, sale):
     results = ols_model.fit(cov_type='HC0')
 
     beta = results.params[1]
+    print(results.params)
 
-    return beta
+    return f"{beta:,.4f}"
 
 def mse(assessed, sale):
     """
@@ -237,11 +239,11 @@ def mse(assessed, sale):
     se = [(a-s)**2 for a, s in zip(assessed, sale)]
     mse = np.mean(se)
 
-    return mse
+    return f"{mse:,.4f}"
 
 def mpe(assessed, sale):
 
     pe = [(s-a)/s for a,s in zip(assessed, sale)]
-    mpe = np.mean(se)
+    mpe = np.mean(pe)
 
-    return mpe
+    return f"{mpe:,.4f}"
