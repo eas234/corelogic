@@ -231,7 +231,7 @@ def tune_model(X_train,
                 
     return df
 
-def rf_train_test_write(X_train, X_test, y_train, y_test, meta_train, meta_test, params_path='params_path.pkl', out_path='out_path.csv'):
+def rf_train_test_write(X_train, X_test, y_train, y_test, meta_train, meta_test, params_path='params_path.pkl', proc_data_dir='data'):
 
     """
     Train model using optimal hyperparams
@@ -254,6 +254,6 @@ def rf_train_test_write(X_train, X_test, y_train, y_test, meta_train, meta_test,
     results_df['y_true'] = y_test
     results_df['y_pred'] = y_pred
 
-    results_df.to_csv(out_path, index=False)
+    results_df.to_csv(os.path.join(proc_data_dir, 'preds.csv'), index=False)
 
     return results_df
