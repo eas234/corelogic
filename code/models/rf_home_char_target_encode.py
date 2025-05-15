@@ -25,6 +25,7 @@ abspath = os.path.abspath(__file__)
 dname = os.path.dirname(abspath)
 os.chdir(dname)
 
+sys.path.insert(0, '..')
 from modeling_utils import *
 from preprocess import *
 
