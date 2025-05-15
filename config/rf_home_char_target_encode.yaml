@@ -8,7 +8,7 @@ mice_iters: 3
 
 max_iters: 1000
 
-n_trials: 20
+n_trials: 100
 
 n_jobs: 5
 
