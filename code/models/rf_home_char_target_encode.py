@@ -30,7 +30,7 @@ from modeling_utils import *
 from preprocess import *
 
 # load config
-with open('../../config/rf_home_char_target_encode_config.yaml', 'r') as stream:
+with open('../../config/rf_home_char_target_encode.yaml', 'r') as stream:
         out = yaml.safe_load(stream)
 
 # assign parameters, paths, and feature names according to config
