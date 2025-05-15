@@ -119,4 +119,4 @@ rf_train_test_write(X_train,
                     meta_train, 
                     meta_test, 
                     params_path=params_path, 
-                    out_path=proc_data_dir)
+                    proc_data_dir=proc_data_dir)
