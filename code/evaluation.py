@@ -229,3 +229,19 @@ def log_coef(assessed, sale):
     beta = results.params[1]
 
     return beta
+
+def mse(assessed, sale):
+    """
+    """
+
+    se = [(a-s)**2 for a, s in zip(assessed, sale)]
+    mse = np.mean(se)
+
+    return mse
+
+def mpe(assessed, sale):
+
+    pe = [(s-a)/s for a,s in zip(assessed, sale)]
+    mpe = np.mean(se)
+
+    return mpe
