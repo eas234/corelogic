@@ -1,10 +1,17 @@
 
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
+import math
 import numpy as np
 import os
 import pandas as pd
+import statistics as stats
+import statsmodels.api as sm
+
 from scipy.stats.mstats import winsorize
+
+from sklearn.linear_model import LinearRegression
+
 
 def set_working_dir():
 
@@ -173,3 +180,52 @@ def binnedDotPlotMultiY(df,
     plt.show()
 
     return None
+
+def cod(ratios):
+    
+    """
+    Calculate coefficient of dispersion for a given array or dataframe column of
+    sales ratios.
+
+    input:
+    - ratios. Can be np.array or pd.DataFrame
+
+    output:
+    - cod, coefficeint of dispersion
+    """
+    
+    median = stats.median(ratios)
+    diff = [abs(r-median) for r in ratios]
+
+    cod = (100/(len(diff)*median))*(sum(diff))
+
+    return cod
+
+def prd(ratio, assessed, sale):
+    """
+
+    """
+
+    median_ratio = stats.median(ratio)
+    median_assessed = stats.median(assessed)
+    median_sale = stats.median(sale)
+
+    prd = median_ratio/(median_assessed/median_sale)
+
+    return prd
+
+def log_coef(assessed, sale):
+    
+    """
+
+    """
+    X = [math.log(s) for s in sale]
+    X = sm.add_constant(X)
+    y = [math.log(a) - math.log(s) for a, s in zip(assessed,sale)]
+    
+    ols_model = sm.OLS(y, X)
+    results = ols_model.fit(cov_type='HC0')
+
+    beta = results.params[1]
+
+    return beta
