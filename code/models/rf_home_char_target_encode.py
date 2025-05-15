@@ -20,16 +20,16 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import make_scorer
 from sklearn.preprocessing import StandardScaler
 
-from modeling_utils import *
-from preprocess import *
-
 # change working directory to this script's location
 abspath = os.path.abspath(__file__)
 dname = os.path.dirname(abspath)
 os.chdir(dname)
 
+from modeling_utils import *
+from preprocess import *
+
 # load config
-with open('../../config/rf_home_char_hand_encode_config.yaml', 'r') as stream:
+with open('../../config/rf_home_char_target_encode_config.yaml', 'r') as stream:
         out = yaml.safe_load(stream)
 
 # assign parameters, paths, and feature names according to config
@@ -45,11 +45,11 @@ smoothing = out['smoothing']
 write_encoding_dict=out['write_encoding_dict']
 
 # paths
-study_name = out['study_name']
+study_dir = out['study_dir']
 sampler_path = out['sampler_path']
 params_path = out['params_path']
 raw_path = out['raw_path']
-out_path = out['out_path']
+proc_data_dir = out['proc_data_dir']
 trials_path = out['trials_path']
 log_dir = out['log_dir']
 encoding_path = out['encoding_path']
@@ -57,11 +57,9 @@ encoding_path = out['encoding_path']
 fips = out['fips']
 label = out['label']
 continuous = out['continuous']
-#binary = out['binary'] + out['missing_ind']
 binary = out['binary']
 categorical = out['categorical']
-#features = out['continuous'] + out['missing_ind'] + out['binary']
-features = out['continuous'] + out['binary']
+features = out['continuous'] + out['binary'] + out['categorical']
 meta = out['meta']
 
 # load raw data
@@ -101,13 +99,13 @@ tune_model(X_train,
            y_train,
             study_name=study_dir, # todo - need to update tune_model to reflect changes in config setup
             load_if_exists=True,
-            sampler=TPESampler(seed=rand_state),
+            sampler=TPESampler(seed=random_state),
             sampler_path=sampler_path, #.pkl file
             params_path=params_path, #.pkl file
             trials_path=trials_path, #.csv file
             n_trials=n_trials,
             test_size=test_size,
-	    random_state=rand_state,
+	    random_state=random_state,
 	    loss_func=mpe2_loss,
             n_jobs=n_jobs,
 	    cv_folds=cv_folds)
