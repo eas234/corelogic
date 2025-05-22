@@ -51,6 +51,7 @@ study_dir = out['study_dir']
 sampler_path = out['sampler_path']
 params_path = out['params_path']
 raw_path = out['raw_path']
+model_dir = out['model_dir']
 proc_data_dir = out['proc_data_dir']
 trials_path = out['trials_path']
 log_dir = out['log_dir']
@@ -124,4 +125,5 @@ rf_train_test_write(X_train,
                     meta_train, 
                     meta_test, 
                     params_path=params_path, 
+		    model_dir=model_dir,
                     proc_data_dir=proc_data_dir)
