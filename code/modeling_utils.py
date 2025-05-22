@@ -20,6 +20,21 @@ import optuna
 from optuna.samplers import TPESampler, RandomSampler
 from optuna.trial import TrialState
 
+def create_directories_if_missing(directories):
+    """
+    Takes a list of directory paths and ensures each exists.
+    If a directory doesn't exist, it will be created.
+
+    Parameters:
+    directories (list of str): List of directory paths.
+    """
+    for directory in directories:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+            print(f"Created directory: {directory}")
+        else:
+            print(f"Directory already exists: {directory}")
+
 def subset_cols(X, n_non_null=10):
 	
     """
