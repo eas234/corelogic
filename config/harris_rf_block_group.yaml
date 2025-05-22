@@ -41,6 +41,8 @@ params_path: '/oak/stanford/groups/deho/proptax/models/harris_rf_block_group/hyp
 
 trials_path: '/oak/stanford/groups/deho/proptax/models/harris_rf_block_group/hyperparams/trials/trials.pkl'
 
+model_dir: '/oak/stanford/groups/deho/proptax/models/harris_rf_block_group/model'
+
 proc_data_dir: '/oak/stanford/groups/deho/proptax/models/harris_rf_block_group/data'
 
 log_dir: '/oak/stanford/groups/deho/proptax/models/harris_rf_block_group/logs'
