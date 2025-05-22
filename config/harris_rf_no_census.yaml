@@ -1,0 +1,107 @@
+rand_state: 42
+
+test_size: 0.25
+
+cv_folds: 5
+
+mice_iters: 3
+
+max_iters: 1000
+
+n_trials: 100
+
+n_jobs: 5
+
+share_non_null: 0.5
+
+min_samples_leaf: 20
+
+smoothing: 10
+
+write_encoding_dict: True
+
+dir_list: ['/oak/stanford/groups/deho/proptax/models/harris_rf_no_census/hyperparams/studies',
+        '/oak/stanford/groups/deho/proptax/models/harris_rf_no_census/hyperparams/samplers',
+        '/oak/stanford/groups/deho/proptax/models/harris_rf_no_census/hyperparams/best_params',
+        '/oak/stanford/groups/deho/proptax/models/harris_rf_no_census/hyperparams/trials',
+        '/oak/stanford/groups/deho/proptax/models/harris_rf_no_census/data',
+        '/oak/stanford/groups/deho/proptax/models/harris_rf_no_census/logs',
+        '/oak/stanford/groups/deho/proptax/models/harris_rf_no_census/encoders',
+        '/oak/stanford/groups/deho/proptax/models/harris_rf_no_census/config',
+        '/oak/stanford/groups/deho/proptax/models/harris_rf_no_census/model'
+]
+
+raw_path: '/oak/stanford/groups/deho/proptax/raw/corelogic_census_2023.csv'
+
+study_dir: '/oak/stanford/groups/deho/proptax/models/harris_rf_no_census/hyperparams/studies/studies'
+
+sampler_path: '/oak/stanford/groups/deho/proptax/models/harris_rf_no_census/hyperparams/samplers/sampler.pkl'
+
+params_path: '/oak/stanford/groups/deho/proptax/models/harris_rf_no_census/hyperparams/best_params/best-params.pkl'
+
+trials_path: '/oak/stanford/groups/deho/proptax/models/harris_rf_no_census/hyperparams/trials/trials.pkl'
+
+model_dir: '/oak/stanford/groups/deho/proptax/models/harris_rf_no_census/model'
+
+proc_data_dir: '/oak/stanford/groups/deho/proptax/models/harris_rf_no_census/data'
+
+log_dir: '/oak/stanford/groups/deho/proptax/models/harris_rf_no_census/logs'
+
+encoding_path: '/oak/stanford/groups/deho/proptax/models/harris_rf_no_census/encoders'
+
+fips: 48201 
+
+meta: ['meta_sfh', 'ASSESSED_YEAR', 'SALE_YEAR', 'CLIP', 'fips', 'tract', 'block_group', 'MARKET_TOTAL_VALUE']
+
+id: ['CLIP']
+
+geo: ['tract',
+    'fips',
+    'block_group']
+ 
+time: ['ASSESSED_YEAR',
+       'SALE_YEAR']
+
+ignore: [ 'WARRANTY_GRANT_IND',
+        'FORE_QC_PROB_IND']
+
+benchmark: ['MARKET_TOTAL_VALUE']
+
+label: 'SALE_AMOUNT'
+
+binary: []
+
+continuous: ['char_yrblt', 
+    'char_beds', 
+    'char_bldg_sf', 
+    'char_ground_sf', 
+    'char_second_sf', 
+    'char_base_fin_sf', 
+    'char_base_unfin_sf', 
+    'char_stories', 
+    'char_nbath', 
+    'char_fbath', 
+    'char_hbath', 
+    'char_n_frpl', 
+    'char_gar1_size', 
+    'char_gar1_sf', 
+    'char_bq_ordinal', 
+    'char_land_sf', 
+    'char_frontage_sf', 
+    'char_depth_sf']
+
+categorical: ['char_air_cat',
+   'char_bsmt_cat',
+   'char_bsmt_fin_cat',
+   'char_ext_wall_cat',
+   'char_gar1_cat',
+   'char_floor_cat',
+   'char_bq_cat',
+   'char_heat_cat',
+   'char_roof_material_cat',
+   'char_style_cat',
+   'char_found_cat',
+   'char_fuel_typ_cat',
+   'char_sewer_cat',
+   'char_water_cat',
+   'char_elec_cat']
