@@ -1,0 +1,109 @@
+rand_state: 42
+
+test_size: 0.25
+
+cv_folds: 5
+
+mice_iters: 3
+
+max_iters: 1000
+
+n_trials: 100
+
+n_jobs: 5
+
+share_non_null: 0.5
+
+min_samples_leaf: 20
+
+smoothing: 10
+
+write_encoding_dict: True
+
+raw_path: '/oak/stanford/groups/deho/proptax/raw/corelogic_census_2023.csv'
+
+study_dir: '/oak/stanford/groups/deho/proptax/models/harris_rf_block_group/hyperparams/studies'
+
+sampler_path: '/oak/stanford/groups/deho/proptax/models/harris_rf_block_group/hyperparams/samplers/sampler.pkl'
+
+params_path: '/oak/stanford/groups/deho/proptax/models/harris_rf_block_group/hyperparams/best_params/best-params.pkl'
+
+trials_path: '/oak/stanford/groups/deho/proptax/models/harris_rf_block_group/hyperparams/trials/trials.pkl'
+
+proc_data_dir: '/oak/stanford/groups/deho/proptax/models/harris_rf_block_group/data'
+
+log_dir: '/oak/stanford/groups/deho/proptax/models/harris_rf_block_group/logs'
+
+encoding_path: '/oak/stanford/groups/deho/proptax/models/harris_rf_block_group/encoders'
+
+fips: 48201 
+
+meta: ['meta_sfh', 'ASSESSED_YEAR', 'SALE_YEAR', 'CLIP', 'fips', 'tract', 'block_group', 'MARKET_TOTAL_VALUE']
+
+id: ['CLIP']
+
+geo: ['tract',
+    'fips',
+    'block_group']
+ 
+time: ['ASSESSED_YEAR',
+       'SALE_YEAR']
+
+ignore: [ 'WARRANTY_GRANT_IND',
+        'FORE_QC_PROB_IND']
+
+benchmark: ['MARKET_TOTAL_VALUE']
+
+label: 'SALE_AMOUNT'
+
+binary: []
+
+continuous: ['char_yrblt', 
+    'char_beds', 
+    'char_bldg_sf', 
+    'char_ground_sf', 
+    'char_second_sf', 
+    'char_base_fin_sf', 
+    'char_base_unfin_sf', 
+    'char_stories', 
+    'char_nbath', 
+    'char_fbath', 
+    'char_hbath', 
+    'char_n_frpl', 
+    'char_gar1_size', 
+    'char_gar1_sf', 
+    'char_bq_ordinal', 
+    'char_land_sf', 
+    'char_frontage_sf', 
+    'char_depth_sf',
+    'census_pct_children_bg',
+    'census_pct_senior_bg',
+    'census_med_age_bg',
+    'census_pct_married_hh_bg',
+    'census_pct_single_hh_bg',
+    'census_pct_high_school_bg',
+    'census_pct_college_bg',
+    'census_pct_graduate_bg',
+    'census_pct_poverty_bg',
+    'census_med_hh_inc_bg',
+    'census_med_per_cap_inc_bg',
+    'census_pct_snap_bg',
+    'census_unemp_rate_bg',
+    'census_med_yr_built_bg',
+    'census_pct_renter_occ_bg']
+
+categorical: ['char_air_cat',
+   'char_bsmt_cat',
+   'char_bsmt_fin_cat',
+   'char_ext_wall_cat',
+   'char_gar1_cat',
+   'char_floor_cat',
+   'char_bq_cat',
+   'char_heat_cat',
+   'char_roof_material_cat',
+   'char_style_cat',
+   'char_found_cat',
+   'char_fuel_typ_cat',
+   'char_sewer_cat',
+   'char_water_cat',
+   'char_elec_cat']
