@@ -20,6 +20,17 @@ smoothing: 10
 
 write_encoding_dict: True
 
+dir_list: ['/oak/stanford/groups/deho/proptax/models/harris_rf_tract/hyperparams/studies',
+        '/oak/stanford/groups/deho/proptax/models/harris_rf_tract/hyperparams/samplers',
+        '/oak/stanford/groups/deho/proptax/models/harris_rf_tract/hyperparams/best_params',
+        '/oak/stanford/groups/deho/proptax/models/harris_rf_tract/hyperparams/trials',
+        '/oak/stanford/groups/deho/proptax/models/harris_rf_tract/data',
+        '/oak/stanford/groups/deho/proptax/models/harris_rf_tract/logs',
+        '/oak/stanford/groups/deho/proptax/models/harris_rf_tract/encoders',
+        '/oak/stanford/groups/deho/proptax/models/harris_rf_tract/config',
+        '/oak/stanford/groups/deho/proptax/models/harris_rf_tract/model'
+]
+
 raw_path: '/oak/stanford/groups/deho/proptax/raw/corelogic_census_2023.csv'
 
 study_dir: '/oak/stanford/groups/deho/proptax/models/harris_rf_tract/hyperparams/studies/studies'
