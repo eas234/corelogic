@@ -22,7 +22,7 @@ write_encoding_dict: True
 
 raw_path: '/oak/stanford/groups/deho/proptax/raw/corelogic_census_2023.csv'
 
-study_dir: '/oak/stanford/groups/deho/proptax/models/harris_rf_block_group/hyperparams/studies'
+study_dir: '/oak/stanford/groups/deho/proptax/models/harris_rf_block_group/hyperparams/studies/studies'
 
 sampler_path: '/oak/stanford/groups/deho/proptax/models/harris_rf_block_group/hyperparams/samplers/sampler.pkl'
 
