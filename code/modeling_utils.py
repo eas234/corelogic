@@ -1,3 +1,4 @@
+import joblib
 import logging
 import miceforest as mf
 import numpy as np
@@ -246,7 +247,15 @@ def tune_model(X_train,
                 
     return df
 
-def rf_train_test_write(X_train, X_test, y_train, y_test, meta_train, meta_test, params_path='params_path.pkl', proc_data_dir='data'):
+def rf_train_test_write(X_train, 
+			X_test, 
+			y_train, 
+			y_test, 
+			meta_train, 
+			meta_test, 
+			params_path='params_path.pkl',
+			model_dir='model'
+			proc_data_dir='data'):
 
     """
     Train model using optimal hyperparams
@@ -259,6 +268,10 @@ def rf_train_test_write(X_train, X_test, y_train, y_test, meta_train, meta_test,
     model = RandomForestRegressor(**hyperparams)
     model.fit(X_train, y_train)
 
+    # write model
+    joblib.dump(model, os.path.join(model_dir, 'model.pkl'))
+
+    # gen preds
     y_pred = model.predict(X_test)
 
     # align indices
@@ -269,6 +282,7 @@ def rf_train_test_write(X_train, X_test, y_train, y_test, meta_train, meta_test,
     results_df['y_true'] = y_test
     results_df['y_pred'] = y_pred
 
+    # write predictions and metadata
     results_df.to_csv(os.path.join(proc_data_dir, 'preds.csv'), index=False)
 
     return results_df
