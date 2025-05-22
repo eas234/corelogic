@@ -30,7 +30,7 @@ from modeling_utils import *
 from preprocess import *
 
 # load config -- change config file to run desired model
-with open('../../config/rf_home_char_target_encode.yaml', 'r') as stream:
+with open('../../config/harris_rf_block_group.yaml', 'r') as stream:
         out = yaml.safe_load(stream)
 
 # assign parameters, paths, and feature names according to config
