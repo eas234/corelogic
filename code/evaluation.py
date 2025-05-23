@@ -241,6 +241,16 @@ def mse(assessed, sale):
 
     return f"{mse:,.4f}"
 
+def rmse(assessed, sale):
+    """
+    """
+
+    se = [(a-s)**2 for a, s in zip(assessed, sale)]
+    mse = np.mean(se)
+    rmse = np.sqrt(mse)
+
+    return f"{rmse:,.4f}"
+
 def mpe(assessed, sale):
 
     pe = [(s-a)/s for a,s in zip(assessed, sale)]
