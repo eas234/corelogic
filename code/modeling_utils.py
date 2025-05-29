@@ -9,6 +9,7 @@ import random
 import sys
 
 from sklearn.ensemble import RandomForestRegressor
+from sklearn import linear_model
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import classification_report
@@ -142,7 +143,6 @@ def mse_loss(y_true, y_pred):
 def rf_reg_objective(trial, 
               X_train, 
               y_train,
-              test_size=0.2, 
               random_state=42, 
               loss_func=mpe2_loss, 
               n_jobs=4,
@@ -151,6 +151,18 @@ def rf_reg_objective(trial,
     '''
     Random forest regressor objective for use in optuna 
     bayesian hyperparameter tuning pipeline
+
+    inputs:
+    - trial: optuna trial instance
+    - X_train: training set features
+    - y_train: training set labels
+    - random_state: for reproducibility across runs
+    - loss_func: desired loss function. can be mean squared percentage error (mpe2) or mean squared error (mse)
+    - n_jobs: number of cpus to use in parallel while tuning
+    - cv_folds: how many folds you want in the test set for cross-validation
+
+    outputs:
+    - mean_cv_accuracy: average performance of trial's parameters across cv_folds
     '''
                   
     # Number of trees in random forest
@@ -184,16 +196,51 @@ def rf_reg_objective(trial,
                   
     return mean_cv_accuracy
 
+def lasso_objective(trial,
+		   X_train,
+		   y_train,
+		   random_state=42,
+		   loss_func=mpe2_loss,
+		   n_jobs=4,
+		   cv_folds=5):
+    """
+    Lasso objective function for use in optuna pipeline.
+    """
+
+    # alpha/lambda weight on lasso regularizer term
+    alpha = trial.suggest_float("alpha", 1e-6, 1000, log=True)
+
+    # determines how the model updates coefficients at every iter
+    selection = trial.suggest_categorical(name="selection", choices=['random', 'cyclic']) 
+
+    # 
+    max_iter = trial.suggest_int("max_iter", 1000, 10000, step=1000)
+
+    params = {
+        "alpha": alpha,
+        "selection": selection,
+        "max_iter": max_iter
+    }
+
+    # build model and scorer
+    model = linear_model.lasso(random_state=random_state, **params)
+    scorer = make_scorer(loss_func)
+    cv_score = cross_val_score(model, X_train, y_train, scoring=scorer, n_jobs=n_jobs, cv=cv_folds)
+
+    mean_cv_accuracy = cv_score.mean()
+                  
+    return mean_cv_accuracy
+
 def tune_model(X_train, 
 	    y_train, 
 	    study_name="example-study",
 	    load_if_exists=True,
 	    sampler=TPESampler(seed=42),
 	    sampler_path='sampler.pkl', #.pkl file
+            model: str='random_forest' # model to tune. current options are 'random_forest', 'lasso'
 	    params_path='best_params.pkl', #.pkl file
 	    trials_path='trials.csv', #.csv file
 	    n_trials=20,
-	    test_size=0.2,
 	    random_state=42,
 	    loss_func=mpe2_loss,
 	    n_jobs=4,
@@ -216,6 +263,7 @@ def tune_model(X_train,
             load_if_exists=load_if_exists,
             sampler=restored_sampler
         )
+		
         completed_trials = [x for x in study.trials if x.state == TrialState.COMPLETE]
         prev_trials = len(completed_trials) 
     
@@ -231,7 +279,10 @@ def tune_model(X_train,
     # Run optimization
     y_train = np.ravel(y_train)
     if prev_trials < n_trials:
-        study.optimize(lambda trial: rf_reg_objective(trial, X_train, y_train, test_size=test_size, random_state=random_state,loss_func=loss_func, n_jobs=n_jobs, cv_folds=cv_folds), n_trials=(n_trials-prev_trials))
+        if model == 'random_forest':
+            study.optimize(lambda trial: rf_reg_objective(trial, X_train, y_train, random_state=random_state, loss_func=loss_func, n_jobs=n_jobs, cv_folds=cv_folds), n_trials=(n_trials-prev_trials))
+	elif model == 'lasso':
+            study.optimize(lambda trial: lasso_objective(trial, X_train, y_train, random_state=random_state, loss_func=loss_func, n_jobs=n_jobs, cv_folds=cv_folds), n_trials=(n_trials-prev_trials))
 
     # Save the sampler
     with open(sampler_path, "wb") as fout:
