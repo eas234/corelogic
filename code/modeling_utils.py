@@ -231,6 +231,75 @@ def lasso_objective(trial,
                   
     return mean_cv_accuracy
 
+def lightGBM_objective(trial, 
+              X_train, 
+              y_train,
+              random_state=42, 
+              cv_folds=5):
+
+    '''
+    lightGBM objective for use in optuna 
+    bayesian hyperparameter tuning pipeline
+
+    inputs:
+    - trial: optuna trial instance
+    - X_train: training set features
+    - y_train: training set labels
+    - random_state: for reproducibility across runs
+    - cv_folds: how many folds you want in the test set for cross-validation
+
+    outputs:
+    - min(cv_results['rmse_mean]): average performance of trial's parameters across cv_folds.
+    rmse is only loss function accepted by this model for now.
+    '''
+    ## hyperparam space - following chicago CCAO
+    num_iterations = trial.suggest_int(name='num_iterations', low=100, high=2500, step=200)
+
+    learning_rate = trial.suggest_float(name='learning_rate', 0.001, 0.398, log=True)
+
+    max_bin = trial.suggest_int(name='max_bin', low=50, high=512, step=66)
+
+    num_leaves = trial.suggest_int(name='num_leaves', low=32, high=2048, step=252)
+
+    max_depth = trial.suggest_int(name='max_depth', low=-1, high=14, step=5)
+
+    feature_fraction = trial.suggest_float(name='feature_fraction', low=0.3, high=0.7, step=0.1)
+
+    min_gain_to_split = trial.suggest_float(name='min_gain_to_split', low=0.001, high=10000, log=True)
+
+    min_data_in_leaf = trial.suggest_int(name='min_data_in_leaf', low=2, high=400, log=True)
+
+    lambda_l1 = trial.suggest_float(name='lambda_l1', low=0.001, high=100, log=True)
+
+    lambda_l2 = trial.suggest_float(name='lambda_l2', low=0.001, high=100, log=True)
+    
+    params = {
+        'num_iterations': num_iterations,
+        'learning_rate': learning_rate,
+        'max_bin': max_bin,
+        'num_leaves': num_leaves,
+        'max_depth': max_depth,
+        'feature_fraction': feature_fraction,
+        'min_gain_to_split': min_gain_to_split,
+        'min_data_in_leaf': min_data_in_leaf,
+        'lambda_l1': lambda_l1,
+        'lambda_l2': lambda_l2
+    }
+    
+    # build model and scorer      
+
+    dtrain = lgb.Dataset(X_train, label=y_train)
+    cv_results = lgb.cv(
+        params,
+        dtrain,
+        nfold=cv_folds,
+        stratified=False,
+        shuffle=False,
+        seed=random_state
+    )
+              
+    return min(cv_results['rmse-mean'])
+
 def tune_model(X_train, 
 	    y_train, 
 	    study_name="example-study",
@@ -283,7 +352,9 @@ def tune_model(X_train,
             study.optimize(lambda trial: rf_reg_objective(trial, X_train, y_train, random_state=random_state, loss_func=loss_func, n_jobs=n_jobs, cv_folds=cv_folds), n_trials=(n_trials-prev_trials))
 	elif model == 'lasso':
             study.optimize(lambda trial: lasso_objective(trial, X_train, y_train, random_state=random_state, loss_func=loss_func, n_jobs=n_jobs, cv_folds=cv_folds), n_trials=(n_trials-prev_trials))
-
+	elif model == 'lightGBM':
+	    study.optimize(lambda trial: lightGBM_objective(trial, X_train, y_train, random_state=random_state, cv_folds=cv_folds)
+	
     # Save the sampler
     with open(sampler_path, "wb") as fout:
         pickle.dump(study.sampler, fout)
