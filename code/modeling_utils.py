@@ -37,91 +37,21 @@ def create_directories_if_missing(directories):
         else:
             print(f"Directory already exists: {directory}")
 
-def subset_cols(X, n_non_null=10):
-	
-    """
-    Subset inputs to features that meet the following conditions:
-    1. Contain more than 1 unique value (not including nans)
-    2. Contain at least n non-null values
-    """
-	
-    drop_cols = [col for col in X.columns if X[col].nunique(dropna=True) <= 1]
-    if drop_cols:
-        print('Warning: ' + str(len(drop_cols)) + ' columns have only one value. Dropping these columns:')
-        print(drop_cols)
-        X = X.drop(columns=drop_cols) 
-
-    mostly_null_cols = [col for col in X.columns if X[col].notnull().sum() <= n_non_null]
-    if mostly_null_cols:
-        print('Warning: ' + str(len(mostly_null_cols)) + ' columns have fewer than ' + str(n_non_null) + ' non-null values. Dropping these columns:')
-        print(mostly_null_cols)
-        X = X.drop(columns=mostly_null_cols)
-
-    X = X.reset_index(drop=True)
-
-    return X
-
-def impute_and_normalize(X, 
-                         features_to_preprocess, 
-                         random_state=42,
-                         mice_iters=3):
-    """
-    Imputes and normalizes selected features in a DataFrame using miceforest and StandardScaler.
-
-    Parameters:
-    - X: pd.DataFrame — input features.
-    - features_to_preprocess: list of column names to impute and normalize.
-    - random_state: int — for reproducibility.
-
-    Returns:
-    - pd.DataFrame with imputed and normalized features.
-    """
-
-    # Copy the DataFrame to avoid modifying original
-    X_processed = X.copy()
-
-    # Subset the data to be imputed
-    features_to_preprocess = [col for col in features_to_preprocess if col in X_processed.columns]
-    subset = X_processed[features_to_preprocess]
-
-    # Create miceforest kernel
-    kernel = mf.ImputationKernel(
-        subset,
-        num_datasets=1,
-        save_all_iterations_data=False,
-        random_state=random_state
-    )
-
-    # Perform imputation
-    kernel.mice(mice_iters)
-
-    # Extract the imputed dataset
-    imputed_subset = kernel.complete_data(0)
-
-    # Normalize using StandardScaler
-    scaler = StandardScaler()
-    normalized_array = scaler.fit_transform(imputed_subset)
-
-    # Replace in original DataFrame
-    X_processed[features_to_preprocess] = normalized_array
-
-    return X_processed
-
-def get_data_splitter(X, y, meta, test_size=0.2, random_state=42):
-    # Split happens here ONCE
-    X_train, X_test, y_train, y_test, meta_train, meta_test = train_test_split(X, y, meta, test_size=test_size, random_state=random_state)
-    
-    # Closure: inner function remembers variables from the outer scope
-    def get_split():
-        return X_train, X_test, y_train, y_test, meta_train, meta_test
-
-    return get_split
-
 def mpe2_loss(y_true, 
               y_pred):
     '''
     Mean Percentage Error Squared loss function
     for use as alternative to MSE in model dev.
+
+    NOTE: generally should not use this as hessian/gradient are 
+    unstable in lightGBM implementation.
+
+    inputs:
+    - y_true: sale price
+    - y_pred: assessed value
+
+    outputs:
+    - loss: mean squared percentage error
     '''
 
     y_true = np.ravel(y_true)
@@ -133,6 +63,14 @@ def mpe2_loss(y_true,
 def mse_loss(y_true, y_pred):
     '''
     Mean squared error loss function for use in model dev
+
+    inputs:
+    - y_true: sale price
+    - y_pred: assessed value
+
+    outputs:
+    - loss: mean squared error
+    
     '''
     y_true = np.ravel(y_true)
     y_pred = np.ravel(y_pred)
@@ -200,11 +138,23 @@ def lasso_objective(trial,
 		   X_train,
 		   y_train,
 		   random_state=42,
-		   loss_func=mpe2_loss,
+		   loss_func=mse_loss,
 		   n_jobs=4,
 		   cv_folds=5):
     """
     Lasso objective function for use in optuna pipeline.
+
+    inputs:
+    - trial: optuna trial instance
+    - X_train: training set features
+    - y_train: training set labels
+    - random_state: for reproducibility across runs
+    - loss_func: desired loss function. can be mean squared percentage error (mpe2) or mean squared error (mse)
+    - n_jobs: number of cpus to use in parallel while tuning
+    - cv_folds: how many folds you want in the test set for cross-validation
+
+    outputs:
+    - mean_cv_accuracy: average performance of trial's parameters across cv_folds
     """
 
     # alpha/lambda weight on lasso regularizer term
@@ -306,7 +256,7 @@ def tune_model(X_train,
 	    load_if_exists=True,
 	    sampler=TPESampler(seed=42),
 	    sampler_path='sampler.pkl', #.pkl file
-            model: str='random_forest' # model to tune. current options are 'random_forest', 'lasso'
+            model: str='random_forest' # model to tune. current options are 'random_forest', 'lasso', 'lightGBM'
 	    params_path='best_params.pkl', #.pkl file
 	    trials_path='trials.csv', #.csv file
 	    n_trials=20,
