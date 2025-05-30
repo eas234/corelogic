@@ -327,11 +327,28 @@ def rf_train_test_write(X_train,
 			meta_test, 
 			params_path='params_path.pkl',
 			model_dir='model',
-			proc_data_dir='data'):
+			proc_data_dir='data',
+		        model_id='default'):
 
     """
     Train model using optimal hyperparams
     Write out predictions along with ground truth and metadata to specified directory
+
+    inputs:
+    -X_train: dataframe of training data features
+    -X_test: dataframe of test data features
+    -y_train: dataframe of training data labels
+    -y_test: dataframe of test data labels
+    -meta_train: metadata from training set
+    -meta_test: metatdata from test set
+    -params_path: .pkl file where the model's hyperparameters live
+    -proc_data_dir: directory where the output should live
+    -model_id: string indicating the model being run
+
+    outputs:
+    -results_df: dataframe, written to proc_data_dir, which contains
+    sale price, predicted value, sales ratio, model_id, and desired metadata
+    for each observation in the test set.
     """
 
     with open(params_path, 'rb') as f:
@@ -351,10 +368,12 @@ def rf_train_test_write(X_train,
     y_test = y_test.reset_index(drop=True)
 
     results_df = pd.DataFrame(meta_test)
-    results_df['y_true'] = y_test
-    results_df['y_pred'] = y_pred
+    results_df['y_true_' + model_id] = y_test
+    results_df['y_pred_' + model_id] = y_pred
+    results_df['ratio_' + model_id] = results_df['y_pred_' + model_id]/results_df['y_true_' + model_id]
+    results_df['model_id'] = model_id
 
     # write predictions and metadata
-    results_df.to_csv(os.path.join(proc_data_dir, 'preds.csv'), index=False)
+    results_df.to_csv(os.path.join(proc_data_dir, model_id + '_preds.csv'), index=False)
 
     return results_df
