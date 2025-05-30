@@ -26,6 +26,7 @@ dname = os.path.dirname(abspath)
 os.chdir(dname)
 
 sys.path.insert(0, '..')
+from census import clean_val
 from modeling_utils import *
 from preprocess import *
 
@@ -43,7 +44,8 @@ n_jobs = out['n_jobs']
 share_non_null = out['share_non_null']
 min_samples_leaf = out['min_samples_leaf']
 smoothing = out['smoothing']
-write_encoding_dict=out['write_encoding_dict']
+write_encoding_dict = out['write_encoding_dict']
+model_id = out['model_id']
 
 # paths
 dir_list = out['dir_list']
@@ -75,6 +77,7 @@ print('data loaded; ' + str(df.shape[0]) + ' rows and ' + str(df.shape[1]) + ' c
 print('subsetting to county ' + str(fips))
 
 # subset to single county
+df.fips = df.fips.apply(lambda x: clean_val(x,5))
 df = df.loc[df.fips == fips]
 print(str(df.shape[0]) + ' rows remaining after county-level subset')
 
@@ -112,10 +115,10 @@ tune_model(X_train,
             trials_path=trials_path, #.csv file
             n_trials=n_trials,
             test_size=test_size,
-	          random_state=random_state,
-	          loss_func=mpe2_loss,
+	    random_state=random_state,
+	    loss_func=mpe2_loss,
             n_jobs=n_jobs,
-	          cv_folds=cv_folds)
+	    cv_folds=cv_folds)
 
 print('optimal params selected; training and testing model')
 rf_train_test_write(X_train, 
@@ -126,4 +129,5 @@ rf_train_test_write(X_train,
                     meta_test, 
                     params_path=params_path, 
 		    model_dir=model_dir,
-                    proc_data_dir=proc_data_dir)
+                    proc_data_dir=proc_data_dir,
+		    model_id=model_id)
