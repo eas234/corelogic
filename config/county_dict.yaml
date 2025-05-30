@@ -1,0 +1,11 @@
+county_dict: {'04013': 'Maricopa County, AZ',
+              '17031': 'Cook County, IL',
+              '06037': 'Los Angeles County, CA',
+              '48201': 'Harris County, TX',
+              '48029': 'Bexar County, TX',
+              '06065': 'Riverside County, CA',
+              '48439': 'Tarrant County, TX',
+              '12057': 'Hillsborough County, FL', 
+              '26163': 'Wayne County, MI',
+              '12099': 'Palm Beach County, FL'
+}
