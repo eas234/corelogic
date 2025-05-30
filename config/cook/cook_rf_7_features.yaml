@@ -80,7 +80,6 @@ binary: []
 continuous: ['char_yrblt',
  'char_beds',
  'char_bldg_sf',
- 'char_stories',
  'char_fbath',
  'char_land_sf']
 
