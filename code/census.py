@@ -181,6 +181,9 @@ def filter_lat_long_overlap(df, mapping_path):
         
         # load existing mapper
         mapper = pd.read_csv(mapping_path)
+
+        # drop any nulls in mapper
+        mapper = mapper[~mapper.fips.isnull()]
         
         # id lat-long combos where map already exists
         filtered = copy.merge(mapper, how='left', on=['latitude', 'longitude'], indicator=True)
@@ -263,6 +266,7 @@ def query_chunk(chunk, mapping_path, max_attempts=5):
         
         # add new maps to mapper
         updated_mapper = concat(mapper, results_df)
+        updated_mapper = updated_mapper[~updated_mapper.fips.isnull()]
         
         # save updated mapper
         updated_mapper.to_csv(mapping_path, index=False)
