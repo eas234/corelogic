@@ -115,7 +115,7 @@ tune_model(X_train,
             trials_path=trials_path, #.csv file
             n_trials=n_trials,
 	    random_state=random_state,
-	    loss_func=mpe2_loss,
+	    loss_func=mse_loss,
             n_jobs=n_jobs,
 	    cv_folds=cv_folds)
 
