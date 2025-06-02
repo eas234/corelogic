@@ -114,7 +114,6 @@ tune_model(X_train,
             params_path=params_path, #.pkl file
             trials_path=trials_path, #.csv file
             n_trials=n_trials,
-            test_size=test_size,
 	    random_state=random_state,
 	    loss_func=mpe2_loss,
             n_jobs=n_jobs,
