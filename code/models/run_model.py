@@ -31,7 +31,7 @@ from modeling_utils import *
 from preprocess import *
 
 # load config -- change config file to run desired model
-with open('../../config/harris_rf_no_census.yaml', 'r') as stream:
+with open('../../config/cook/cook_rf_3_features.yaml', 'r') as stream:
         out = yaml.safe_load(stream)
 
 # assign parameters, paths, and feature names according to config
