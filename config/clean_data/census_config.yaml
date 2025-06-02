@@ -1,0 +1,158 @@
+datapath: '/oak/stanford/groups/deho/proptax/raw'
+
+corelogic:
+
+  filename: "/oak/stanford/groups/deho/proptax/raw/sales_assessments_2023.csv"
+
+tract:
+
+  tract_educ: 
+    
+    filename: '2023_5YACS_tract_level_education.csv'
+
+    varlist: ['B15003_025E', 'B15003_023E', 'B15003_022E',  'B15003_017E', 'B15003_001E']
+
+  tract_hh_structure: 
+
+    filename: '2023_5YACS_tract_level_household_structure.csv'
+  
+    varlist: ['B11001_002E', 'B11001_001E', 'B11001_008E']
+
+  tract_med_rent: 
+  
+    filename: '2023_5YACS_tract_level_med_rent.csv'
+
+    varlist: ['B25064_001E']
+
+  tract_med_yr_built: 
+  
+    filename: '2023_5YACS_tract_level_med_yr_built.csv'
+    
+    varlist: ['B25035_001E']
+
+  tract_med_age: 
+  
+    filename: '2023_5YACS_tract_level_median_age.csv'
+    
+    varlist: ['B01002_001E']
+
+  tract_med_inc: 
+  
+    filename: '2023_5YACS_tract_level_median_income.csv'
+
+    varlist: ['B19013_001E']
+
+  tract_owner_occ: 
+  
+    filename: '2023_5YACS_tract_level_owner_occupied.csv'
+
+    varlist: ['B25003_002E', 'B25003_001E']
+
+  tract_per_cap_inc: 
+
+    filename: '2023_5YACS_tract_level_per_capita_income.csv'
+
+    varlist: ['B19301_001E']
+
+  tract_poverty_share: 
+  
+    filename: '2023_5YACS_tract_level_poverty_share.csv'
+
+    varlist: ['B17017_002E',  'B17017_001E']
+
+  tract_sex_by_age: 
+  
+    filename: '2023_5YACS_tract_level_sex_by_age.csv'
+
+    varlist: ['B01001_001E', 'B01001_003E', 'B01001_004E', 'B01001_005E', 'B01001_006E', 'B01001_027E', 'B01001_028E', 'B01001_029E', 'B01001_030E', 'B01001_007E', 'B01001_031E', 'B01001_020E', 'B01001_021E', 'B01001_022E', 'B01001_023E', 'B01001_024E', 'B01001_025E', 'B01001_044E', 'B01001_045E', 'B01001_046E', 'B01001_047E', 'B01001_048E', 'B01001_049E']
+
+  tract_snap: 
+
+    filename: '2023_5YACS_tract_level_snap.csv'
+
+    varlist: ['B22010_002E', 'B22010_001E']
+
+  tract_unemp: 
+  
+    filename: '2023_5YACS_tract_level_unemployment.csv'
+
+    varlist: ['B23025_005E', 'B23025_002E']
+
+
+block_group:
+
+  block_group_educ: 
+    
+    filename: '2023_5YACS_block_group_level_education.csv'
+
+    varlist: ['B15003_025E', 'B15003_023E', 'B15003_022E',  'B15003_017E', 'B15003_001E']
+
+  block_group_hh_structure: 
+
+    filename: '2023_5YACS_block_group_level_household_structure.csv'
+  
+    varlist: ['B11001_002E', 'B11001_001E', 'B11001_008E']
+
+  block_group_med_rent: 
+  
+    filename: '2023_5YACS_block_group_level_med_rent.csv'
+
+    varlist: ['B25064_001E']
+
+  block_group_med_yr_built: 
+  
+    filename: '2023_5YACS_block_group_level_med_yr_built.csv'
+    
+    varlist: ['B25035_001E']
+
+  block_group_med_age: 
+  
+    filename: '2023_5YACS_block_group_level_median_age.csv'
+    
+    varlist: ['B01002_001E']
+
+  block_group_med_inc: 
+  
+    filename: '2023_5YACS_block_group_level_median_income.csv'
+
+    varlist: ['B19013_001E']
+
+  block_group_owner_occ: 
+  
+    filename: '2023_5YACS_block_group_level_owner_occupied.csv'
+
+    varlist: ['B25003_002E', 'B25003_001E']
+
+  block_group_per_cap_inc: 
+
+    filename: '2023_5YACS_block_group_level_per_capita_income.csv'
+
+    varlist: ['B19301_001E']
+
+  block_group_poverty_share: 
+  
+    filename: '2023_5YACS_block_group_level_poverty_share.csv'
+
+    varlist: ['B17017_002E',  'B17017_001E']
+
+  block_group_sex_by_age: 
+  
+    filename: '2023_5YACS_block_group_level_sex_by_age.csv'
+
+    varlist: ['B01001_001E', 'B01001_003E', 'B01001_004E', 'B01001_005E', 'B01001_006E', 'B01001_027E', 'B01001_028E', 'B01001_029E', 'B01001_030E', 'B01001_007E', 'B01001_031E', 'B01001_020E', 'B01001_021E', 'B01001_022E', 'B01001_023E', 'B01001_024E', 'B01001_025E', 'B01001_044E', 'B01001_045E', 'B01001_046E', 'B01001_047E', 'B01001_048E', 'B01001_049E']
+
+  block_group_snap: 
+
+    filename: '2023_5YACS_block_group_level_snap.csv'
+
+    varlist: ['B22010_002E', 'B22010_001E']
+
+  block_group_unemp: 
+  
+    filename: '2023_5YACS_block_group_level_unemployment.csv'
+
+    varlist: ['B23025_005E', 'B23025_002E']
+
+mapping_path: '/oak/stanford/groups/deho/proptax/raw/mapper.csv'
+
+outdir: '/oak/stanford/groups/deho/proptax/clean'
