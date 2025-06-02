@@ -10,7 +10,9 @@ os.chdir(dname)
 
 # append working directory to path
 sys.path.append(os.getcwd())
-from utils import *
+
+sys.path.append("..")
+from census import preproc_census_df, gen_varbs, merge_corelogic_census, wrapper
 
 # load config
 with open('../../config/clean_data/census_config.yaml', 'r') as stream:
@@ -64,11 +66,9 @@ else:
 corelogic = pd.read_csv(out['corelogic']['filename'])
 merged = merge_corelogic_census(corelogic, tract, block_group)
 
-# write
-merged.to_csv(os.path.join(out['outdir'], 'corelogic_census_2023.csv'), index=False)
-
 # query census to reverse geocode observations where census merge failed
 output = wrapper(merged, tract, block_group, mapping_path=out['mapping_path'], chunk_size=100)
 
+print('writing fully geocoded data')
 # write
 output.to_csv(os.path.join(out['outdir'], 'corelogic_census_2023.csv'), index=False)
