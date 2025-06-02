@@ -205,7 +205,7 @@ def lightGBM_objective(trial,
     ## hyperparam space - following chicago CCAO
     num_iterations = trial.suggest_int(name='num_iterations', low=100, high=2500, step=200)
 
-    learning_rate = trial.suggest_float(name='learning_rate', 0.001, 0.398, log=True)
+    learning_rate = trial.suggest_float(name='learning_rate', low=0.001, high=0.398, log=True)
 
     max_bin = trial.suggest_int(name='max_bin', low=50, high=512, step=66)
 
