@@ -82,7 +82,7 @@ def rf_reg_objective(trial,
               X_train, 
               y_train,
               random_state=42, 
-              loss_func=mpe2_loss, 
+              loss_func=mse_loss, 
               n_jobs=4,
               cv_folds=5):
 
@@ -261,7 +261,7 @@ def tune_model(X_train,
 	    trials_path='trials.csv', #.csv file
 	    n_trials=20,
 	    random_state=42,
-	    loss_func=mpe2_loss,
+	    loss_func=mse_loss,
 	    n_jobs=4,
 	    cv_folds=5):
 
