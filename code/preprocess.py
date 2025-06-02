@@ -495,7 +495,7 @@ class Preprocess:
                 encoding_dicts[col]=combined_dict
 
             with open(os.path.join(self.__encoding_path, 'encodings.yaml'), 'w') as f:
-                yaml.dump(combined_dict, f)
+                yaml.dump(encoding_dicts, f)
             
             self.logger.info(f'Encodings written to {self.__encoding_path} as encodings.yaml')
         
