@@ -256,7 +256,7 @@ def tune_model(X_train,
 	    load_if_exists=True,
 	    sampler=TPESampler(seed=42),
 	    sampler_path='sampler.pkl', #.pkl file
-            model: str='random_forest' # model to tune. current options are 'random_forest', 'lasso', 'lightGBM'
+            model: str='random_forest', # model to tune. current options are 'random_forest', 'lasso', 'lightGBM'
 	    params_path='best_params.pkl', #.pkl file
 	    trials_path='trials.csv', #.csv file
 	    n_trials=20,
@@ -300,10 +300,10 @@ def tune_model(X_train,
     if prev_trials < n_trials:
         if model == 'random_forest':
             study.optimize(lambda trial: rf_reg_objective(trial, X_train, y_train, random_state=random_state, loss_func=loss_func, n_jobs=n_jobs, cv_folds=cv_folds), n_trials=(n_trials-prev_trials))
-	elif model == 'lasso':
+        elif model == 'lasso':
             study.optimize(lambda trial: lasso_objective(trial, X_train, y_train, random_state=random_state, loss_func=loss_func, n_jobs=n_jobs, cv_folds=cv_folds), n_trials=(n_trials-prev_trials))
-	elif model == 'lightGBM':
-	    study.optimize(lambda trial: lightGBM_objective(trial, X_train, y_train, random_state=random_state, cv_folds=cv_folds)
+        elif model == 'lightGBM':
+            study.optimize(lambda trial: lightGBM_objective(trial, X_train, y_train, random_state=random_state, cv_folds=cv_folds))
 	
     # Save the sampler
     with open(sampler_path, "wb") as fout:
