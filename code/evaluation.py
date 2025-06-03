@@ -257,3 +257,113 @@ def mpe(assessed, sale):
     mpe = np.mean(pe)
 
     return f"{mpe:,.4f}"
+
+def add_labels(x_positions, heights, offset=0.01, fontsize=10):
+
+    """
+    Helper function for over_under_bars(). adds value labels formatted
+    as integers at the top of each bar, centered over the midpoint.
+    """
+        for x, h in zip(x_positions, heights):
+            plt.text(x, h + offset, f"{int(round(h))}", ha='center', va='bottom', fontsize=fontsize)
+
+def over_under_bars(df: pd.DataFrame=None,
+                     model_id: str='model',
+                     n_bins: int=10,
+                     thousands: bool=True,
+                     figsize: tuple=(10,6),
+                     x_label: str='Sale price ($, thousands)',
+                     y_label: str='Share (percentage points)',
+                     fig_title: str=None,
+                     axis_label_fontsize: int=18,
+                     bar_label_fontsize: int=10,
+                     title_fontsize: int=20,
+                     tick_fontsize: int=16,
+                     fig_dir: str=None):
+    """
+    Grouped bar plot showing share of homes over/underassessed by bins of sale price
+    
+    inputs:
+    - df: DataFrame containing assessed values and sale prices
+    - model_id: string indicating model which generated assessed values
+    - nbins: number of bins to put on x axis of histogram
+    - thousands: boolean indicating whether to divide x axis variable by 1000
+    for readability
+    - figsize: size of figure
+    - x_label, y_label: axis labels
+    - fig_title: title of figure
+    - axis_label_fontsize: fontsize of axis labels
+    - bar_label_fontsize: fontside of value labels that sit atop each bar
+    - title_fontsize: fontsize of title
+    - tick_fontsize: fontsize of axis tick labels
+    - fig_dir: directory where figure gets written. if None, function does not write.
+    """
+    
+    # copy dataframe
+    copy=df.copy()
+
+    # bin observations by sale price
+    bins = pd.qcut(copy['y_true_' + model_id], q=n_bins, duplicates='drop')
+    binMidpoints = bins.apply(lambda interval: (interval.left + interval.right) / 2)
+    copy['midpoints'] = binMidpoints
+    
+    # gen varbs for plotting
+    copy['assessed_below'] = [1 if x <= y else 0 for x, y in zip(copy['y_pred_' + model_id], copy['y_true_' + model_id])]
+    copy['assessed_above'] = [1 if x > y else 0 for x, y in zip(copy['y_pred_' + model_id], copy['y_true_' + model_id])]
+
+    # group observations in copy by bins of sale price
+    grouped = copy[['midpoints', 'assessed_below', 'assessed_above']].groupby('midpoints').mean().reset_index()
+    grouped.sort_values('midpoints', ascending=True, inplace=True)
+                         
+    if thousands==True:
+        # divide x-axis (sale price) by 1000 for readability
+        grouped['midpoints'] = grouped['midpoints'].astype(float)*(1/1000)
+        grouped['midpoints'] = grouped['midpoints'].apply(lambda x: f"{x:,.0f}")
+    
+    x = np.arange(n_bins)
+    bar_width = 0.35
+
+    # set figsize
+    plt.figure(figsize=figsize)
+    
+    # set font
+    plt.rcParams['font.family'] = 'DejaVu Serif'
+    
+    # Plot bars centered over each bin label
+    plt.bar(x - bar_width/2, grouped['assessed_below']*100, width=bar_width, label='Share Underassessed', color='#ef8a62', alpha=0.8)
+    plt.bar(x + bar_width/2, grouped['assessed_above']*100, width=bar_width, label='Share Overassessed', color='#67a9cf', alpha=0.8)
+
+    # add text labels atop each bar displaying value of bar
+    add_labels(x - bar_width/2, grouped['assessed_below']*100, fontsize=bar_label_fontsize)
+    add_labels(x + bar_width/2, grouped['assessed_above']*100, fontsize=bar_label_fontsize)
+    
+    # Set tick labels
+    plt.xticks(x, grouped['midpoints'], fontsize=tick_fontsize)
+    plt.yticks(fontsize=tick_fontsize)
+
+    # Set axis labels
+    plt.xlabel(x_label, fontsize=axis_label_fontsize)
+    plt.ylabel(y_label, fontsize=axis_label_fontsize)
+
+    if fig_title:
+        # set figure title
+        plt.title(fig_title, fontsize=title_fontsize)
+
+    # set tick fontsize
+    plt.legend(fontsize=tick_fontsize)
+
+    # various plot formatting
+    ax = plt.gca()
+    # get rid of top and right plot bars
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+
+    # add some horizontal lines for easy reading
+    for y in [20, 40, 60, 80]:
+        ax.axhline(y=y, linestyle='--', color='gray', alpha=0.2)
+    plt.tight_layout()
+
+    if fig_dir:
+        plt.save_fig(os.path.join(fig_dir, model_id + '_over_under_bars.png'))
+    
+    return grouped
