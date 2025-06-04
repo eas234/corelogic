@@ -20,34 +20,34 @@ smoothing: 10
 
 write_encoding_dict: True
 
-dir_list: ['/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/hyperparams/studies',
-        '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/hyperparams/samplers',
-        '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/hyperparams/best_params',
-        '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/hyperparams/trials',
-        '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/data',
-        '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/logs',
-        '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/encoders',
-        '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/config',
-        '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/model'
+dir_list: ['/oak/stanford/groups/deho/proptax/models/hillsborough_rf_11_features/hyperparams/studies',
+        '/oak/stanford/groups/deho/proptax/models/hillsborough_rf_11_features/hyperparams/samplers',
+        '/oak/stanford/groups/deho/proptax/models/hillsborough_rf_11_features/hyperparams/best_params',
+        '/oak/stanford/groups/deho/proptax/models/hillsborough_rf_11_features/hyperparams/trials',
+        '/oak/stanford/groups/deho/proptax/models/hillsborough_rf_11_features/data',
+        '/oak/stanford/groups/deho/proptax/models/hillsborough_rf_11_features/logs',
+        '/oak/stanford/groups/deho/proptax/models/hillsborough_rf_11_features/encoders',
+        '/oak/stanford/groups/deho/proptax/models/hillsborough_rf_11_features/config',
+        '/oak/stanford/groups/deho/proptax/models/hillsborough_rf_11_features/model'
 ]
 
 raw_path: '/oak/stanford/groups/deho/proptax/raw/corelogic_census_2023.csv'
 
-study_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/hyperparams/studies/studies'
+study_dir: '/oak/stanford/groups/deho/proptax/models/hillsborough_rf_11_features/hyperparams/studies/studies'
 
-sampler_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/hyperparams/samplers/sampler.pkl'
+sampler_path: '/oak/stanford/groups/deho/proptax/models/hillsborough_rf_11_features/hyperparams/samplers/sampler.pkl'
 
-params_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/hyperparams/best_params/best-params.pkl'
+params_path: '/oak/stanford/groups/deho/proptax/models/hillsborough_rf_11_features/hyperparams/best_params/best-params.pkl'
 
-trials_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/hyperparams/trials/trials.pkl'
+trials_path: '/oak/stanford/groups/deho/proptax/models/hillsborough_rf_11_features/hyperparams/trials/trials.pkl'
 
-model_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/model'
+model_dir: '/oak/stanford/groups/deho/proptax/models/hillsborough_rf_11_features/model'
 
-proc_data_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/data'
+proc_data_dir: '/oak/stanford/groups/deho/proptax/models/hillsborough_rf_11_features/data'
 
-log_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/logs'
+log_dir: '/oak/stanford/groups/deho/proptax/models/hillsborough_rf_11_features/logs'
 
-encoding_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/encoders'
+encoding_path: '/oak/stanford/groups/deho/proptax/models/hillsborough_rf_11_features/encoders'
 
 fips: '12057'
 
