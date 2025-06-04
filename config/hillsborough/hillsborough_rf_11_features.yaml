@@ -1,0 +1,91 @@
+rand_state: 42
+
+test_size: 0.25
+
+cv_folds: 5
+
+mice_iters: 3
+
+max_iters: 1000
+
+n_trials: 100
+
+n_jobs: 5
+
+share_non_null: 0.5
+
+min_samples_leaf: 20
+
+smoothing: 10
+
+write_encoding_dict: True
+
+dir_list: ['/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/hyperparams/studies',
+        '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/hyperparams/samplers',
+        '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/hyperparams/best_params',
+        '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/hyperparams/trials',
+        '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/data',
+        '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/logs',
+        '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/encoders',
+        '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/config',
+        '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/model'
+]
+
+raw_path: '/oak/stanford/groups/deho/proptax/raw/corelogic_census_2023.csv'
+
+study_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/hyperparams/studies/studies'
+
+sampler_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/hyperparams/samplers/sampler.pkl'
+
+params_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/hyperparams/best_params/best-params.pkl'
+
+trials_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/hyperparams/trials/trials.pkl'
+
+model_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/model'
+
+proc_data_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/data'
+
+log_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/logs'
+
+encoding_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_11_features/encoders'
+
+fips: '17031'
+
+county_name: 'cook'
+  
+model_id: 'cook_rf_11_features'
+
+model_type: 'rf'
+
+meta: ['meta_sfh', 'ASSESSED_YEAR', 'SALE_YEAR', 'CLIP', 'fips', 'tract', 'block_group', 'MARKET_TOTAL_VALUE']
+
+id: ['CLIP']
+
+geo: ['tract',
+    'fips',
+    'block_group']
+ 
+time: ['ASSESSED_YEAR',
+       'SALE_YEAR']
+
+ignore: [ 'WARRANTY_GRANT_IND',
+        'FORE_QC_PROB_IND']
+
+benchmark: ['MARKET_TOTAL_VALUE']
+
+label: 'SALE_AMOUNT'
+
+binary: []
+
+continuous: ['char_yrblt',
+ 'char_beds',
+ 'char_bldg_sf',
+ 'char_stories',
+ 'char_fbath',
+ 'char_land_sf']
+
+categorical: ['char_air_cat',
+ 'char_bsmt_cat',
+ 'char_gar1_cat',
+ 'char_roof_material_cat',
+ 'char_style_cat']
