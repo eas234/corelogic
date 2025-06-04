@@ -87,5 +87,4 @@ continuous: ['char_yrblt',
  'char_depth_sf']
 
 categorical: ['char_air_cat',
- 'char_bsmt_cat',
   'char_roof_material_cat']
