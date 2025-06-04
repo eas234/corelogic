@@ -80,14 +80,14 @@ binary: []
 continuous: ['char_yrblt',
  'char_beds',
  'char_bldg_sf',
+ 'char_ground_sf',
  'char_stories',
  'char_fbath',
- 'char_gar1_size',
- 'char_land_sf']
+ 'char_nbath',
+ 'char_land_sf',
+ 'char_frontage_sf',
+ 'char_depth_sf']
 
 categorical: ['char_air_cat',
- 'char_bsmt_cat',
  'char_ext_wall_cat',
- 'char_gar1_cat',
- 'char_roof_material_cat',
- 'char_style_cat']
+ 'char_roof_material_cat']
