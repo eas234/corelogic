@@ -49,11 +49,11 @@ log_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_4_features/logs'
 
 encoding_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_4_features/encoders'
 
-fips: '17031'
+fips: '12057'
 
-county_name: 'cook'
+county_name: 'hillsborough'
   
-model_id: 'cook_rf_4_features'
+model_id: 'hillsborough_rf_4_features'
 
 model_type: 'rf'
 
