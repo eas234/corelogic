@@ -1,0 +1,45 @@
+model_descriptors:
+
+    fips: '17031'
+
+    model_type: 'rf'
+
+    model_label: 'ablation_study'
+
+model_params:
+
+  n_features: 10
+
+  log_label: True
+
+  rand_state: 42
+
+  test_size: 0.25
+
+  cv_folds: 5
+
+  mice_iters: 3
+
+  max_iters: 1000
+
+  n_trials: 100
+
+  n_jobs: 5
+
+  share_non_null: 0.5
+
+  min_samples_leaf: 20
+
+  smoothing: 10
+
+  write_encoding_dict: True
+
+features: 
+
+  continuous: None
+
+  categorical: None
+
+  meta: ['meta_sfh', 'ASSESSED_YEAR', 'SALE_YEAR', 'CLIP', 'fips', 'tract', 'block_group', 'MARKET_TOTAL_VALUE']
+
+  label: 'SALE_AMOUNT'
