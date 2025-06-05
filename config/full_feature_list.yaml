@@ -64,3 +64,5 @@ categorical: ['char_air_cat',
     'census_unemp_rate_bg',
     'census_med_yr_built_bg',
     'census_pct_renter_occ_bg']
+
+label: ['SALE_AMOUNT']
