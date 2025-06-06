@@ -328,7 +328,8 @@ def rf_train_test_write(X_train,
 			params_path='params_path.pkl',
 			model_dir='model',
 			proc_data_dir='data',
-		        model_id='default'):
+		        model_id='default',
+		        log_label=True):
 
     """
     Train model using optimal hyperparams
@@ -344,11 +345,14 @@ def rf_train_test_write(X_train,
     -params_path: .pkl file where the model's hyperparameters live
     -proc_data_dir: directory where the output should live
     -model_id: string indicating the model being run
+    -log_label: indicates whether label was log-transformed for training, and therefore
+    labels and predictions should be exponentiated before writing results to memory. 
 
     outputs:
     -results_df: dataframe, written to proc_data_dir, which contains
     sale price, predicted value, sales ratio, model_id, and desired metadata
     for each observation in the test set.
+    also contains exponentiated labels and predictions if log_label == True.
     """
 
     with open(params_path, 'rb') as f:
@@ -368,8 +372,12 @@ def rf_train_test_write(X_train,
     y_test = y_test.reset_index(drop=True)
 
     results_df = pd.DataFrame(meta_test)
-    results_df['y_true_' + model_id] = y_test
-    results_df['y_pred_' + model_id] = y_pred
+    if log_label == True:
+        results_df['y_true_' + model_id] = [math.exp(x) for x in y_test]
+        results_df['y_pred_' + model_id] = [math.exp(x) for x in y_pred]
+    else:
+        results_df['y_true_' + model_id] = y_test
+        results_df['y_pred_' + model_id] = y_pred
     results_df['ratio_' + model_id] = results_df['y_pred_' + model_id]/results_df['y_true_' + model_id]
     results_df['model_id'] = model_id
 
