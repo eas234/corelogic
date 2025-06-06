@@ -43,3 +43,23 @@ features:
   meta: ['meta_sfh', 'ASSESSED_YEAR', 'SALE_YEAR', 'CLIP', 'fips', 'tract', 'block_group', 'MARKET_TOTAL_VALUE']
 
   label: 'SALE_AMOUNT'
+
+paths:
+
+    raw_path: '/oak/stanford/groups/deho/proptax/raw/corelogic_census_2023.csv'
+
+    study_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_3_features_log_label/hyperparams/studies/studies'
+
+    sampler_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_3_features_log_label/hyperparams/samplers/sampler.pkl'
+
+    params_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_3_features_log_label/hyperparams/best_params/best-params.pkl'
+
+    trials_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_3_features_log_label/hyperparams/trials/trials.pkl'
+
+    model_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_3_features_log_label/model'
+
+    proc_data_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_3_features_log_label/data'
+
+    log_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_3_features_log_label/logs'
+
+    encoding_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_3_features_log_label/encoders'
