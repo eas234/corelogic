@@ -596,15 +596,15 @@ class Preprocess:
                 raise ValueError(f"Label {self._label} contains non-positive values; cannot apply log transformation")
             else:
                 if inplace == True:
-                    self.y_train = [math.log(x) for x in self.y_train]
-                    self.y_test = [math.log(x) for x in self.y_test]
+                    self.y_train = pd.Series([math.log(x) for x in self.y_train])
+                    self.y_test = pd.Series([math.log(x) for x in self.y_test])
                     self.logger.info(f"log transformation of {self._label} successfully applied in place.")
                     return None
                 else:
                     processed_train = self.y_train.copy()
                     processed_test = self.y_test.copy()
-                    processed_train = [math.log(x) for x in processed_train]
-                    processed_test = [math.log(x) for x in processed_test]
+                    processed_train = pd.Series([math.log(x) for x in processed_train])
+                    processed_test = pd.Series([math.log(x) for x in processed_test])
                     return processed_train, processed_test
 
         else:
