@@ -436,89 +436,6 @@ class Preprocess:
         self._continuous_cols = [col for col in self._continuous_cols if col in remaining_cols]
         self._binary_cols = [col for col in self._binary_cols if col in remaining_cols]
         self._categorical_cols = [col for col in self._categorical_cols if col in remaining_cols]
-        
-        
-    def target_encode(self, inplace: bool=True):
-
-        """
-        TODO: update self._continuous_cols to include encoded cols after encoding; empty out categorical cols
-
-        Encodes categorical variables specified in self._categorical_cols
-        using category_encoder's TargetEncoder().
-
-        For each value v of a categorical variable c, the model outputs a
-        weighted average between the the prior and posterior of the outcome y.
-        The prior is the average of y across the entire training set, while 
-        the posterior is the average of y among observations with c=v.
-
-        Formally:
-
-        v_encoded = lambda(n)*posterior + (1-lambda(n))*prior
-
-        Smoothing is governed by the following sigmoid function:
-
-        lambda(n) = 1 / (1 + e ^ ( (n-k) / f ))
-
-        When k=n, lambda(n) = 0.5
-        As f approaches infinity, lambda(n) --> 1 and v_encoded --> posterior
-
-        Inputs:
-        -cols=self._categorical_cols, columns to encode
-        -self.__min_samples_leaf: k
-        -self.__smoothing: f
-        -self.__write_encoding_dict: boolean governing whether method writes encoding dictionary
-        mapping encodings to category values as .yaml file
-        -self.__encoding_path: path where encoding dict is written 
-
-        Outputs:
-        - if inplace, updates self._X_test and self._X_train with encoded categorical vars
-        - if not inplace, returns copies of X_test and X_train with encoded categorical vars
-
-        """
-
-        self.logger.info("Encoding categoricals using target_encode()")
-        enc = TargetEncoder(cols=tuple(self.X_train[self._categorical_cols].columns),
-                             min_samples_leaf=self.__min_samples_leaf, 
-                             smoothing=self.__smoothing).fit(self.X_train, self.y_train)
-        self.logger.info("Encoder fitted")
-
-        if self.__write_encoding_dict:
-            encoding_dicts={}
-
-            for i in range(len(enc.ordinal_encoder.mapping)):
-                col = enc.ordinal_encoder.cols[i]
-                mapping_series = enc.ordinal_encoder.mapping[i]['mapping']
-            
-            # Create the combined dictionary
-                combined_dict = {
-                    category: enc.mapping[col][code]
-                    for category, code in mapping_series.items()
-                }
-                combined_dict['UNSEEN'] = enc.mapping[col][-1]
-                encoding_dicts[col]=combined_dict
-
-            with open(os.path.join(self.__encoding_path, 'encodings.yaml'), 'w') as f:
-                yaml.dump(encoding_dicts, f)
-            
-            self.logger.info(f'Encodings written to {self.__encoding_path} as encodings.yaml')
-        
-        if inplace:
-            self.logger.info("Encoding categoricals inplace")
-            self.X_train = enc.transform(self.X_train)
-            self.X_test = enc.transform(self.X_test)
-            
-            self.logger.info("Updating categorical and continuous col lists to reflect encoding")
-            self._continuous_cols += self._categorical_cols
-            self._categorical_cols = 0
-
-            self.logger.info("Resetting dataframe indices")
-            self.X_train.reset_index(drop=True, inplace=True)
-            self.X_test.reset_index(drop=True, inplace=True)
-        else:
-            self.logger.info("Encoding categoricals on copies of X_train, X_test")
-            X_train = enc.transform(self.X_train.copy())
-            X_test = enc.transform(self.X_test.copy())
-            return X_train, X_test
 
     def winsorize_continuous(self, inplace: bool=True):
 
@@ -610,6 +527,93 @@ class Preprocess:
         else:
             self.logger.info(f"log_label is False; log transformation not applied to label {self._label}.")
             return None
+
+    def target_encode(self, inplace: bool=True):
+
+        """
+        TODO: update self._continuous_cols to include encoded cols after encoding; empty out categorical cols
+
+        Encodes categorical variables specified in self._categorical_cols
+        using category_encoder's TargetEncoder().
+
+        For each value v of a categorical variable c, the model outputs a
+        weighted average between the the prior and posterior of the outcome y.
+        The prior is the average of y across the entire training set, while 
+        the posterior is the average of y among observations with c=v.
+
+        Formally:
+
+        v_encoded = lambda(n)*posterior + (1-lambda(n))*prior
+
+        Smoothing is governed by the following sigmoid function:
+
+        lambda(n) = 1 / (1 + e ^ ( (n-k) / f ))
+
+        When k=n, lambda(n) = 0.5
+        As f approaches infinity, lambda(n) --> 1 and v_encoded --> posterior
+
+        Inputs:
+        -cols=self._categorical_cols, columns to encode
+        -self.__min_samples_leaf: k
+        -self.__smoothing: f
+        -self.__write_encoding_dict: boolean governing whether method writes encoding dictionary
+        mapping encodings to category values as .yaml file
+        -self.__encoding_path: path where encoding dict is written 
+
+        Outputs:
+        - if inplace, updates self._X_test and self._X_train with encoded categorical vars
+        - if not inplace, returns copies of X_test and X_train with encoded categorical vars
+
+        """
+
+        
+
+        self.logger.info("Encoding categoricals using target_encode()")
+        self.X_train.reset_index(drop=True)
+        self.y_train.reset_index(drop=True)
+        enc = TargetEncoder(cols=tuple(self.X_train[self._categorical_cols].columns),
+                             min_samples_leaf=self.__min_samples_leaf, 
+                             smoothing=self.__smoothing).fit(self.X_train, self.y_train)
+        self.logger.info("Encoder fitted")
+
+        if self.__write_encoding_dict:
+            encoding_dicts={}
+
+            for i in range(len(enc.ordinal_encoder.mapping)):
+                col = enc.ordinal_encoder.cols[i]
+                mapping_series = enc.ordinal_encoder.mapping[i]['mapping']
+            
+            # Create the combined dictionary
+                combined_dict = {
+                    category: enc.mapping[col][code]
+                    for category, code in mapping_series.items()
+                }
+                combined_dict['UNSEEN'] = enc.mapping[col][-1]
+                encoding_dicts[col]=combined_dict
+
+            with open(os.path.join(self.__encoding_path, 'encodings.yaml'), 'w') as f:
+                yaml.dump(encoding_dicts, f)
+            
+            self.logger.info(f'Encodings written to {self.__encoding_path} as encodings.yaml')
+        
+        if inplace:
+            self.logger.info("Encoding categoricals inplace")
+            
+            self.X_train = enc.transform(self.X_train)
+            self.X_test = enc.transform(self.X_test)
+            
+            self.logger.info("Updating categorical and continuous col lists to reflect encoding")
+            self._continuous_cols += self._categorical_cols
+            self._categorical_cols = 0
+
+            self.logger.info("Resetting dataframe indices")
+            self.X_train.reset_index(drop=True, inplace=True)
+            self.X_test.reset_index(drop=True, inplace=True)
+        else:
+            self.logger.info("Encoding categoricals on copies of X_train, X_test")
+            X_train = enc.transform(self.X_train.copy())
+            X_test = enc.transform(self.X_test.copy())
+            return X_train, X_test
 
     def _validate_data_for_imputation(self):
 
