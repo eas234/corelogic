@@ -569,8 +569,8 @@ class Preprocess:
         
 
         self.logger.info("Encoding categoricals using target_encode()")
-        self.X_train.reset_index(drop=True)
-        self.y_train.reset_index(drop=True)
+        self.X_train.reset_index(drop=True, inplace=True)
+        self.y_train.reset_index(drop=True, inplace=True)
         enc = TargetEncoder(cols=tuple(self.X_train[self._categorical_cols].columns),
                              min_samples_leaf=self.__min_samples_leaf, 
                              smoothing=self.__smoothing).fit(self.X_train, self.y_train)
