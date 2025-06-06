@@ -38,6 +38,7 @@ class Preprocess:
                  share_non_null: float=0.25, # minimum share of non-null values required in each column
                  random_state: int=42, # for reproducibility
                  wins_pctile: int=1, # percentile at which data are winsorized (symmetric)
+                 log_label: bool=True, # whether to apply log transformation to label
                  mice_iters: int=3, # n_iters for miceforest imputer
                  test_size: float=0.2, # desired size of test set
                  log_dir: str='logs', # logger filepath
@@ -83,6 +84,7 @@ class Preprocess:
         self.__share_non_null = share_non_null
         self.__random_state = random_state
         self.__wins_pctile = wins_pctile
+        self.__log_label = log_label
         self.__mice_iters = mice_iters
         self.__test_size = test_size
 
@@ -577,6 +579,37 @@ class Preprocess:
             processed_test= np.clip(processed_test, lower, upper)
             return processed_data
 
+    def log_label(self, inplace: bool=True):
+        """
+        Applies log transformation to label if self.__log_label == True.
+
+        If inplace, transformation occurs in place. Otherwise, transformation
+        is applied to a copy of the label, and the copy is returned.
+        """
+
+        if self.__log_label == True:
+            self.logger.info(f"Applying log transformation to {self._label}.")
+            # validate that all values are non-negative first
+            if (self.y_train <= 0).any() or (self.y_test <= 0).any():
+                self.logger.error(f"Label {self._label} contains non-positive values; cannot apply log transformation")
+                raise ValueError(f"Label {self._label} contains non-positive values; cannot apply log transformation")
+            else:
+                if inplace == True:
+                    self.y_train = [math.log(x) for x in self.y_train]
+                    self.y_test = [math.log(x) for x in self.y_test]
+                    self.logger.info(f"log transformation of {self._label} successfully applied in place.")
+                    return None
+                else:
+                    processed_train = self.y_train.copy()
+                    processed_test = self.y_test.copy()
+                    processed_train = [math.log(x) for x in processed_train]
+                    processed_test = [math.log(x) for x in processed_test]
+                    return processed_train, processed_test
+
+        else:
+            self.logger.info(f"log_label is False; log transformation not applied to label {self._label}.")
+            return None
+
     def _validate_data_for_imputation(self):
 
         """
@@ -796,6 +829,8 @@ class Preprocess:
         if self.__wins_pctile > 0:
             self.winsorize_continuous()
             self.winsorize_label()
+
+        self.log_label()
         
         if target_encode:
             self.target_encode()
