@@ -35,102 +35,102 @@ for i in range(3,15:
     with open('../../config/cook/cook_rf_' + str(i) + '_features.yaml', 'r') as stream:
         out = yaml.safe_load(stream)
 
-# assign parameters, paths, and feature names according to config
-random_state = out['rand_state']
-test_size = out['test_size']
-cv_folds = out['cv_folds']
-mice_iters = out['mice_iters']
-n_trials = out['n_trials']
-n_jobs = out['n_jobs']
-log_label = out['log_label']
-share_non_null = out['share_non_null']
-min_samples_leaf = out['min_samples_leaf']
-smoothing = out['smoothing']
-write_encoding_dict = out['write_encoding_dict']
-model_id = out['model_id']
-
-# paths
-dir_list = out['dir_list']
-study_dir = out['study_dir']
-sampler_path = out['sampler_path']
-params_path = out['params_path']
-raw_path = out['raw_path']
-model_dir = out['model_dir']
-proc_data_dir = out['proc_data_dir']
-trials_path = out['trials_path']
-log_dir = out['log_dir']
-encoding_path = out['encoding_path']
-
-# varbs
-fips = out['fips']
-label = out['label']
-continuous = out['continuous']
-binary = out['binary']
-categorical = out['categorical']
-features = out['continuous'] + out['binary'] + out['categorical']
-meta = out['meta']
-
-# create model dirs
-create_directories_if_missing(dir_list)
-
-# load raw data
-df = pd.read_csv(raw_path)
-print('data loaded; ' + str(df.shape[0]) + ' rows and ' + str(df.shape[1]) + ' columns.')
-print('subsetting to county ' + str(fips))
-
-# subset to single county
-df.fips = df.fips.apply(lambda x: clean_val(x,5))
-df = df.loc[df.fips == fips]
-print(str(df.shape[0]) + ' rows remaining after county-level subset')
-
-preproc = Preprocess(df.copy(),
-		    label,
-		    continuous,
-		    binary,
-		    categorical,
-		    meta,
-		    share_non_null=share_non_null,
+	# assign parameters, paths, and feature names according to config
+	random_state = out['rand_state']
+	test_size = out['test_size']
+	cv_folds = out['cv_folds']
+	mice_iters = out['mice_iters']
+	n_trials = out['n_trials']
+	n_jobs = out['n_jobs']
+	log_label = out['log_label']
+	share_non_null = out['share_non_null']
+	min_samples_leaf = out['min_samples_leaf']
+	smoothing = out['smoothing']
+	write_encoding_dict = out['write_encoding_dict']
+	model_id = out['model_id']
+	
+	# paths
+	dir_list = out['dir_list']
+	study_dir = out['study_dir']
+	sampler_path = out['sampler_path']
+	params_path = out['params_path']
+	raw_path = out['raw_path']
+	model_dir = out['model_dir']
+	proc_data_dir = out['proc_data_dir']
+	trials_path = out['trials_path']
+	log_dir = out['log_dir']
+	encoding_path = out['encoding_path']
+	
+	# varbs
+	fips = out['fips']
+	label = out['label']
+	continuous = out['continuous']
+	binary = out['binary']
+	categorical = out['categorical']
+	features = out['continuous'] + out['binary'] + out['categorical']
+	meta = out['meta']
+	
+	# create model dirs
+	create_directories_if_missing(dir_list)
+	
+	# load raw data
+	df = pd.read_csv(raw_path)
+	print('data loaded; ' + str(df.shape[0]) + ' rows and ' + str(df.shape[1]) + ' columns.')
+	print('subsetting to county ' + str(fips))
+	
+	# subset to single county
+	df.fips = df.fips.apply(lambda x: clean_val(x,5))
+	df = df.loc[df.fips == fips]
+	print(str(df.shape[0]) + ' rows remaining after county-level subset')
+	
+	preproc = Preprocess(df.copy(),
+			    label,
+			    continuous,
+			    binary,
+			    categorical,
+			    meta,
+			    share_non_null=share_non_null,
+			    random_state=random_state,
+			    wins_pctile=1,
+			    log_label=log_label,
+			    mice_iters=mice_iters,
+			    log_dir=log_dir,
+			    min_samples_leaf=min_samples_leaf,
+			    smoothing=smoothing,
+			    write_encoding_dict=write_encoding_dict,
+			    encoding_path=encoding_path)
+	
+	# run preprocessor
+	X_train, X_test, y_train, y_test, meta_train, meta_test, continuous, binary, categorical = preproc.run(target_encode=True)
+	
+	# write pre-processed train and test sets
+	for key, value in {'X_train': X_train, 'X_test': X_test, 'y_train': y_train, 'y_test': y_test, 'meta_train': meta_train, 'meta_test': meta_test}.items():
+	    value.to_csv(os.path.join(proc_data_dir, f'{key}.csv'))
+					  
+	# tune model hyperparams
+	tune_model(X_train, 
+	           y_train,
+	            study_name=study_dir, # todo - need to update tune_model to reflect changes in config setup
+	            load_if_exists=True,
+	            sampler=TPESampler(seed=random_state),
+	            sampler_path=sampler_path, #.pkl file
+	            params_path=params_path, #.pkl file
+	            trials_path=trials_path, #.csv file
+	            n_trials=n_trials,
 		    random_state=random_state,
-		    wins_pctile=1,
-		    log_label=log_label,
-		    mice_iters=mice_iters,
-		    log_dir=log_dir,
-		    min_samples_leaf=min_samples_leaf,
-		    smoothing=smoothing,
-		    write_encoding_dict=write_encoding_dict,
-		    encoding_path=encoding_path)
-
-# run preprocessor
-X_train, X_test, y_train, y_test, meta_train, meta_test, continuous, binary, categorical = preproc.run(target_encode=True)
-
-# write pre-processed train and test sets
-for key, value in {'X_train': X_train, 'X_test': X_test, 'y_train': y_train, 'y_test': y_test, 'meta_train': meta_train, 'meta_test': meta_test}.items():
-    value.to_csv(os.path.join(proc_data_dir, f'{key}.csv'))
-				  
-# tune model hyperparams
-tune_model(X_train, 
-           y_train,
-            study_name=study_dir, # todo - need to update tune_model to reflect changes in config setup
-            load_if_exists=True,
-            sampler=TPESampler(seed=random_state),
-            sampler_path=sampler_path, #.pkl file
-            params_path=params_path, #.pkl file
-            trials_path=trials_path, #.csv file
-            n_trials=n_trials,
-	    random_state=random_state,
-	    loss_func=mse_loss,
-            n_jobs=n_jobs,
-	    cv_folds=cv_folds)
-
-print('optimal params selected; training and testing model')
-rf_train_test_write(X_train, 
-                    X_test, 
-                    y_train, 
-                    y_test, 
-                    meta_train, 
-                    meta_test, 
-                    params_path=params_path, 
-		    model_dir=model_dir,
-                    proc_data_dir=proc_data_dir,
-		    model_id=model_id,
-		    log_label=log_label)
+		    loss_func=mse_loss,
+	            n_jobs=n_jobs,
+		    cv_folds=cv_folds)
+	
+	print('optimal params selected; training and testing model')
+	rf_train_test_write(X_train, 
+	                    X_test, 
+	                    y_train, 
+	                    y_test, 
+	                    meta_train, 
+	                    meta_test, 
+	                    params_path=params_path, 
+			    model_dir=model_dir,
+	                    proc_data_dir=proc_data_dir,
+			    model_id=model_id,
+			    log_label=log_label)
