@@ -367,3 +367,101 @@ def over_under_bars(df: pd.DataFrame=None,
         plt.save_fig(os.path.join(fig_dir, model_id + '_over_under_bars.png'))
     
     return grouped
+
+
+def binnedDotPlotMultiX(df,
+                        binVars=['MARKET_TOTAL_VALUE_WINS'],
+                        yVar='SALE_AMOUNT_WINS',
+                        line_labels=None,
+                        colors=None,
+                        alphas=None,
+                        nBins=20,
+                        thousands=True,
+                        center='mean',
+                        xLabel='Sale Price ($, Thousands)',
+                        yLabel='Assessed Market Value ($, Thousands)',
+                        axLim=800,
+                        censor_top=False):
+
+    copy = df.copy()
+
+    if thousands:
+        for var in binVars:
+            copy[var] = copy[var] / 1000
+        
+        copy[yVar] = copy[yVar] / 1000
+
+    # Create quantile bins and midpoints
+    for var in binVars:
+        bins = pd.qcut(copy[var], q=nBins, duplicates='drop')
+        copy['midpoints_' + var] = bins.apply(lambda interval: (interval.left + interval.right) / 2)
+
+    # Begin plot
+    plt.figure(figsize=(8, 5))
+
+    for idx, var in enumerate(binVars):
+        grouped = copy.groupby('midpoints_'+var)[yVar].agg(
+            median='median',
+            q1=lambda x: np.percentile(x, 25),
+            q3=lambda x: np.percentile(x, 75),
+            mean='mean',
+            std='std',
+            count='count'
+        ).reset_index()
+
+        if center == 'median':
+            grouped['lowerErr'] = grouped['median'] - grouped['q1']
+            grouped['upperErr'] = grouped['q3'] - grouped['median']
+        elif center == 'mean':
+            grouped['se'] = grouped['std'] / np.sqrt(grouped['count'])
+            grouped['lowerErr'] = 1.96 * grouped['se']
+            grouped['upperErr'] = 1.96 * grouped['se']
+
+        # Pick color and label
+        color = colors[idx] if colors and idx < len(colors) else 'black'
+        label = line_labels[idx] if line_labels and idx < len(line_labels) else yVar
+        alpha = alphas[idx] if alphas and idx < len(line_labels) else 1.0
+        
+        if censor_top==True:
+            plt.errorbar(
+                grouped['midpoints_'+var][:-1],
+                grouped[center][:-1],
+                yerr=[grouped['lowerErr'][:-1], grouped['upperErr'][:-1]],
+                fmt='o-',
+                fillstyle='none',
+                capsize=5,
+                label=label,
+                color=color,
+                alpha=alpha
+            )
+        else:
+            plt.errorbar(
+            grouped['midpoints_'+var],
+            grouped[center],
+            yerr=[grouped['lowerErr'], grouped['upperErr']],
+            fmt='o-',
+            fillstyle='none',
+            capsize=5,
+            label=label,
+            color=color,
+            alpha=alpha
+        )
+
+    # Final plot settings
+    plt.xlabel(xLabel)
+    plt.ylabel(yLabel)
+    plt.xlim(0, axLim)
+    plt.ylim(0, axLim)
+
+    xmin, xmax = plt.xlim()
+    plt.plot([xmin, xmax], [xmin, xmax], linestyle='--', color='red')
+
+    plt.legend()
+    plt.gca().xaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{int(x)}"))
+    plt.gca().yaxis.set_major_formatter(FuncFormatter(lambda y, _: f"{int(y)}"))
+
+    joined_binVars = '_'.join(binVars)
+    plt.savefig(f'../figs/dot_plot_{yVar}_{joined_binVars}_{center}_{axLim}.png')
+    plt.show()
+
+    return None
