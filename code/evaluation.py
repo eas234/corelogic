@@ -28,7 +28,7 @@ def set_working_dir():
     return None
 
 
-def binnedDotPlot(df,
+def binned_dot_plot(df,
                     binVar='MARKET_TOTAL_VALUE_WINS',
                     nBins=20,
                     yVar='SALE_AMOUNT_WINS',
@@ -87,7 +87,7 @@ def binnedDotPlot(df,
 
     return None
 
-def binnedDotPlotMultiY(df,
+def binned_dot_plot_multi_y(df,
                         binVar='MARKET_TOTAL_VALUE_WINS',
                         yVars=['SALE_AMOUNT_WINS'],
                         line_labels=None,
@@ -398,7 +398,7 @@ def over_under_bars(df: pd.DataFrame=None,
     return grouped
 
 
-def binnedDotPlotMultiX(df,
+def binned_dot_plot_multi_x(df,
                         binVars=['MARKET_TOTAL_VALUE_WINS'],
                         yVar='SALE_AMOUNT_WINS',
                         line_labels=None,
