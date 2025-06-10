@@ -48,6 +48,7 @@ for i in range(3,15):
         smoothing = out['smoothing']
         write_encoding_dict = out['write_encoding_dict']
         model_id = out['model_id']
+	loss_func = out['loss_func']
 	
 	# paths
         dir_list = out['dir_list']
@@ -118,7 +119,7 @@ for i in range(3,15):
 	            trials_path=trials_path, #.csv file
 	            n_trials=n_trials,
 		    random_state=random_state,
-		    loss_func=mse_loss,
+		    loss_func=loss_func,
 	            n_jobs=n_jobs,
 		    cv_folds=cv_folds)
 	
