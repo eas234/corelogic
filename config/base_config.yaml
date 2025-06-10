@@ -34,6 +34,8 @@ model_params:
 
   write_encoding_dict: True
 
+  loss_func: mae_loss
+
 features: 
 
   continuous: None
