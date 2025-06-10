@@ -79,6 +79,24 @@ def mse_loss(y_true, y_pred):
 
     return loss
 
+def mae_loss(y_true, y_pred):
+    """
+    Mean absolute error loss function for use in modeling pipelines
+
+    inputs:
+    - y_true: sale price
+    - y_pred: assessed value
+
+    outputs:
+    - loss: mean absolute error
+    """
+    y_true = np.ravel(y_true)
+    y_pred = np.ravel(y_pred)
+    abs_err = np.ravel([abs(x-y) for x, y in zip(y_true, y_pred)])
+    loss = abs_err.mean()
+
+    return loss
+
 def rf_reg_objective(trial, 
               X_train, 
               y_train,
