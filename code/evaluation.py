@@ -7,8 +7,6 @@ import pandas as pd
 import statistics as stats
 import statsmodels.api as sm
 
-from scipy.stats.mstats import winsorize
-from sklearn.linear_model import LinearRegression
 from typing import Union
 
 
@@ -293,8 +291,8 @@ def add_labels(x_positions, heights, offset=0.01, fontsize=10):
     Helper function for over_under_bars(). adds value labels formatted
     as integers at the top of each bar, centered over the midpoint.
     """
-        for x, h in zip(x_positions, heights):
-            plt.text(x, h + offset, f"{int(round(h))}", ha='center', va='bottom', fontsize=fontsize)
+    for x, h in zip(x_positions, heights):
+        plt.text(x, h + offset, f"{int(round(h))}", ha='center', va='bottom', fontsize=fontsize)
 
 def over_under_bars(df: pd.DataFrame=None,
                      model_id: str='model',
@@ -650,8 +648,6 @@ def r_squared_coef_dot_plot(dfs: list=None,
     ax.set_ylabel(y_label, fontsize=axis_label_fontsize)
     
     ax.tick_params(axis='both', labelsize=tick_fontsize) 
-    
-    
     plt.show()
     plt.close()
     
