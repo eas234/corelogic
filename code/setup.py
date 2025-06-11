@@ -232,6 +232,7 @@ class Setup:
             df = pd.read_csv(self.base_config['paths']['raw_path'])
             
             ## Subset data to columns of interest
+            ## for this part - update so that census features are left out of the feature availability analysis
             data = (df[['fips'] + self.feature_list['continuous'] + self.feature_list['categorical'] + 
                         self.feature_list['census_tract'] + self.feature_list['census_block_group']])
 
@@ -310,16 +311,26 @@ class Setup:
 
                   'fips': self.fips,
                   'county_name': self.county_name,
-                  'model_id': model_id, ## Not sure where this comes from, generated above
+                  'model_id': model_id, ## Not sure where this comes from, generated above -- this looks fine
                   'model_type': self.model_type,
                   'meta': self.base_config['features']['meta'],
-                  'id': ['CLIP'], ## Not sure where this comes from
-                  'geo': ['tract', 'fips', 'block_group'], ## Not sure where this comes from
-                  'time': ['ASSESSED_YEAR', 'SALE_YEAR'], ## Not sure where this comes from
-                  'ignore': [ 'WARRANTY_GRANT_IND', 'FORE_QC_PROB_IND'], ## Not sure where this comes from
-                  'benchmark': ['MARKET_TOTAL_VALUE'], ## Not sure where this comes from
+                  # I created the categories below because I thought it might be helpful to keep track of things like
+                  # unique property identifiers (CLIP), geography, and time as separate categories, but most of these
+                  # end up in meta_features if we use them at all. I've suggested some categories we can delete below.
+                  'id': ['CLIP'], ## Not sure where this comes from - CLIP is corelogic's unique property id. we can delete this category
+                  # as we aren't using it, and clip is stored as a meta feature.
+                  'geo': ['tract', 'fips', 'block_group'], ## Not sure where this comes from - can delete
+                  'time': ['ASSESSED_YEAR', 'SALE_YEAR'], ## Not sure where this comes from - keep in for now, we may want to do some time-based
+                  # adjustments to sale price down the road
+                  'ignore': [ 'WARRANTY_GRANT_IND', 'FORE_QC_PROB_IND'], ## Not sure where this comes from -- can delete
+                  'benchmark': ['MARKET_TOTAL_VALUE'], ## Not sure where this comes from - 'MARKET_TOTAL_VALUE' is corelogic's record
+                  # of the assessed total value of each property provided or imputed from county data. can delete for now as it's stored
+                  # as a meta feature
                   'label': self.label,
-                  'binary': [], ## Not sure where this comes from
+                  'binary': [], ## Not sure where this comes from - I had generated missing indicators in previous iterations
+                  # of model training, which were stored here as binary features and had their own processing pipeline.
+                  # keep this in for now but fine to leave it blank. Might be good to point it to whatever is in base_config
+                  # in case we want to add in binary features later.
                   'continuous': continuous,
                   'categorical': categorical}
 
