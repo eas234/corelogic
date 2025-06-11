@@ -48,7 +48,7 @@ for i in range(3,15):
         smoothing = out['smoothing']
         write_encoding_dict = out['write_encoding_dict']
         model_id = out['model_id']
-	loss_func = out['loss_func']
+        loss_func = out['loss_func']
 	
 	# paths
         dir_list = out['dir_list']
