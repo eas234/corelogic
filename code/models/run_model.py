@@ -48,7 +48,10 @@ for i in range(3,15):
         smoothing = out['smoothing']
         write_encoding_dict = out['write_encoding_dict']
         model_id = out['model_id']
-        loss_func = out['loss_func']
+        if out['loss_func'] == 'mae_loss':
+		loss_func = mae_loss
+	elif out['loss_func'] == 'mse_loss':
+		loss_func = mse_loss
 	
 	# paths
         dir_list = out['dir_list']
