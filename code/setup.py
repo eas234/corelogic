@@ -1,5 +1,7 @@
 import os
 import yaml
+import numpy as np
+import pandas as pd
 
 from typing import Union
 
@@ -196,11 +198,11 @@ class Setup:
             else:
                 print(f"Directory already exists: {os.path.join('/oak/stanford/groups/deho/proptax/models/', f"{self.county_name}_{self.model_type}_{self.study_label}", dir)}")
 
-            directories.append(os.path.join('/oak/stanford/groups/deho/proptax/models/', f"{self.county_name}_{self.model_type}_{self.study_label}, dir))
+            directories.append(os.path.join('/oak/stanford/groups/deho/proptax/models/', f"{self.county_name}_{self.model_type}_{self.study_label}", dir))
 
         return directories
     
-    def build_config(self):
+    def build_config(self, feature_order_path='../config/feature_order_2023.yaml'):
         """
         builds config file according to specifications provided by user.
 
@@ -212,4 +214,118 @@ class Setup:
         
         
         """
-        pass
+        # Check if least of features ordered by most to least common within a county exists
+        if os.path.exists(feature_order_path):
+            try:
+                with open(feature_order_path, 'r') as stream:
+                    feature_order = yaml.safe_load(stream)
+            except:
+                raise ValueError("Error trying to load feature_order_path as yaml.")
+            
+            ## Load data
+            df = pd.read_csv(self.base_config['paths']['raw_path'])
+                
+        else: 
+            ## If not, create and save a list
+
+            ## Load data
+            df = pd.read_csv(self.base_config['paths']['raw_path'])
+            
+            ## Subset data to columns of interest
+            data = (df[['fips'] + self.feature_list['continuous'] + self.feature_list['categorical'] + 
+                        self.feature_list['census_tract'] + self.feature_list['census_block_group']])
+
+            ## Calculate # of counties that have at least share_non_null values for a given column
+            fips = data.loc[:,'fips']
+            data = data.drop(columns=['fips']).notna()
+            data.loc[:,'fips'] = fips
+            availability = data.groupby('fips').mean().reset_index().drop(columns=['fips'])
+
+            ## Sort columns in order of the number of counties that have at least share_non_null values 
+            features = (availability >= self.base_config['model_params']['share_non_null']).sum().reset_index()
+            features.columns = ['cols', 'availability']
+            features = features.sort_values('availability', ascending=False)['cols'].to_list()
+
+            feature_order = {'features_order' : features}
+
+            with open(feature_order_path, 'w') as stream:
+                yaml.dump(feature_order, stream, default_flow_style=False)
+        
+        ## Subset all columns to the set of columns that are available within the fips
+        df = df[df['fips'] == self.fips]
+
+        fips_availability = df.count() / df.shape[0]
+        fips_cols = fips_availability[fips_availability >= self.base_config['model_params']['share_non_null']].reset_index()
+        fips_cols.columns = ['cols', 'availability']
+        fips_cols = fips_cols.sort_values('availability', ascending=True)['cols'].to_list()
+
+        feature_order = [x for x in feature_order['feature_order'] if x in fips_cols]
+
+        ## Subset features to specified number
+        if self.n_features > len(feature_order):
+            raise ValueError("More features requested than available in fips.")
+        
+        elif self.n_features == -1:
+            feature_order = feature_order
+
+        else: 
+            feature_order = feature_order[:self.n_features]
+
+        ## Split vars into categorical and continuous (continuous includes census vars)
+        categorical = [x for x in feature_order if x in self.feature_list['categorical']]
+        continuous = [x for x in feature_order if x not in self.feature_list['categorical']]
+
+        ## Generate dir_list
+        ## Note: I (Emma) am getting an access error here
+        dir_list = self.gen_paths()
+
+        ## Generate model ID
+        model_id = f"{self.fips}_{self.county_name}_{self.model_type}_{self.study_label}_{self.n_features}_features"
+
+        config = {'rand_state' : self.base_config['model_params']['rand_state'], 
+                  'test_size' : self.base_config['model_params']['test_size'], 
+                  'cv_folds' : self.base_config['model_params']['cv_folds'], 
+                  'mice_iters' : self.base_config['model_params']['mice_iters'], 
+                  'max_iters' : self.base_config['model_params']['max_iters'], 
+                  'n_trials' : self.base_config['model_params']['n_trials'], 
+                  'n_jobs' : self.base_config['model_params']['n_jobs'], 
+                  'share_non_null' : self.base_config['model_params']['share_non_null'], 
+                  'min_samples_leaf' : self.base_config['model_params']['min_samples_leaf'], 
+                  'smoothing' :  self.base_config['model_params']['smoothing'],
+                  'write_encoding_dict' : self.base_config['model_params']['write_encoding_dict'], 
+                  'log_label' : self.log_label, 
+
+                  ## Study paths a little funky - copying from the base_config format, but not sure if correct
+                  'dir_list' : dir_list, 
+                  'raw_path': self.base_config['paths']['raw_path'],
+
+                  'study_dir': f"{dir_list[0]}/studies",
+                  'sampler_path': f"{dir_list[1]}/sampler.pkl",
+                  'params_path': f"{dir_list[2]}/best-params.pkl",
+                  'trials_path': f"{dir_list[3]}/trials.pkl",
+                  'model_dir': dir_list[8],
+                  'proc_data_dir': dir_list[4],
+                  'log_dir': dir_list[5],
+                  'encoding_path': dir_list[6],
+
+                  'fips': self.fips,
+                  'county_name': self.county_name,
+                  'model_id': model_id, ## Not sure where this comes from, generated above
+                  'model_type': self.model_type,
+                  'meta': self.base_config['features']['meta'],
+                  'id': ['CLIP'], ## Not sure where this comes from
+                  'geo': ['tract', 'fips', 'block_group'], ## Not sure where this comes from
+                  'time': ['ASSESSED_YEAR', 'SALE_YEAR'], ## Not sure where this comes from
+                  'ignore': [ 'WARRANTY_GRANT_IND', 'FORE_QC_PROB_IND'], ## Not sure where this comes from
+                  'benchmark': ['MARKET_TOTAL_VALUE'], ## Not sure where this comes from
+                  'label': self.label,
+                  'binary': [], ## Not sure where this comes from
+                  'continuous': continuous,
+                  'categorical': categorical}
+
+        ## Note sure if this is correct either
+        config_path = dir_list[7]
+
+        with open(f"{config_path}/{model_id}.yaml", 'w') as stream:
+            yaml.dump(config, stream, default_flow_style=False)
+

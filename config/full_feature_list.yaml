@@ -33,7 +33,7 @@ categorical: ['char_air_cat',
    'char_water_cat',
    'char_elec_cat']
 
-  census_tract: ['census_pct_children_tract',
+census_tract: ['census_pct_children_tract',
     'census_pct_senior_tract',
     'census_med_age_tract',
     'census_pct_married_hh_tract',
@@ -49,7 +49,7 @@ categorical: ['char_air_cat',
     'census_med_yr_built_tract',
     'census_pct_renter_occ_tract']
 
-  census_block_group: ['census_pct_children_bg',
+census_block_group: ['census_pct_children_bg',
     'census_pct_senior_bg',
     'census_med_age_bg',
     'census_pct_married_hh_bg',
