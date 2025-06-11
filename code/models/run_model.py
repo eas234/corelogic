@@ -32,7 +32,7 @@ from preprocess import *
 
 # load config -- change config file to run desired model
 for i in range(3,15):
-    with open('../../config/cook/cook_rf_' + str(i) + '_features.yaml', 'r') as stream:
+    with open('../../config/cook/cook_rf_' + str(i) + '_features_mae_loss.yaml', 'r') as stream:
         out = yaml.safe_load(stream)
 
 	# assign parameters, paths, and feature names according to config
