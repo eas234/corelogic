@@ -202,7 +202,7 @@ class Setup:
 
         return directories
     
-    def build_config(self, feature_order_path='../config/feature_order_2023.csv'):
+    def build_config(self, feature_order_path='../config/feature_order_2023.csv', base_dir='/oak/stanford/groups/deho/proptax/models/'):
         """
         builds config file according to specifications provided by user.
 
@@ -227,9 +227,12 @@ class Setup:
             ## Load data
             df = pd.read_csv(self.base_config['paths']['raw_path'])
             
-            ## Subset data to columns of interest
-            ## for this part - update so that census features are left out of the feature availability analysis
-            df = (df[['fips'] + self.feature_list['continuous'] + self.feature_list['categorical']])
+            ## Subset data to all columns used for modeling
+            ## This should always come from full_feature_list 
+            ## (because it will become the default order for subsequent calls)
+            with open('../config/full_feature_list.yaml', 'r') as stream:
+                full_feature_list = yaml.safe_load(stream)
+            df = (df[['fips'] + full_feature_list['continuous'] + full_feature_list['categorical']])
 
             ## Calculate # of counties that have at least share_non_null values for a given column
             fips = df.loc[:,'fips']
@@ -262,11 +265,12 @@ class Setup:
             feature_order = feature_order[:self.n_features]
 
         ## Split vars into categorical and continuous (continuous includes census vars)
+        ## This step also restricts to the categorical and continuous lists provided in Setup(), if applicable
         categorical = [x for x in feature_order if x in self.feature_list['categorical']]
-        continuous = [x for x in feature_order if x not in self.feature_list['categorical']]
+        continuous = [x for x in feature_order if x in self.feature_list['continuous']]
 
         ## Generate dir_list
-        dir_list = self.gen_paths()
+        dir_list = self.gen_paths(base_dir)
 
         ## Generate model ID
         model_id = f"{self.fips}_{self.county_name}_{self.model_type}_{self.study_label}_{self.n_features}_features"
@@ -312,5 +316,5 @@ class Setup:
         config_path = dir_list[7]
 
         with open(f"{config_path}/{model_id}.yaml", 'w') as stream:
-            yaml.dump(config, stream, default_flow_style=False)
+            yaml.dump(config, stream)
 
