@@ -163,7 +163,7 @@ class Setup:
             self.base_config = None
 
 
-    def gen_paths(self): 
+    def gen_paths(self, base_dir='/oak/stanford/groups/deho/proptax/models/'): 
 
         """
         generates paths required to store model data, logs, config, and ouput
@@ -179,30 +179,30 @@ class Setup:
 
 
 
-        dir_list = ['/hyperparams/studies', 
-                    '/hyperparams/samplers', 
-                    '/hyperparams/best_params', 
-                    '/hyperparams/trials',
-                    '/data',
-                    '/logs',
-                    '/encoders',
-                    '/config',
-                    '/model']
+        dir_list = ['hyperparams/studies', 
+                    'hyperparams/samplers', 
+                    'hyperparams/best_params', 
+                    'hyperparams/trials',
+                    'data',
+                    'logs',
+                    'encoders',
+                    'config',
+                    'model']
 
         directories = []
         
         for dir in dir_list:
-            if not os.path.exists(os.path.join('/oak/stanford/groups/deho/proptax/models/', f"{self.county_name}_{self.model_type}_{self.study_label}", dir)):
-                os.makedirs(os.path.join('/oak/stanford/groups/deho/proptax/models/', f"{self.county_name}_{self.model_type}_{self.study_label}", dir))
-                print(f"Created directory: {os.path.join('/oak/stanford/groups/deho/proptax/models/', f"{self.county_name}_{self.model_type}_{self.study_label}", dir)}")
+            if not os.path.exists(os.path.join(base_dir, f"{self.county_name}_{self.model_type}_{self.study_label}", dir)):
+                os.makedirs(os.path.join(base_dir, f"{self.county_name}_{self.model_type}_{self.study_label}", dir))
+                print(f"Created directory: {os.path.join(base_dir, f"{self.county_name}_{self.model_type}_{self.study_label}", dir)}")
             else:
-                print(f"Directory already exists: {os.path.join('/oak/stanford/groups/deho/proptax/models/', f"{self.county_name}_{self.model_type}_{self.study_label}", dir)}")
+                print(f"Directory already exists: {os.path.join(base_dir, f"{self.county_name}_{self.model_type}_{self.study_label}", dir)}")
 
-            directories.append(os.path.join('/oak/stanford/groups/deho/proptax/models/', f"{self.county_name}_{self.model_type}_{self.study_label}", dir))
+            directories.append(os.path.join(base_dir, f"{self.county_name}_{self.model_type}_{self.study_label}", dir))
 
         return directories
     
-    def build_config(self, feature_order_path='../config/feature_order_2023.yaml'):
+    def build_config(self, feature_order_path='../config/feature_order_2023.csv'):
         """
         builds config file according to specifications provided by user.
 
@@ -214,16 +214,12 @@ class Setup:
         
         
         """
-        # Check if least of features ordered by most to least common within a county exists
+        # Check if list of features ordered by most to least common within a county exists
         if os.path.exists(feature_order_path):
             try:
-                with open(feature_order_path, 'r') as stream:
-                    feature_order = yaml.safe_load(stream)
+                feature_order = pd.read_csv(feature_order_path)
             except:
-                raise ValueError("Error trying to load feature_order_path as yaml.")
-            
-            ## Load data
-            df = pd.read_csv(self.base_config['paths']['raw_path'])
+                raise ValueError("Error trying to load feature_order_path as csv.")
                 
         else: 
             ## If not, create and save a list
@@ -233,39 +229,32 @@ class Setup:
             
             ## Subset data to columns of interest
             ## for this part - update so that census features are left out of the feature availability analysis
-            data = (df[['fips'] + self.feature_list['continuous'] + self.feature_list['categorical'] + 
-                        self.feature_list['census_tract'] + self.feature_list['census_block_group']])
+            df = (df[['fips'] + self.feature_list['continuous'] + self.feature_list['categorical']])
 
             ## Calculate # of counties that have at least share_non_null values for a given column
-            fips = data.loc[:,'fips']
-            data = data.drop(columns=['fips']).notna()
-            data.loc[:,'fips'] = fips
-            availability = data.groupby('fips').mean().reset_index().drop(columns=['fips'])
+            fips = df.loc[:,'fips']
+            df = df.drop(columns=['fips']).notna()
+            df.loc[:,'fips'] = fips
+            feature_order = df.groupby('fips').mean().reset_index()
 
-            ## Sort columns in order of the number of counties that have at least share_non_null values 
-            features = (availability >= self.base_config['model_params']['share_non_null']).sum().reset_index()
-            features.columns = ['cols', 'availability']
-            features = features.sort_values('availability', ascending=False)['cols'].to_list()
+            feature_order.to_csv(feature_order_path, index=False)
+            feature_order = pd.read_csv(feature_order_path)
 
-            feature_order = {'features_order' : features}
+        ## Sort columns in order of the number of counties that have at least share_non_null values 
+        features = (feature_order.drop(columns=['fips']) >= self.base_config['model_params']['share_non_null']).sum().reset_index().rename(columns={'index' : 'feature', 0 : 'availability'})
+        features = features.sort_values('availability', ascending=False)['feature'].to_list()
 
-            with open(feature_order_path, 'w') as stream:
-                yaml.dump(feature_order, stream, default_flow_style=False)
-        
-        ## Subset all columns to the set of columns that are available within the fips
-        df = df[df['fips'] == self.fips]
+        ## Select only features present in specified fips
+        fips_features = feature_order[feature_order['fips'] == int(self.fips)].drop(columns=['fips']).reset_index(drop=True).T.reset_index().rename(columns={ 'index' : 'feature', 0 : 'availability'})
+        fips_features = fips_features[fips_features['availability'] >= self.base_config['model_params']['share_non_null']]['feature'].to_list()
 
-        fips_availability = df.count() / df.shape[0]
-        fips_cols = fips_availability[fips_availability >= self.base_config['model_params']['share_non_null']].reset_index()
-        fips_cols.columns = ['cols', 'availability']
-        fips_cols = fips_cols.sort_values('availability', ascending=True)['cols'].to_list()
-
-        feature_order = [x for x in feature_order['feature_order'] if x in fips_cols]
+        ## Order features that are present in the fips
+        feature_order = [x for x in feature_order if x in fips_features]
 
         ## Subset features to specified number
         if self.n_features > len(feature_order):
             raise ValueError("More features requested than available in fips.")
-        
+
         elif self.n_features == -1:
             feature_order = feature_order
 
@@ -277,7 +266,6 @@ class Setup:
         continuous = [x for x in feature_order if x not in self.feature_list['categorical']]
 
         ## Generate dir_list
-        ## Note: I (Emma) am getting an access error here
         dir_list = self.gen_paths()
 
         ## Generate model ID
@@ -294,9 +282,9 @@ class Setup:
                   'min_samples_leaf' : self.base_config['model_params']['min_samples_leaf'], 
                   'smoothing' :  self.base_config['model_params']['smoothing'],
                   'write_encoding_dict' : self.base_config['model_params']['write_encoding_dict'], 
+
                   'log_label' : self.log_label, 
 
-                  ## Study paths a little funky - copying from the base_config format, but not sure if correct
                   'dir_list' : dir_list, 
                   'raw_path': self.base_config['paths']['raw_path'],
 
@@ -311,30 +299,16 @@ class Setup:
 
                   'fips': self.fips,
                   'county_name': self.county_name,
-                  'model_id': model_id, ## Not sure where this comes from, generated above -- this looks fine
+                  'model_id': model_id,
                   'model_type': self.model_type,
                   'meta': self.base_config['features']['meta'],
-                  # I created the categories below because I thought it might be helpful to keep track of things like
-                  # unique property identifiers (CLIP), geography, and time as separate categories, but most of these
-                  # end up in meta_features if we use them at all. I've suggested some categories we can delete below.
-                  'id': ['CLIP'], ## Not sure where this comes from - CLIP is corelogic's unique property id. we can delete this category
-                  # as we aren't using it, and clip is stored as a meta feature.
-                  'geo': ['tract', 'fips', 'block_group'], ## Not sure where this comes from - can delete
-                  'time': ['ASSESSED_YEAR', 'SALE_YEAR'], ## Not sure where this comes from - keep in for now, we may want to do some time-based
-                  # adjustments to sale price down the road
-                  'ignore': [ 'WARRANTY_GRANT_IND', 'FORE_QC_PROB_IND'], ## Not sure where this comes from -- can delete
-                  'benchmark': ['MARKET_TOTAL_VALUE'], ## Not sure where this comes from - 'MARKET_TOTAL_VALUE' is corelogic's record
-                  # of the assessed total value of each property provided or imputed from county data. can delete for now as it's stored
-                  # as a meta feature
+
+                  'time': self.base_config['features']['time'], 
                   'label': self.label,
-                  'binary': [], ## Not sure where this comes from - I had generated missing indicators in previous iterations
-                  # of model training, which were stored here as binary features and had their own processing pipeline.
-                  # keep this in for now but fine to leave it blank. Might be good to point it to whatever is in base_config
-                  # in case we want to add in binary features later.
+                  'binary': self.base_config['features']['binary'],
                   'continuous': continuous,
                   'categorical': categorical}
 
-        ## Note sure if this is correct either
         config_path = dir_list[7]
 
         with open(f"{config_path}/{model_id}.yaml", 'w') as stream:
