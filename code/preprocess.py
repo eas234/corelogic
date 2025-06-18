@@ -285,15 +285,15 @@ class Preprocess:
             if len(group) < self.__outlier_min_group_size:
                 return pd.Series(False, index=group.index)
     
-            median = group[label].median()
-            mad = np.median(np.abs(group[label] - median))
+            median = group[self._label].median()
+            mad = np.median(np.abs(group[self._label] - median))
     
             if mad == 0:
                 return pd.Series(False, index=group.index)
     
             threshold = 2 * 1.4826 * mad  # Approximate to ~2 std dev for normal dist
             #threshold = 2*mad
-            return np.abs(group[label] - median) > threshold
+            return np.abs(group[self._label] - median) > threshold
     
         # Initialize flag
         copy['label_is_outlier'] = False
