@@ -104,7 +104,6 @@ for i in range(3,15):
 			    log_label=log_label,
 			    mice_iters=mice_iters,
 			    log_dir=log_dir,
-                            drop_outliers=drop_outliers,
 			    min_samples_leaf=min_samples_leaf,
 			    smoothing=smoothing,
 			    write_encoding_dict=write_encoding_dict,
