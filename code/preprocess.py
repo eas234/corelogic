@@ -15,7 +15,7 @@ class Preprocess:
     """
     Class which contains methods to preprocess data.
 
-    Methods include:
+    (incomplete list of) Methods:
     
     - Setters and getters for all class attributes
     - drop_null_labels(): drops rows where label is null
@@ -38,6 +38,9 @@ class Preprocess:
                  meta_cols: list=None, # columns of metadata that methods should not modify
                  share_non_null: float=0.25, # minimum share of non-null values required in each column
                  random_state: int=42, # for reproducibility
+                 outlier_min_group_size: int=2, # minimum n of obs needed in outlier detection group
+                 outlier_grouping_cols: list=None, # list of cols by which to group observations for outlier detection
+                 outlier_geo_col: str=None, # level of geography to use for grouping observations for outlier detection
                  wins_pctile: int=1, # percentile at which data are winsorized (symmetric)
                  log_label: bool=True, # whether to apply log transformation to label
                  mice_iters: int=3, # n_iters for miceforest imputer
@@ -79,11 +82,14 @@ class Preprocess:
         self._binary_cols = binary_cols or []
         self._categorical_cols = categorical_cols or []
         self._meta_cols = meta_cols or []
+        self._outlier_grouping_cols = outlier_grouping_cols or []
+        self._outlier_geo_col = outlier_geo_col 
         
         
         # protected attributes
         self.__share_non_null = share_non_null
         self.__random_state = random_state
+        self.__outlier_min_group_size = outlier_min_group_size
         self.__wins_pctile = wins_pctile
         self.__log_label = log_label
         self.__mice_iters = mice_iters
@@ -259,6 +265,141 @@ class Preprocess:
             processed_data = processed_data.reset_index(drop=True)
             self.logger.info(f"Dropped {before - len(processed_data)} rows with null labels out of {before} total rows.")
             return processed_data
+
+    def flag_outliers(self, 
+                     inplace: bool=True):
+
+        copy = self._data.copy()
+
+        # Create deciles of variables in home_char
+        for var in self._outlier_grouping_cols:
+            copy[var + '_decile'] = pd.qcut(
+                copy[var],
+                10,
+                labels=False,
+                duplicates='drop')
+        decile_char = [x + '_decile' for x in self._outlier_grouping_cols]
+    
+        # MAD-based outlier detection function
+        def identify_mad_outliers(group):
+            if len(group) < min_group_size:
+                return pd.Series(False, index=group.index)
+    
+            median = group[label].median()
+            mad = np.median(np.abs(group[label] - median))
+    
+            if mad == 0:
+                return pd.Series(False, index=group.index)
+    
+            threshold = 2 * 1.4826 * mad  # Approximate to ~2 std dev for normal dist
+            #threshold = 2*mad
+            return np.abs(group[label] - median) > threshold
+    
+        # Initialize flag
+        copy['label_is_outlier'] = False
+    
+        
+        # generate sets of group keys
+        group_keys = []
+        
+        for i in range(len(decile_char)):
+            group_keys.append(decile_char[:(i+1)])
+            
+        if self._outlier_geo_col:
+            group_keys = [[self._outlier_geo_col] + x for x in group_keys]
+    
+        for keys in group_keys:
+            mask = copy['label_is_outlier'] == False
+            sub_df = copy[mask]
+    
+            valid_mask = sub_df[keys].notna().all(axis=1)
+            valid_rows = sub_df[valid_mask]
+    
+            if valid_rows.empty:
+                continue
+    
+            # Group and apply outlier function
+            grouped = valid_rows.groupby(keys, group_keys=False)
+            outlier_flags = grouped.apply(identify_mad_outliers)
+    
+            # Make sure indices match
+            outlier_flags.index = outlier_flags.index.droplevel(0) if isinstance(outlier_flags.index, pd.MultiIndex) else outlier_flags.index
+    
+            copy.loc[outlier_flags.index, 'label_is_outlier'] = outlier_flags
+
+        if inplace:
+            self._data = copy
+        return copy
+
+    def drop_outliers(self, 
+                     inplace: bool=True):
+
+        copy = self._data.copy()
+
+        # Create deciles of variables in home_char
+        for var in self._outlier_grouping_cols:
+            copy[var + '_decile'] = pd.qcut(
+                copy[var],
+                10,
+                labels=False,
+                duplicates='drop')
+        decile_char = [x + '_decile' for x in self._outlier_grouping_cols]
+    
+        # MAD-based outlier detection function
+        def identify_mad_outliers(group):
+            if len(group) < min_group_size:
+                return pd.Series(False, index=group.index)
+    
+            median = group[label].median()
+            mad = np.median(np.abs(group[label] - median))
+    
+            if mad == 0:
+                return pd.Series(False, index=group.index)
+    
+            threshold = 2 * 1.4826 * mad  # Approximate to ~2 std dev for normal dist
+            #threshold = 2*mad
+            return np.abs(group[label] - median) > threshold
+    
+        # Initialize flag
+        copy['label_is_outlier'] = False
+    
+        
+        # generate sets of group keys
+        group_keys = []
+        
+        for i in range(len(decile_char)):
+            group_keys.append(decile_char[:(i+1)])
+            
+        if self._outlier_geo_col:
+            group_keys = [[self._outlier_geo_col] + x for x in group_keys]
+    
+        for keys in group_keys:
+            mask = copy['label_is_outlier'] == False
+            sub_df = copy[mask]
+    
+            valid_mask = sub_df[keys].notna().all(axis=1)
+            valid_rows = sub_df[valid_mask]
+    
+            if valid_rows.empty:
+                continue
+    
+            # Group and apply outlier function
+            grouped = valid_rows.groupby(keys, group_keys=False)
+            outlier_flags = grouped.apply(identify_mad_outliers)
+    
+            # Make sure indices match
+            outlier_flags.index = outlier_flags.index.droplevel(0) if isinstance(outlier_flags.index, pd.MultiIndex) else outlier_flags.index
+    
+            copy.loc[outlier_flags.index, 'label_is_outlier'] = outlier_flags
+
+        # drop outlier columns
+        copy = copy[copy.label_is_outlier == False].reset_index(drop=True)
+
+        if inplace:
+            self._data = copy
+            
+        return copy
+
 
     def drop_single_value_cols(self, inplace: bool=True):
 
@@ -437,6 +578,73 @@ class Preprocess:
         self._binary_cols = [col for col in self._binary_cols if col in remaining_cols]
         self._categorical_cols = [col for col in self._categorical_cols if col in remaining_cols]
 
+    def flag_outliers(self, 
+                     inplace: bool=True):
+
+        copy = df.copy()
+
+        # Create deciles of variables in home_char
+        for var in self._outlier_grouping_cols:
+            copy[var + '_decile'] = pd.qcut(
+                copy[var],
+                10,
+                labels=False,
+                duplicates='drop')
+        decile_char = [x + '_decile' for x in self._outlier_grouping_cols]
+    
+        # MAD-based outlier detection function
+        def identify_mad_outliers(group):
+            if len(group) < min_group_size:
+                return pd.Series(False, index=group.index)
+    
+            median = group[label].median()
+            mad = np.median(np.abs(group[label] - median))
+    
+            if mad == 0:
+                return pd.Series(False, index=group.index)
+    
+            threshold = 2 * 1.4826 * mad  # Approximate to ~2 std dev for normal dist
+            #threshold = 2*mad
+            return np.abs(group[label] - median) > threshold
+    
+        # Initialize flag
+        copy['label_is_outlier'] = False
+    
+        
+        # generate sets of group keys
+        group_keys = []
+        
+        for i in range(len(decile_char)):
+            group_keys.append(decile_char[:(i+1)])
+            
+        if self._outlier_geo_col:
+            group_keys = [[self._outlier_geo_col] + x for x in group_keys]
+    
+        for keys in group_keys:
+            mask = copy['label_is_outlier'] == False
+            sub_df = copy[mask]
+    
+            valid_mask = sub_df[keys].notna().all(axis=1)
+            valid_rows = sub_df[valid_mask]
+    
+            if valid_rows.empty:
+                continue
+    
+            # Group and apply outlier function
+            grouped = valid_rows.groupby(keys, group_keys=False)
+            outlier_flags = grouped.apply(identify_mad_outliers)
+    
+            # Make sure indices match
+            outlier_flags.index = outlier_flags.index.droplevel(0) if isinstance(outlier_flags.index, pd.MultiIndex) else outlier_flags.index
+    
+            copy.loc[outlier_flags.index, 'label_is_outlier'] = outlier_flags
+
+        if inplace:
+            self._data = copy
+            self._meta_cols += ['label_is_outlier']
+    
+        return copy
+
     def winsorize_continuous(self, inplace: bool=True):
 
         """
@@ -531,7 +739,6 @@ class Preprocess:
     def target_encode(self, inplace: bool=True):
 
         """
-        TODO: update self._continuous_cols to include encoded cols after encoding; empty out categorical cols
 
         Encodes categorical variables specified in self._categorical_cols
         using category_encoder's TargetEncoder().
@@ -792,6 +999,7 @@ class Preprocess:
     def run(self, 
             inplace: bool=True,
             one_hot: bool=False,
+            drop_outliers: bool=True,
             target_encode: bool=False,
             normalize_binary: bool=False):
 
@@ -823,6 +1031,11 @@ class Preprocess:
         self.drop_single_value_cols()
         
         self.drop_mostly_null_cols()
+
+        self.flag_outliers()
+
+        if drop_outliers:
+            self.drop_outliers()
         
         self.train_test_split()
         
