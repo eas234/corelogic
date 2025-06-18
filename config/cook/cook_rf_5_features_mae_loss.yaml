@@ -21,40 +21,40 @@ smoothing: 10
 write_encoding_dict: True
 log_label: True
 
-dir_list: ['/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss/hyperparams/studies',
-        '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss/hyperparams/samplers',
-        '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss/hyperparams/best_params',
-        '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss/hyperparams/trials',
-        '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss/data',
-        '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss/logs',
-        '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss/encoders',
-        '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss/config',
-        '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss/model'
+dir_list: ['/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss_drop_outliers/hyperparams/studies',
+        '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss_drop_outliers/hyperparams/samplers',
+        '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss_drop_outliers/hyperparams/best_params',
+        '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss_drop_outliers/hyperparams/trials',
+        '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss_drop_outliers/data',
+        '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss_drop_outliers/logs',
+        '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss_drop_outliers/encoders',
+        '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss_drop_outliers/config',
+        '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss_drop_outliers/model'
 ]
 
 raw_path: '/oak/stanford/groups/deho/proptax/raw/corelogic_census_2023.csv'
 
-study_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss/hyperparams/studies/studies'
+study_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss_drop_outliers/hyperparams/studies/studies'
 
-sampler_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss/hyperparams/samplers/sampler.pkl'
+sampler_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss_drop_outliers/hyperparams/samplers/sampler.pkl'
 
-params_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss/hyperparams/best_params/best-params.pkl'
+params_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss_drop_outliers/hyperparams/best_params/best-params.pkl'
 
-trials_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss/hyperparams/trials/trials.pkl'
+trials_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss_drop_outliers/hyperparams/trials/trials.pkl'
 
-model_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss/model'
+model_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss_drop_outliers/model'
 
-proc_data_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss/data'
+proc_data_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss_drop_outliers/data'
 
-log_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss/logs'
+log_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss_drop_outliers/logs'
 
-encoding_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss/encoders'
+encoding_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_5_features_log_label_mae_loss_drop_outliers/encoders'
 
 fips: '17031'
 
 county_name: 'cook'
   
-model_id: 'cook_rf_5_features_log_label_mae_loss'
+model_id: 'cook_rf_5_features_log_label_mae_loss_drop_outliers'
 
 model_type: 'rf'
 
@@ -91,4 +91,4 @@ outlier_grouping_cols: ['char_yrblt', 'char_bldg_sf', 'char_land_sf']
 
 outlier_geo_col: 'tract'
 
-drop_outliers: False
+drop_outliers: True
