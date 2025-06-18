@@ -326,9 +326,11 @@ class Preprocess:
             outlier_flags.index = outlier_flags.index.droplevel(0) if isinstance(outlier_flags.index, pd.MultiIndex) else outlier_flags.index
     
             copy.loc[outlier_flags.index, 'label_is_outlier'] = outlier_flags
+            
 
         if inplace:
             self._data = copy
+            self._meta_cols += ['label_is_outlier']
         return copy
 
     def drop_outliers(self, 
@@ -577,73 +579,6 @@ class Preprocess:
         self._continuous_cols = [col for col in self._continuous_cols if col in remaining_cols]
         self._binary_cols = [col for col in self._binary_cols if col in remaining_cols]
         self._categorical_cols = [col for col in self._categorical_cols if col in remaining_cols]
-
-    def flag_outliers(self, 
-                     inplace: bool=True):
-
-        copy = df.copy()
-
-        # Create deciles of variables in home_char
-        for var in self._outlier_grouping_cols:
-            copy[var + '_decile'] = pd.qcut(
-                copy[var],
-                10,
-                labels=False,
-                duplicates='drop')
-        decile_char = [x + '_decile' for x in self._outlier_grouping_cols]
-    
-        # MAD-based outlier detection function
-        def identify_mad_outliers(group):
-            if len(group) < min_group_size:
-                return pd.Series(False, index=group.index)
-    
-            median = group[label].median()
-            mad = np.median(np.abs(group[label] - median))
-    
-            if mad == 0:
-                return pd.Series(False, index=group.index)
-    
-            threshold = 2 * 1.4826 * mad  # Approximate to ~2 std dev for normal dist
-            #threshold = 2*mad
-            return np.abs(group[label] - median) > threshold
-    
-        # Initialize flag
-        copy['label_is_outlier'] = False
-    
-        
-        # generate sets of group keys
-        group_keys = []
-        
-        for i in range(len(decile_char)):
-            group_keys.append(decile_char[:(i+1)])
-            
-        if self._outlier_geo_col:
-            group_keys = [[self._outlier_geo_col] + x for x in group_keys]
-    
-        for keys in group_keys:
-            mask = copy['label_is_outlier'] == False
-            sub_df = copy[mask]
-    
-            valid_mask = sub_df[keys].notna().all(axis=1)
-            valid_rows = sub_df[valid_mask]
-    
-            if valid_rows.empty:
-                continue
-    
-            # Group and apply outlier function
-            grouped = valid_rows.groupby(keys, group_keys=False)
-            outlier_flags = grouped.apply(identify_mad_outliers)
-    
-            # Make sure indices match
-            outlier_flags.index = outlier_flags.index.droplevel(0) if isinstance(outlier_flags.index, pd.MultiIndex) else outlier_flags.index
-    
-            copy.loc[outlier_flags.index, 'label_is_outlier'] = outlier_flags
-
-        if inplace:
-            self._data = copy
-            self._meta_cols += ['label_is_outlier']
-    
-        return copy
 
     def winsorize_continuous(self, inplace: bool=True):
 
