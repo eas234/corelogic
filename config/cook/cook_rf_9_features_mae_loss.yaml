@@ -19,42 +19,42 @@ min_samples_leaf: 20
 smoothing: 10
 
 write_encoding_dict: True
-log_label: False
+log_label: True
 
-dir_list: ['/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_mae_loss/hyperparams/studies',
-        '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_mae_loss/hyperparams/samplers',
-        '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_mae_loss/hyperparams/best_params',
-        '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_mae_loss/hyperparams/trials',
-        '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_mae_loss/data',
-        '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_mae_loss/logs',
-        '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_mae_loss/encoders',
-        '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_mae_loss/config',
-        '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_mae_loss/model'
+dir_list: ['/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_log_label_mae_loss/hyperparams/studies',
+        '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_log_label_mae_loss/hyperparams/samplers',
+        '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_log_label_mae_loss/hyperparams/best_params',
+        '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_log_label_mae_loss/hyperparams/trials',
+        '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_log_label_mae_loss/data',
+        '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_log_label_mae_loss/logs',
+        '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_log_label_mae_loss/encoders',
+        '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_log_label_mae_loss/config',
+        '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_log_label_mae_loss/model'
 ]
 
 raw_path: '/oak/stanford/groups/deho/proptax/raw/corelogic_census_2023.csv'
 
-study_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_mae_loss/hyperparams/studies/studies'
+study_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_log_label_mae_loss/hyperparams/studies/studies'
 
-sampler_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_mae_loss/hyperparams/samplers/sampler.pkl'
+sampler_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_log_label_mae_loss/hyperparams/samplers/sampler.pkl'
 
-params_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_mae_loss/hyperparams/best_params/best-params.pkl'
+params_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_log_label_mae_loss/hyperparams/best_params/best-params.pkl'
 
-trials_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_mae_loss/hyperparams/trials/trials.pkl'
+trials_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_log_label_mae_loss/hyperparams/trials/trials.pkl'
 
-model_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_mae_loss/model'
+model_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_log_label_mae_loss/model'
 
-proc_data_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_mae_loss/data'
+proc_data_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_log_label_mae_loss/data'
 
-log_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_mae_loss/logs'
+log_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_log_label_mae_loss/logs'
 
-encoding_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_mae_loss/encoders'
+encoding_path: '/oak/stanford/groups/deho/proptax/models/cook_rf_9_features_log_label_mae_loss/encoders'
 
 fips: '17031'
 
 county_name: 'cook'
   
-model_id: 'cook_rf_9_features_mae_loss'
+model_id: 'cook_rf_9_features_log_label_mae_loss'
 
 model_type: 'rf'
 
@@ -89,3 +89,9 @@ categorical: ['char_air_cat',
  'char_gar1_cat',
  'char_roof_material_cat']
 loss_func: mae_loss
+# Added block
+outlier_grouping_cols: ['char_yrblt', 'char_bldg_sf', 'char_land_sf']
+
+outlier_geo_col: 'Tract'
+
+drop_outliers: False
