@@ -48,6 +48,7 @@ for i in range(3,15):
         smoothing = out['smoothing']
         write_encoding_dict = out['write_encoding_dict']
         model_id = out['model_id']
+        drop_outliers = out['drop_outliers']
         if out['loss_func'] == 'mae_loss':
             loss_func = mae_loss
         elif out['loss_func'] == 'mse_loss':
@@ -73,6 +74,8 @@ for i in range(3,15):
         categorical = out['categorical']
         features = out['continuous'] + out['binary'] + out['categorical']
         meta = out['meta']
+        outlier_grouping_cols = out['outlier_grouping_cols']
+        outlier_geo_col = out['outlier_geo_col']
 	
 	# create model dirs
         create_directories_if_missing(dir_list)
@@ -93,19 +96,22 @@ for i in range(3,15):
 			    binary,
 			    categorical,
 			    meta,
+                            outlier_grouping_cols=outlier_grouping_cols,
+                            outlier_geo_col=outlier_geo_col,
 			    share_non_null=share_non_null,
 			    random_state=random_state,
 			    wins_pctile=1,
 			    log_label=log_label,
 			    mice_iters=mice_iters,
 			    log_dir=log_dir,
+                            drop_outliers=drop_outliers,
 			    min_samples_leaf=min_samples_leaf,
 			    smoothing=smoothing,
 			    write_encoding_dict=write_encoding_dict,
 			    encoding_path=encoding_path)
 	
 	# run preprocessor
-        X_train, X_test, y_train, y_test, meta_train, meta_test, continuous, binary, categorical = preproc.run(target_encode=True)
+        X_train, X_test, y_train, y_test, meta_train, meta_test, continuous, binary, categorical = preproc.run(target_encode=True, drop_outliers=drop_outliers)
 	
 	# write pre-processed train and test sets
         for key, value in {'X_train': X_train, 'X_test': X_test, 'y_train': y_train, 'y_test': y_test, 'meta_train': meta_train, 'meta_test': meta_test}.items():
