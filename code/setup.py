@@ -24,6 +24,9 @@ class Setup:
              categorical: list=None, # list of categorical features to include. if None, defaults to list in feature_list
              census: Union[str,list]=None,  # valid options are 'bg', 'tract' or list. if None, no census features included.
              label: str=None, # model label. if None, defaults to label specified in feature_list.
+             outlier_grouping_cols: list=None, # list of housing characteristics to use to group observations for outlier detection
+             outlier_geo_col: str=None, # level of geography (e.g. tract, block group) to use for outlier groups
+             drop_outliers: bool=False, # whether to drop outliers after they are detected
              log_label: bool=True, # toggle whether to apply log transformation to the label
              loss_func: str=None, # loss function we want to include in the config.
              base_config: str='../config/base_config.yaml' # base config for use as input to build_config()
@@ -132,7 +135,29 @@ class Setup:
                 self.label = self.feature_list['label']
             except:
                 raise ValueError("Error processing label from feature_list. ensure label is present in feature_list or specify label directly as string.")
-            
+                
+        if outlier_grouping_cols:
+            if isinstance(outlier_grouping_cols, list):
+                self.outlier_grouping_cols = outlier_grouping_cols
+            else:
+                raise ValueError('outlier_grouping_cols must be list.')
+
+        if outlier_geo_col:
+            if isinstance(outlier_geo_col, str):
+                self.outlier_geo_col = outlier_geo_col
+            else:
+                raise ValueError('outlier_geo_col must be str.')
+        else:
+            self.outlier_geo_col = None
+
+        if drop_outliers:
+            if isinstance(drop_outliers, bool):
+                self.drop_outliers = drop_outliers
+            else:
+                raise ValueError('drop_outliers must be bool')
+        else:
+            self.drop_outliers = False
+                
         if log_label:
             if isinstance(log_label, bool):
                 self.log_label = log_label
@@ -285,7 +310,8 @@ class Setup:
                   'share_non_null' : self.base_config['model_params']['share_non_null'], 
                   'min_samples_leaf' : self.base_config['model_params']['min_samples_leaf'], 
                   'smoothing' :  self.base_config['model_params']['smoothing'],
-                  'write_encoding_dict' : self.base_config['model_params']['write_encoding_dict'], 
+                  'write_encoding_dict' : self.base_config['model_params']['write_encoding_dict'],
+                  'drop_outliers': self.drop_outliers,
 
                   'log_label' : self.log_label, 
 
@@ -311,10 +337,11 @@ class Setup:
                   'label': self.label,
                   'binary': self.base_config['features']['binary'],
                   'continuous': continuous,
-                  'categorical': categorical}
+                  'categorical': categorical,
+                  'outlier_grouping_cols': self.outlier_grouping_cols,
+                  'outlier_geo_col': self.outlier_geo_col}
 
         config_path = dir_list[7]
 
         with open(f"{config_path}/{model_id}.yaml", 'w') as stream:
             yaml.dump(config, stream)
-
