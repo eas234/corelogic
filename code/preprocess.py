@@ -283,7 +283,7 @@ class Preprocess:
         copy['drop'] = [1 if x < 1 else 0 for x in copy.ratio_bins]
 
         # drop da bin
-        copy = copy[copy.drop != 1]
+        copy = copy[copy['drop'] != 1]
 
         # remove the cols we generated for this function
         copy = copy.drop(['ratio', 'ratio_bins', 'drop'], axis=1, inplace=True)
