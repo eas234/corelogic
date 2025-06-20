@@ -286,7 +286,7 @@ class Preprocess:
         copy = copy[copy['drop'] != 1]
 
         # remove the cols we generated for this function
-        copy = copy.drop(['ratio', 'ratio_bins', 'drop'], axis=1, inplace=True)
+        copy.drop(['ratio', 'ratio_bins', 'drop'], axis=1, inplace=True)
 
         if inplace==True:
             self._data = copy
