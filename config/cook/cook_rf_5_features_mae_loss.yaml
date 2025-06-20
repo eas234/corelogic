@@ -86,9 +86,4 @@ continuous: ['char_yrblt',
 
 categorical: []
 loss_func: mae_loss
-# Added block
-outlier_grouping_cols: ['char_yrblt', 'char_bldg_sf', 'char_land_sf']
-
-outlier_geo_col: 'tract'
-
-drop_outliers: True
+drop_lowest_ratios: True

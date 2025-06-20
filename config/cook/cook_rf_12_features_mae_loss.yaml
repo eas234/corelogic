@@ -92,9 +92,4 @@ categorical: ['char_air_cat',
  'char_roof_material_cat',
  'char_style_cat']
 loss_func: mae_loss
-# Added block
-outlier_grouping_cols: ['char_yrblt', 'char_bldg_sf', 'char_land_sf']
-
-outlier_geo_col: 'tract'
-
-drop_outliers: True
+drop_lowest_ratios: True
