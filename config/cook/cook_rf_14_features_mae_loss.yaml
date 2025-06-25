@@ -92,4 +92,4 @@ categorical: ['char_air_cat',
  'char_roof_material_cat',
  'char_style_cat']
 loss_func: mae_loss
-drop_lowest_ratios: True
+drop_lowest_ratios: False
