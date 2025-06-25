@@ -58,13 +58,11 @@ model_id: 'cook_rf_14_features_log_label_mae_loss_drop_outliers_cook_data'
 
 model_type: 'rf'
 
-meta: ['meta_sfh', 'ASSESSED_YEAR', 'SALE_YEAR', 'CLIP', 'fips', 'tract', 'block_group', 'MARKET_TOTAL_VALUE']
+meta: ['meta_sfh', 'ASSESSED_YEAR', 'SALE_YEAR', 'CLIP', 'fips', 'MARKET_TOTAL_VALUE']
 
 id: ['CLIP']
 
-geo: ['tract',
-    'fips',
-    'block_group']
+geo: ['fips']
  
 time: ['ASSESSED_YEAR',
        'SALE_YEAR']
