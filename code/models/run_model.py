@@ -31,7 +31,7 @@ from modeling_utils import *
 from preprocess import *
 
 # load config -- change config file to run desired model
-for i in range(3,15):
+for i in range(14,15):
     with open('../../config/cook/cook_rf_' + str(i) + '_features_mae_loss.yaml', 'r') as stream:
         out = yaml.safe_load(stream)
 
