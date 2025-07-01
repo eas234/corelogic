@@ -49,7 +49,7 @@ for i in range(3,15):
              drop_lowest_ratios=True,
              log_label=True, # toggle whether to apply log transformation to the label
              loss_func='mae_loss', # loss function we want to include in the config.
-             base_config='../config/base_config.yaml' # base config for use as input to build_config())
+             base_config='../../config/base_config.yaml' # base config for use as input to build_config())
 			    )
 
     gen_config.build_config(feature_order_path='../../config/feature_order_2023.csv', 
