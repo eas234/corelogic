@@ -298,6 +298,7 @@ class Setup:
                   'drop_lowest_ratios': self.drop_lowest_ratios,
 
                   'log_label' : self.log_label, 
+                  'loss_func': self.loss_func,
 
                   'dir_list' : dir_list, 
                   'raw_path': self.base_config['paths']['raw_path'],
