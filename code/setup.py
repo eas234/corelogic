@@ -328,3 +328,5 @@ class Setup:
 
         with open(f"{config_path}/{model_id}.yaml", 'w') as stream:
             yaml.dump(config, stream)
+
+        self.config_location = f"{config_path}/{model_id}.yaml"
