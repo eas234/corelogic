@@ -37,11 +37,11 @@ fips = '04013'
 for i in range(3,15):
 
     gen_config = setup.Setup(fips=fips, 
-             fips_county_crosswalk='../config/county_dict.yaml', # location of crosswalk between fips code and county name
+             fips_county_crosswalk='../../config/county_dict.yaml', # location of crosswalk between fips code and county name
              model_type='rf', # specifies type of model. examples: 'rf', 'lasso', 'lightGBM'
              study_label=f'ablation_study_{i}_features', # label for the type of study being run
              n_features=i, # specify number of model features (for ablation study). if -1 or None, include all specified.
-             feature_list='../config/full_feature_list.yaml', # config with full list of features of each type
+             feature_list='../../config/full_feature_list.yaml', # config with full list of features of each type
              continuous=None, # list of continuous features to include. if None, defaults to list in feature_list
              categorical=None, # list of categorical features to include. if None, defaults to list in feature_list
              census=None,  # valid options are 'bg', 'tract' or list. if None, no census features included.
@@ -52,7 +52,7 @@ for i in range(3,15):
              base_config='../config/base_config.yaml' # base config for use as input to build_config())
 			    )
 
-    gen_config.build_config(feature_order_path='../config/feature_order_2023.csv', 
+    gen_config.build_config(feature_order_path='../../config/feature_order_2023.csv', 
 			    base_dir='/oak/stanford/groups/deho/proptax/models/')
 
 			     
