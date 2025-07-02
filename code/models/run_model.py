@@ -31,7 +31,7 @@ from census import clean_val
 from modeling_utils import *
 from preprocess import *
 
-fips = '48201'
+fips = '12057'
 
 # load config -- change config file to run desired model
 for i in range(3,15):
