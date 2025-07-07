@@ -652,3 +652,56 @@ def r_squared_coef_dot_plot(dfs: list=None,
     plt.close()
     
     return r_squareds, coefs
+
+def mae_coef_dot_plot(dfs: Optional[List[pd.DataFrame]] = None,
+                           figsize: tuple = (5,4),
+                           labels: Optional[List[str]] = None,
+                           x_label: str = 'MAE ($)',
+                           y_label: str = 'Log coefficient (lower is more regressive)',
+                           axis_label_fontsize: int = 20,
+                           tick_fontsize: int = 16):
+    
+    if dfs is None:
+        raise ValueError("List of DataFrames cannot be None")
+        
+    set_serif_font()  # Set serif font before creating plot
+    maes = []
+    coefs = []
+    
+    for df in dfs:
+        idx = [i for i in range(len(df.columns)) if 'y_pred' in df.columns[i]]
+        assessed = df[df.columns[idx[0]]]
+        
+        idx = [i for i in range(len(df.columns)) if 'y_true' in df.columns[i]]
+        sale = df[df.columns[idx[0]]]
+        
+        maes.append(mae(assessed,sale,format_output=False))
+        coefs.append(log_coef(assessed, sale, format_output=False))
+        
+    # correct types
+    maes = [float(x) for x in maes]
+    coefs = [float(x) for x in coefs]
+    
+    # create figure
+    fig,ax = plt.subplots(figsize=figsize)
+    
+    # set font
+    plt.rcParams['font.family'] = 'DejaVu Serif'
+    
+    # gen array of alphas
+    
+    alphas = np.linspace(0.1,1,len(dfs))
+    ax.scatter(maes, coefs, alpha=alphas, edgecolors='k', s=100)
+    
+    if labels:
+        for i, txt in enumerate(labels):
+            ax.annotate(txt, (maes[i]+100, coefs[i]+0.0005), fontsize=tick_fontsize-2)
+            
+    ax.set_xlabel(x_label, fontsize=axis_label_fontsize)
+    ax.set_ylabel(y_label, fontsize=axis_label_fontsize)
+    
+    ax.tick_params(axis='both', labelsize=tick_fontsize) 
+    plt.show()
+    plt.close()
+    
+    return maes, coefs
