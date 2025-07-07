@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import redivis
 import sys
 import yaml
 
@@ -63,7 +64,11 @@ else:
         block_group.to_csv(os.path.join(out['outdir'], 'census_bg_level.csv'), index=False)
 
 # merge to corelogic
-corelogic = pd.read_csv(out['corelogic']['filename'])
+#corelogic = pd.read_csv(out['corelogic']['filename'])
+user = redivis.user(out['corelogic']['redivis_user'])
+workflow = user.workflow(out['corelogic']['workflow'])
+table = workflow.table(out['corelogic']['workflow_table'])
+corelogic = table.to_pandas_dataframe()
 merged = merge_corelogic_census(corelogic, tract, block_group)
 
 # query census to reverse geocode observations where census merge failed
