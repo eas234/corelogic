@@ -7,6 +7,11 @@ import pandas as pd
 import statistics as stats
 import statsmodels.api as sm
 
+import yaml
+import seaborn as sns
+from matplotlib.lines import Line2D
+
+
 from typing import Union
 
 
@@ -705,3 +710,121 @@ def mae_coef_dot_plot(dfs: Optional[List[pd.DataFrame]] = None,
     plt.close()
     
     return maes, coefs
+
+def error_coef_relative_dot_plot(dfs: list = None,
+                                 error = mae,
+                                 best_fit_line = False,
+                                 set_alphas = False,
+                                 baseline_type = 'max error',
+                                 figsize: tuple = (5,4),
+                                 x_label: str = u'Δ MAE \n(lower is more accurate)',
+                                 y_label: str = u'Δ log coefficient \n(higher is less regressive)',
+                                 title: str = '',
+                                 axis_label_fontsize: int = 10,
+                                 tick_fontsize: int = 8):
+    
+    with open('../config/county_dict.yaml', 'r') as stream:
+        county_dict_yaml = yaml.safe_load(stream)
+
+    county_dict = pd.DataFrame({'fips' : list(county_dict_yaml.keys()), 'county' : list(county_dict_yaml.values())})
+
+    if dfs is None:
+        raise ValueError("List of DataFrames cannot be None")
+        
+    errs = []
+    coefs = []
+    ids = []
+    n_features = []
+
+    for df in dfs:
+        idx = [i for i in range(len(df.columns)) if 'y_pred' in df.columns[i]]
+        assessed = df[df.columns[idx[0]]]
+        
+        idx = [i for i in range(len(df.columns)) if 'y_true' in df.columns[i]]
+        sale = df[df.columns[idx[0]]]
+
+        idx = [i for i in range(len(df.columns)) if 'fips' in df.columns[i]]
+        fips = df[df.columns[idx[0]]][0]
+
+        idx = [i for i in range(len(df.columns)) if 'model_id' in df.columns[i]]
+        nf = df[df.columns[idx[0]]]
+
+        n = nf.str.extract(r'_(\d+)_features').astype(int)[0][0]
+        
+        errs.append(error(assessed, sale))
+        coefs.append(log_coef(assessed, sale))
+        ids.append(fips)
+        n_features.append(n)
+
+    errs = [float(x) for x in errs]
+    coefs = [float(x) for x in coefs]
+
+    out = pd.DataFrame({'fips' : ids, 'n_features' : n_features, 'errs' : errs, 'coefs' : coefs})
+
+    if baseline_type == 'max error':
+        baseline = out[out.groupby(['fips'])['errs'].transform('max') == out['errs']]
+
+    elif baseline_type == 'fewest features':
+        baseline = out[out.groupby(['fips'])['n_features'].transform('min') == out['n_features']]
+
+    else:
+        raise Exception('unrecognized baseline type')
+
+    ## Either way, results are then compared to the baseline
+    baseline.columns = ['fips', 'n_features', 'baseline_err', 'baseline_coef']
+    baseline = baseline.drop(columns=['n_features'])
+    baseline = baseline.drop_duplicates(subset=['fips'])
+
+    out = out.merge(baseline, on='fips')
+    out['error_delta'] =  out['errs'] - out['baseline_err']
+    out['coef_delta'] = out['coefs'] - out['baseline_coef']
+    out['fips'] = out['fips'].astype(str).str.pad(width=5, side='left', fillchar='0')
+
+    out = out.merge(county_dict, on='fips')
+
+    sns.set_style('white')
+
+    fig, ax = plt.subplots(figsize=figsize)
+    plt.rcParams['font.family'] = 'DejaVu Serif'
+    ax.axvline(x=0, color='lightgray', linestyle='--', linewidth=0.8) 
+    ax.axhline(y=0, color='lightgray', linestyle='--', linewidth=0.8)
+
+    colors = sns.color_palette(n_colors=out['fips'].nunique())
+
+    i = 0
+    legend = []
+    for fips in out['fips'].unique():
+        tmp = out[out['fips'] == fips].reset_index(drop=True)
+
+        if set_alphas:
+            alpha = tmp['n_features'] / max(tmp['n_features'])
+        else: 
+            alpha = np.repeat(1, tmp.shape[0])
+
+        label = tmp['county'][0]
+
+        ax.scatter(tmp['error_delta'], tmp['coef_delta'], alpha=alpha, edgecolors='k', s=50, color=colors[i])
+        legend.append(Line2D([0], [0], marker='o', color='k', label=label,
+                            markerfacecolor=colors[i], markersize=8, ls = ''))
+
+        if best_fit_line: 
+            m, b = np.polyfit(tmp['error_delta'], tmp['coef_delta'], deg=1)
+            x = np.array([min(tmp['error_delta']), max(tmp['error_delta'])])
+            ax.plot(x, b + m * x, color=colors[i], lw=1)
+
+        i += 1
+            
+    ax.set_xlabel(x_label, fontsize=axis_label_fontsize)
+    ax.set_ylabel(y_label, fontsize=axis_label_fontsize)
+    ax.set_title(title)
+
+    ax.tick_params(axis='both', labelsize=tick_fontsize) 
+    ax.tick_params(axis='x', rotation=30)
+
+    ax.legend(handles=legend, bbox_to_anchor=(1.1, 1.05))
+
+    plt.show()
+    plt.close()
+
+    return out[['fips', 'n_features', 'errs', 'coefs']]
+
