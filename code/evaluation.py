@@ -10,6 +10,7 @@ import statsmodels.api as sm
 import yaml
 import seaborn as sns
 from matplotlib.lines import Line2D
+from sklearn.preprocessing import MinMaxScaler
 
 
 from typing import Union
@@ -289,6 +290,88 @@ def r_squared(assessed, sale):
     r_squared = 1 - sum_squared_resids/total_sum_squares
     
     return f"{r_squared:,.4f}"
+
+def gini_ratio(assessed, sale):
+    """
+    Gini_sale > Gini_assessed means assessment ratios are higher for low-priced than high-priced properties, i.e., regressive
+    """
+    return gini(sale) / gini(assessed)
+
+def gini(vector):
+    """
+    1. Order data from smallest to largest
+    2. G = 2(Sum_i=1^n i*x_i) / (n * Sum_i=1^n x_i) - (n + 1) / n 
+    """
+
+    vector = vector.sort_values(ascending=True).reset_index(drop=True)
+    n = len(vector)
+    gini = 2 *  np.sum(vector.index * vector) / (n * np.sum(vector)) - (n + 1) / n
+
+    return gini
+
+def suits_index(assessed, sale):
+    
+    """
+    1 - (L/K) where:
+    K = 5000
+    L approx. Sum_i=1^n (1/2) * [a(p_i) + a(p_{i - 1})] * (p_i - p_{i - 1})
+    """
+
+    ## Create DF and sort on sale price from lowest to highest
+    suits_df = pd.DataFrame({'assessed' : assessed, 'sale' : sale})
+    suits_df = suits_df.sort_values('sale', ascending=True).reset_index(drop=True)
+
+    ## Calculate cumulative amount of sale and tax
+    suits_df_cum = np.cumsum(suits_df)
+
+    ## Rescale to be in 0-100 range
+    scaler = MinMaxScaler(feature_range=(0, 100))
+    scaler.fit(suits_df_cum)
+    suits_df_cum = scaler.transform(suits_df_cum)
+    suits_df_cum = pd.DataFrame(suits_df_cum)
+    suits_df_cum.columns = ['assessed', 'sale']
+
+    ## Lag each column
+    suits_df_cum['assessed_lag'] = suits_df_cum['assessed'].shift(1)
+    suits_df_cum['sale_lag'] = suits_df_cum['sale'].shift(1)
+    suits_df_cum = suits_df_cum.dropna()
+
+    ## Approximate integral
+    L = np.sum(0.5 * (suits_df_cum['assessed'] + suits_df_cum['assessed_lag']) * (suits_df_cum['sale'] - suits_df_cum['sale_lag']))
+
+    ## K is the area under the 45-degree line - since data is scaled 0-100 that is:
+    ## (1/2) * 100 * 100 = 5000
+    K = 5000
+
+    return 1 - (L/K)
+
+def prb(assessed, sale):
+    """
+    Calculate coefficient of price-related bias
+    Formula from: https://gitlab.com/ccao-data-science---modeling/packages/assessr/-/blob/master/R/formulas.R?ref_type=heads
+
+    Indicates the percentage by which assessment ratios change whenever values are doubled or halved. 
+    e.g. a PRB of −0.03 means assessment levels decrease by 3 percent when value doubles. 
+
+    Per CCAO: 
+    - The PRB should range between −0.05 and +0.05.
+    - PRBs outside the range of −0.10 to +0.10 are considered unacceptable. 
+    """
+
+    ratio = assessed / sale
+    median_ratio = np.median(ratio)
+
+    y = (ratio - median_ratio) / median_ratio
+    X = np.log(((assessed / median_ratio) + sale) * 0.5) / np.log(2)
+
+    X = sm.add_constant(X)
+    
+    ols_model = sm.OLS(y, X)
+    results = ols_model.fit(cov_type='HC0')
+
+    beta = results.params.iloc[1]
+
+    return beta
 
 def add_labels(x_positions, heights, offset=0.01, fontsize=10):
 
