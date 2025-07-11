@@ -11,6 +11,8 @@ import yaml
 import seaborn as sns
 from matplotlib.lines import Line2D
 from sklearn.preprocessing import MinMaxScaler
+from scipy.stats import gaussian_kde
+from scipy.stats import kstest
 
 
 from typing import Union
@@ -372,6 +374,33 @@ def prb(assessed, sale):
     beta = results.params.iloc[1]
 
     return beta
+
+def kde_metric(assessed, sale):
+    """
+    This is not exactly the same as the kde_test implementation in the R ks package, 
+    but it does test of whether the assessed and sale values of homes 
+    are drawn from statistically significantly different distributions
+    """
+
+    assessed = np.asarray(assessed)
+    sale = np.asarray(sale)
+
+    kde_assessed = gaussian_kde(assessed)
+    kde_sale = gaussian_kde(sale)
+
+    min_val = min(assessed.min(), sale.min())
+    max_val = max(assessed.max(), sale.max())
+
+    curve_assessed =  kde_assessed.evaluate(np.linspace(min_val, max_val, 1000))
+    curve_sale =  kde_sale.evaluate(np.linspace(min_val, max_val, 1000))
+
+    plt.plot(np.linspace(min_val, max_val, 1000), curve_assessed, label='assessed')
+    plt.plot(np.linspace(min_val, max_val, 1000), curve_sale, label='sale')
+    plt.xlabel("value")
+    plt.legend()
+    plt.show()
+
+    return kstest(curve_assessed, curve_sale)
 
 def add_labels(x_positions, heights, offset=0.01, fontsize=10):
 
