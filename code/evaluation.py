@@ -375,11 +375,10 @@ def prb(assessed, sale):
 
     return beta
 
-def kde_metric(assessed, sale):
+def kstest(assessed, sale):
     """
-    This is not exactly the same as the kde_test implementation in the R ks package, 
-    but it does test of whether the assessed and sale values of homes 
-    are drawn from statistically significantly different distributions
+    KS test: max distance between distributions
+    standard (fast) test for whether data was drawn from different distributions
     """
 
     assessed = np.asarray(assessed)
@@ -401,6 +400,55 @@ def kde_metric(assessed, sale):
     plt.show()
 
     return kstest(curve_assessed, curve_sale)
+
+def kde_test(assessed, sale, n_bootstrap=1000):
+
+    """
+    Tests whether the distance of two density functions f(x) and g(x) as given by: 
+    S_v [f(v) - g(v)]^2 
+    is statistically significant. v represents "the x-axis, i.e., sale price or assessed value" (per McMillen & Singh)
+    """
+
+    assessed = np.asarray(assessed)
+    sale = np.asarray(sale)
+    
+    kde_assessed = gaussian_kde(assessed)
+    kde_sale = gaussian_kde(sale)
+    
+    min_val = min(assessed.min(), sale.min()) ## TODO: not sure if these should be across both sets of data or pick one
+    max_val = max(assessed.max(), sale.max())
+    grid = np.linspace(min_val, max_val, 1000) ## TODO: 1000 may be too large of a step size
+
+    statistic = np.trapezoid((kde_assessed(grid) - kde_sale(grid)) ** 2, grid)
+    
+    p_value = kde_test_pvalue(assessed, sale, n_bootstrap, statistic)
+    
+    return statistic, p_value
+
+def kde_test_pvalue(x, y, n_bootstrap, observed_stat):
+
+    n = len(x)
+    combined = np.concatenate([x, y])
+    bootstrap_stats = []
+    
+    for _ in range(n_bootstrap):
+        perm = np.random.permutation(combined)
+        x_boot = perm[:n]
+        y_boot = perm[n:]
+        
+        kde_xboot = gaussian_kde(x_boot)
+        kde_yboot = gaussian_kde(y_boot)
+        
+        min_val = min(x_boot.min(), y_boot.min())
+        max_val = max(x_boot.max(), y_boot.max())
+        grid = np.linspace(min_val, max_val, 1000)
+
+        stat_boot = np.trapezoid((kde_xboot(grid) - kde_yboot(grid)) ** 2, grid)
+
+        bootstrap_stats.append(stat_boot)
+    
+    p_value = np.mean(np.array(bootstrap_stats) >= observed_stat)
+    return p_value
 
 def add_labels(x_positions, heights, offset=0.01, fontsize=10):
 
