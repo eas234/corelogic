@@ -19,11 +19,15 @@ ccao = pd.read_parquet('../data/cook_county/training_data.parquet')
 # clean corelogic
 corelogic.dropna(subset=['latitude', 'longitude', 'address', 'SALE_AMOUNT', 'sale_date'], inplace=True)
 corelogic['sale_yr_month'] = [math.floor(x/100) for x in corelogic['sale_date']]
+corelogic['sale_day'] = [x%100 for x in corelogic.sale_date]
 corelogic=corelogic[corelogic['MULTI_OR_SPLIT_PARCEL_CODE'].isnull()]
 corelogic['latitude_trunc'] = corelogic['latitude'].round(4)
 corelogic['longitude_trunc'] = corelogic['longitude'].round(4)
 corelogic['street_num'] = corelogic['address'].str.extract(r'^(\d+)').astype(int)
 corelogic.drop_duplicates(subset=['CLIP', 'sale_yr_month'],inplace=True)
+
+grouped = corelogic.groupby(['address', 'sale_yr_month'])['sale_date'].min().reset_index()
+corelogic = grouped.merge(corelogic, how='left', on=['address', 'sale_yr_month', 'sale_date'])
 
 # clean CCAO
 ccao.dropna(subset=['loc_latitude', 'loc_longitude', 'loc_property_address', 'meta_sale_date'], how='any', inplace=True)
@@ -33,6 +37,10 @@ ccao[['loc_latitude_trunc', 'loc_longitude_trunc']] = ccao[['loc_latitude', 'loc
 ccao['date_stripped'] = ccao.meta_sale_date.astype(str).str.replace('-', '', regex=False)
 ccao['date_stripped'] = ccao.date_stripped.astype(int)
 ccao['date_yr_month'] = [math.floor(x/100) for x in ccao.date_stripped]
+ccao['date_day'] = [x%100 for x in ccao.date_stripped]
+
+grouped = ccao.groupby(['loc_property_address', 'date_yr_month'])['date_stripped'].min().reset_index()
+ccao = grouped.merge(ccao, how='left', on=['loc_property_address', 'date_yr_month', 'date_stripped'])
 
 # merge corelogic and ccao
 merged = corelogic.merge(ccao[['street_num', 
@@ -44,7 +52,8 @@ merged = corelogic.merge(ccao[['street_num',
                                'meta_sale_price', 
                                'loc_property_address', 
                                'date_stripped', 
-                               'date_yr_month']], 
+                               'date_yr_month',
+                               'date_day']], 
                          left_on=['street_num', 'latitude_trunc', 'longitude_trunc', 'sale_yr_month'], 
                          right_on=['street_num', 'loc_latitude_trunc', 'loc_longitude_trunc', 'date_yr_month'], 
                          how='inner')
@@ -53,13 +62,13 @@ merged = corelogic.merge(ccao[['street_num',
 merged['address_similarity'] = [similar(str(x),str(y)) for x, y in zip(merged.address, merged.loc_property_address)]
 merged = merged.loc[merged.address_similarity >= 0.6]
 
-merged.sort_values("address_similarity", ascending = False).drop_duplicates(subset=['CLIP', 'meta_sale_document_num', 'meta_sale_price', 'date_stripped'], 
-                                                                            keep="first", 
-                                                                            inplace=True)
+merged['day_match'] = [1 if x == y else 0 for x, y in zip(merged.date_day, merged.sale_day)]
 
-merged.sort_values('address_similarity', ascending = False).drop_duplicates(subset=['CLIP', 'sale_date', 'SALE_AMOUNT'], 
-                                                                            keep='first', 
-                                                                            inplace=True)
+merged = merged.sort_values(['address_similarity', 'day_match'], ascending = False).drop_duplicates(subset=['CLIP', 'meta_sale_document_num', 'meta_sale_price', 'date_stripped'], 
+                                                                            keep="first")
+
+merged = merged.sort_values(['address_similarity', 'day_match'], ascending = False).drop_duplicates(subset=['CLIP', 'sale_date', 'SALE_AMOUNT'], 
+                                                                            keep='first')
 
 # ensure no multi-parcel sales remain in data
 merged = merged[merged.MULTI_OR_SPLIT_PARCEL_CODE.isnull()]
