@@ -188,7 +188,7 @@ def binned_dot_plot_multi_y(df,
 
     return None
 
-def cod(assessed, sale):
+def cod(assessed, sale, format=False):
     
     """
     Calculate coefficient of dispersion for a given array or dataframe column of
@@ -206,23 +206,29 @@ def cod(assessed, sale):
 
     cod = (100/(len(diff)*median))*(sum(diff))
 
-    return f"{cod:,.2f}%"
+    if format:
+        return f"{cod:,.2f}%"
+    else: 
+        return cod
 
-def prd(assessed, sale):
+def prd(assessed, sale, format=False):
     """
 
     """
 
     ratios = [a/s for a, s in zip(assessed, sale)]
-    median_ratio = stats.median(ratios)
-    median_assessed = stats.median(assessed)
-    median_sale = stats.median(sale)
+    mean_ratio = np.mean(ratios)
+    mean_assessed = np.mean(assessed)
+    mean_sale = np.mean(sale)
 
-    prd = median_ratio/(median_assessed/median_sale)
+    prd = mean_ratio/(mean_assessed/mean_sale)
 
-    return f"{prd:,.4f}"
+    if format:
+        return f"{prd:,.4f}"
+    else:
+        return prd
 
-def log_coef(assessed, sale):
+def log_coef(assessed, sale, format=False):
     
     """
 
@@ -236,18 +242,24 @@ def log_coef(assessed, sale):
 
     beta = results.params[1]
 
-    return f"{beta:,.4f}"
+    if format:
+        return f"{beta:,.4f}"
+    else:
+        return beta
 
-def mse(assessed, sale):
+def mse(assessed, sale, format=False):
     """
     """
 
     se = [(a-s)**2 for a, s in zip(assessed, sale)]
     mse = np.mean(se)
 
-    return f"{mse:,.4f}"
+    if format:
+        return f"{mse:,.4f}"
+    else:
+        return mse
 
-def rmse(assessed, sale):
+def rmse(assessed, sale, format=False):
     """
     """
 
@@ -255,30 +267,42 @@ def rmse(assessed, sale):
     mse = np.mean(se)
     rmse = np.sqrt(mse)
 
-    return f"${rmse:,.0f}"
+    if format:
+        return f"${rmse:,.0f}"
+    else:
+        return rmse
 
-def mae(assessed, sale):
+def mae(assessed, sale, format=False):
     
     ae = [abs(a-s) for a, s, in zip(assessed, sale)]
     mae = np.mean(ae)
     
-    return f"${mae:,.0f}"
+    if format:
+        return f"${mae:,.0f}"
+    else:
+        return mae
 
-def mpe(assessed, sale):
+def mpe(assessed, sale, format=False):
 
     pe = [(s-a)/s for a,s in zip(assessed, sale)]
     mpe = 100*np.mean(pe)
 
-    return f"{mpe:,.2f}"
+    if format:
+        return f"{mpe:,.2f}"
+    else:
+        return mpe
 
-def mape(assessed, sale):
+def mape(assessed, sale, format=False):
     
     ape = [abs((s-a)/s) for a, s in zip(assessed, sale)]
     mape = 100*np.mean(ape)
     
-    return f"{mape:,.2f}%"
+    if format:
+        return f"{mape:,.2f}%"
+    else:
+        return mape
 
-def r_squared(assessed, sale):
+def r_squared(assessed, sale, format=False):
     
     resids = assessed - sale
     resids_squared = resids**2
@@ -291,7 +315,10 @@ def r_squared(assessed, sale):
     
     r_squared = 1 - sum_squared_resids/total_sum_squares
     
-    return f"{r_squared:,.4f}"
+    if format:
+        return f"{r_squared:,.4f}"
+    else:
+        return r_squared
 
 def gini_ratio(assessed, sale):
     """
@@ -375,7 +402,7 @@ def prb(assessed, sale):
 
     return beta
 
-def kstest(assessed, sale):
+def ks_test(assessed, sale):
     """
     KS test: max distance between distributions
     standard (fast) test for whether data was drawn from different distributions
@@ -398,8 +425,9 @@ def kstest(assessed, sale):
     plt.xlabel("value")
     plt.legend()
     plt.show()
+    plt.close()
 
-    return kstest(curve_assessed, curve_sale)
+    return kstest(curve_assessed, curve_sale).pvalue
 
 def kde_test(assessed, sale, n_bootstrap=1000):
 
@@ -423,7 +451,7 @@ def kde_test(assessed, sale, n_bootstrap=1000):
     
     p_value = kde_test_pvalue(assessed, sale, n_bootstrap, statistic)
     
-    return statistic, p_value
+    return p_value
 
 def kde_test_pvalue(x, y, n_bootstrap, observed_stat):
 
@@ -818,9 +846,9 @@ def r_squared_coef_dot_plot(dfs: list=None,
     
     return r_squareds, coefs
 
-def mae_coef_dot_plot(dfs: Optional[List[pd.DataFrame]] = None,
+def mae_coef_dot_plot(dfs=None, #: Optional[List[pd.DataFrame]] = None,
                            figsize: tuple = (5,4),
-                           labels: Optional[List[str]] = None,
+                           labels=None, #: Optional[List[str]] = None,
                            x_label: str = 'MAE ($)',
                            y_label: str = 'Log coefficient (lower is more regressive)',
                            axis_label_fontsize: int = 20,
@@ -829,7 +857,7 @@ def mae_coef_dot_plot(dfs: Optional[List[pd.DataFrame]] = None,
     if dfs is None:
         raise ValueError("List of DataFrames cannot be None")
         
-    set_serif_font()  # Set serif font before creating plot
+    #set_serif_font()  # Set serif font before creating plot
     maes = []
     coefs = []
     
