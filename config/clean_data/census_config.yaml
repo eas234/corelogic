@@ -8,7 +8,7 @@ corelogic:
 
   workflow: "corelogic:xwnd"
 
-  workflow_table: "sales_assessments_2023:97ps"
+  workflow_table: "sales_assessments_2018_2023:phce"
 
 tract:
 

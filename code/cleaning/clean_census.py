@@ -76,4 +76,4 @@ output = wrapper(merged, tract, block_group, mapping_path=out['mapping_path'], c
 
 print('writing fully geocoded data')
 # write
-output.to_csv(os.path.join(out['outdir'], 'corelogic_census_2023.csv'), index=False)
+output.to_csv(os.path.join(out['outdir'], 'corelogic_census_2018_2023.csv'), index=False)
