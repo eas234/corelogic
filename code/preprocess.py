@@ -21,6 +21,7 @@ class Preprocess:
     - drop_null_labels(): drops rows where label is null
     - drop_single_value_cols(): drops columns that have only one value
     - drop_mostly_null_cols(): drops columns that have fewer than share_non_null non-null values
+    - drop_repeat_sales(): drops all but the last instance of a property that has been sold multiple times
     - winsorize_continuous(): winsorizes continuous features at wins_pctile and 100-wins_pctile
     - winsorize_labels(): winsorizes labels at wins_pctile and 100-wins_pctile
     - one_hot(): one-hot encodes categorical variables
@@ -363,6 +364,30 @@ class Preprocess:
             processed_data = self._data.copy()
             processed_data = processed_data.drop(columns=drop_cols)
             processed_data = processed_data.reset_index(drop=True)
+            return processed_data
+        
+    def drop_repeat_sales(self, inplace: bool=True):
+
+        """
+        Drop repeat sales of the same property. Only the most recent sale is kept. 
+
+        If inplace==True, observations are dropped in place and self._data indices
+        are reset after drop.
+
+        Else, method returns copy of self._data called processed_data where 
+        observations with missing labels have been dropped, and indices are 
+        reset after drop.
+        """
+
+        before = len(self._data)
+        if inplace==True:
+            self._data.drop_duplicates(subset=['CLIP'], keep='last', inplace=True)
+            self._data = self._data.reset_index(drop=True)
+            self.logger.info(f"Dropped {before - len(self._data)} rows with duplicate sales out of {before} total rows.")
+        else:
+            processed_data = self._data.drop_duplicates(subset=['CLIP'], keep='last', inplace=False)
+            processed_data = processed_data.reset_index(drop=True)
+            self.logger.info(f"Dropped {before - len(processed_data)} rows with duplicate sales out of {before} total rows.")
             return processed_data
 
     def one_hot(self, inplace: bool=True):
@@ -834,6 +859,7 @@ class Preprocess:
             inplace: bool=True,
             one_hot: bool=False,
             drop_lowest_ratios: bool=True,
+            drop_repeat_sales: bool=False,
             target_encode: bool=False,
             normalize_binary: bool=False):
 
@@ -864,6 +890,9 @@ class Preprocess:
 
         if drop_lowest_ratios:
             self.drop_lowest_ratios()
+        
+        if drop_repeat_sales:
+            self.drop_repeat_sales()
         
         self.drop_single_value_cols()
         
