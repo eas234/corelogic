@@ -403,7 +403,7 @@ class Preprocess:
             processed_data[dummies.columns] = dummies
             return processed_data
         
-    def train_test_split(self, return_items: bool=False):
+    def train_test_split(self, return_items: bool=False, by_year=True):
 
         """
         Generates train-test split attributes
@@ -419,13 +419,22 @@ class Preprocess:
             split using same indices as X and y but which are not used in 
             model development
         - return_items: if true, returns test-train split 
+        - by_year: if True, train-test split sets test set as most-recent year of sales, and train set as previous years of sales.
 
         Returns:
         self.X_train, self.X_test, self.y_train, self.y_test, self.meta_train, self.meta_test
         as attributes of Encode() object.
         """
-
-        self.X_train, self.X_test, self.y_train, self.y_test, self.meta_train, self.meta_test = train_test_split(self._data[self._binary_cols + self._categorical_cols + self._continuous_cols], 
+        if by_year:
+            """
+            sketch - add gen time varbs util first. then use sale_year from that. 
+            not all jurisdictions have the same range of data. some jurisdictions have a limited number of sales in the last year. 
+            want to include a check of count of sales in last year as fraction of total sales, controlling for number of years of data.
+            if last year is too limited, use last 2 years. everything else goes in train set. 
+            """
+            pass
+        else: 
+            self.X_train, self.X_test, self.y_train, self.y_test, self.meta_train, self.meta_test = train_test_split(self._data[self._binary_cols + self._categorical_cols + self._continuous_cols], 
                                                                                                 self._data[self._label], 
                                                                                                 self._data[self._meta_cols], 
                                                                                                 test_size=self.__test_size, 
