@@ -894,7 +894,7 @@ class Preprocess:
         If inplace==False, method is applied to a copy of self._data.
         Method returns normalized copy of continuous features in self._data.
         """
-        if include_time_cols == true: 
+        if include_time_cols == True: 
             features_to_process = [x for x in self.X_train.columns if x in self._continuous_cols + self._time_cols]
 
         else: 
