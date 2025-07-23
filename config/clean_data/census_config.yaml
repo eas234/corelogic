@@ -2,7 +2,7 @@ datapath: '/oak/stanford/groups/deho/proptax/raw'
 
 corelogic:
 
-  filename: "/oak/stanford/groups/deho/proptax/raw/sales_assessments_2023.csv"
+  filename: "/oak/stanford/groups/deho/proptax/raw/sales_assessments_2018_2023.csv"
 
   redivis_user: 'eannes'
 
