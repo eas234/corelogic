@@ -508,8 +508,7 @@ class Preprocess:
     def train_test_split(self, return_items: bool=False, by_year=True):
 
         """
-        Generates train-test split attributes
-        using sklearn's train_test_split.
+        Generates train-test split either by year or using sklearn.train_test_split().
 
         Inputs:
         - self.__random_state: for repoducibility
@@ -525,24 +524,44 @@ class Preprocess:
 
         Returns:
         self.X_train, self.X_test, self.y_train, self.y_test, self.meta_train, self.meta_test
-        as attributes of Encode() object.
+        as attributes of Preprocess() object.
         """
         if by_year:
-            """
-            sketch - add gen time varbs util first. then use sale_year from that. 
-            not all jurisdictions have the same range of data. some jurisdictions have a limited number of sales in the last year. 
-            want to include a check of count of sales in last year as fraction of total sales, controlling for number of years of data.
-            if last year is too limited, use last 2 years. everything else goes in train set. 
-            """
-            pass
+            
+            if 'sale_year' not in self._data.columns:
+                self.logger.warning("'sale_year' not in columns; cannot perform train-test split by year.")
+                raise ValueError("'sale_year' not in columns; cannot perform train-test split by year.")
+            
+            copy = self._data.copy()
+
+            # check whether there are sufficient observations in last year of sales to use as test set.
+            # if so, use last year of sales as test set.
+            if copy[copy.sale_year == copy.sale_year.max()].shape[0]/copy.shape[0] > 0.1:
+                self.X_train = copy[copy.sale_year < copy.sale_year.max()][self._binary_cols + self._categorical_cols + self._continuous_cols + self._time_cols]
+                self.X_test = copy[copy.sale_year == copy.sale_year.max()][self._binary_cols + self._categorical_cols + self._continuous_cols + self._time_cols]
+                self.y_train = copy[copy[copy.sale_year < copy.sale_year.max()][self._label]
+                self.y_test = copy[copy[copy.sale_year == copy.sale_year.max()][self._label]
+                self.meta_train = copy[copy[copy.sale_year < copy.sale_year.max()][self._meta_cols]
+                self.meta_test = copy[copy[copy.sale_year == copy.sale_year.max()][self._meta_cols]
+
+            # if there are not enough sales in the last year of data, use the last two years as the test set.
+            else:
+                self.X_train = copy[copy.sale_year < (copy.sale_year.max()-1)][self._binary_cols + self._categorical_cols + self._continuous_cols + self._time_cols]
+                self.X_test = copy[copy.sale_year >= (copy.sale_year.max()-1)][self._binary_cols + self._categorical_cols + self._continuous_cols + self._time_cols]
+                self.y_train = copy[copy[copy.sale_year < (copy.sale_year.max()-1)][self._label]
+                self.y_test = copy[copy[copy.sale_year >= (copy.sale_year.max()-1)][self._label]
+                self.meta_train = copy[copy[copy.sale_year < (copy.sale_year.max()-1)][self._meta_cols]
+                self.meta_test = copy[copy[copy.sale_year >= (copy.sale_year.max()-1)][self._meta_cols]
+
+                self.logger.info("X_train, X_test, y_train, y_test, meta_train, meta_test now stored as attributes of preprocess() object. Split performed by year of sale.")
         else: 
-            self.X_train, self.X_test, self.y_train, self.y_test, self.meta_train, self.meta_test = train_test_split(self._data[self._binary_cols + self._categorical_cols + self._continuous_cols], 
+            self.X_train, self.X_test, self.y_train, self.y_test, self.meta_train, self.meta_test = train_test_split(self._data[self._binary_cols + self._categorical_cols + self._continuous_cols + self._time_cols], 
                                                                                                 self._data[self._label], 
                                                                                                 self._data[self._meta_cols], 
                                                                                                 test_size=self.__test_size, 
                                                                                                 random_state=self.__random_state)
         
-        self.logger.info("X_train, X_test, y_train, y_test, meta_train, meta_test now stored as attributes of preprocess() object")
+        self.logger.info("X_train, X_test, y_train, y_test, meta_train, meta_test now stored as attributes of preprocess() object. split performed using train_test_split()")
 
     def _drop_problematic_cols_from_splits(self):
         """
@@ -857,7 +876,7 @@ class Preprocess:
             else:
                 return imputed_train, imputed_test
 
-    def normalize_continuous_cols(self, inplace: bool=True):
+    def normalize_continuous_cols(self, inplace: bool=True, include_time_cols=True):
 
         """
         Normalizes continuous features if present in data using sklearn's
@@ -866,6 +885,7 @@ class Preprocess:
         inputs:
             inplace: boolean specifying whether normalization happens in place or
             on a copy of self._data
+            include_time_cols: boolean specifying whether to include time columns
 
         If inplace==True, continuous columns of  self._data are modified in place. 
         Method does not return anything.
@@ -873,8 +893,12 @@ class Preprocess:
         If inplace==False, method is applied to a copy of self._data.
         Method returns normalized copy of continuous features in self._data.
         """
-        features_to_process = [x for x in self.X_train.columns if x in self._continuous_cols]
+        if include_time_cols == true: 
+            features_to_process = [x for x in self.X_train.columns if x in self._continuous_cols + self._time_cols]
 
+        else: 
+            features_to_process = [x for x in self.X_train.columns if x in self._continuous_cols]
+            
         if not features_to_process:
             self.logger.info('Data has no continuous columns; normalize_continuous_cols() not applied.')
             return
@@ -935,6 +959,7 @@ class Preprocess:
     def run(self, 
             inplace: bool=True,
             one_hot: bool=False,
+            gen_time_vars: bool=True,
             drop_lowest_ratios: bool=True,
             drop_repeat_sales: bool=False,
             target_encode: bool=False,
@@ -965,15 +990,18 @@ class Preprocess:
                 
         self.drop_null_labels()
 
+        if gen_time_vars:
+            self.gen_time_vars()
+        
+        self.drop_single_value_cols()
+        
+        self.drop_mostly_null_cols()
+
         if drop_lowest_ratios:
             self.drop_lowest_ratios()
         
         if drop_repeat_sales:
             self.drop_repeat_sales()
-        
-        self.drop_single_value_cols()
-        
-        self.drop_mostly_null_cols()
         
         self.train_test_split()
         
