@@ -98,6 +98,7 @@ for i in range(3,15):
         categorical = out['categorical']
         features = out['continuous'] + out['binary'] + out['categorical']
         meta = out['meta']
+        sale_date_col = out['sale_date_col']
 	
 	# create model dirs
         create_directories_if_missing(dir_list)
@@ -118,6 +119,7 @@ for i in range(3,15):
 			    binary,
 			    categorical,
 			    meta,
+                            sale_date_col,
 			    share_non_null=share_non_null,
 			    random_state=random_state,
 			    wins_pctile=1,

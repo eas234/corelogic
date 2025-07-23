@@ -317,6 +317,7 @@ class Setup:
                   'model_id': model_id,
                   'model_type': self.model_type,
                   'meta': self.base_config['features']['meta'],
+                  'sale_date_col': self.base_config['features']['sale_date_col'],
 
                   'time': self.base_config['features']['time'], 
                   'label': self.label,

@@ -345,7 +345,7 @@ class Preprocess:
                 return group.rank(pct=True) * 100  
 
             # apply percentile rank to data grouped by sale year
-            copy['ratio_percentile'] = df.groupby('sale_year')['ratio'].transform(percentile_rank).round(0)
+            copy['ratio_percentile'] = copy.groupby('sale_year')['ratio'].transform(percentile_rank).round(0)
 
             # drop observations in the lowest percentile of ratios by sale year
             copy = copy[copy.ratio_percentile >= 1]
@@ -540,19 +540,19 @@ class Preprocess:
             if copy[copy.sale_year == copy.sale_year.max()].shape[0]/copy.shape[0] > 0.1:
                 self.X_train = copy[copy.sale_year < copy.sale_year.max()][self._binary_cols + self._categorical_cols + self._continuous_cols + self._time_cols]
                 self.X_test = copy[copy.sale_year == copy.sale_year.max()][self._binary_cols + self._categorical_cols + self._continuous_cols + self._time_cols]
-                self.y_train = copy[copy[copy.sale_year < copy.sale_year.max()][self._label]
-                self.y_test = copy[copy[copy.sale_year == copy.sale_year.max()][self._label]
-                self.meta_train = copy[copy[copy.sale_year < copy.sale_year.max()][self._meta_cols]
-                self.meta_test = copy[copy[copy.sale_year == copy.sale_year.max()][self._meta_cols]
+                self.y_train = copy[copy.sale_year < copy.sale_year.max()][self._label]
+                self.y_test = copy[copy.sale_year == copy.sale_year.max()][self._label]
+                self.meta_train = copy[copy.sale_year < copy.sale_year.max()][self._meta_cols]
+                self.meta_test = copy[copy.sale_year == copy.sale_year.max()][self._meta_cols]
 
             # if there are not enough sales in the last year of data, use the last two years as the test set.
             else:
                 self.X_train = copy[copy.sale_year < (copy.sale_year.max()-1)][self._binary_cols + self._categorical_cols + self._continuous_cols + self._time_cols]
                 self.X_test = copy[copy.sale_year >= (copy.sale_year.max()-1)][self._binary_cols + self._categorical_cols + self._continuous_cols + self._time_cols]
-                self.y_train = copy[copy[copy.sale_year < (copy.sale_year.max()-1)][self._label]
-                self.y_test = copy[copy[copy.sale_year >= (copy.sale_year.max()-1)][self._label]
-                self.meta_train = copy[copy[copy.sale_year < (copy.sale_year.max()-1)][self._meta_cols]
-                self.meta_test = copy[copy[copy.sale_year >= (copy.sale_year.max()-1)][self._meta_cols]
+                self.y_train = copy[copy.sale_year < (copy.sale_year.max()-1)][self._label]
+                self.y_test = copy[copy.sale_year >= (copy.sale_year.max()-1)][self._label]
+                self.meta_train = copy[copy.sale_year < (copy.sale_year.max()-1)][self._meta_cols]
+                self.meta_test = copy[copy.sale_year >= (copy.sale_year.max()-1)][self._meta_cols]
 
                 self.logger.info("X_train, X_test, y_train, y_test, meta_train, meta_test now stored as attributes of preprocess() object. Split performed by year of sale.")
         else: 

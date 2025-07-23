@@ -48,6 +48,8 @@ features:
 
   time: ['ASSESSED_YEAR', 'SALE_YEAR']
 
+  sale_date_col : 'sale_date'
+
   binary : []
 
 paths:
