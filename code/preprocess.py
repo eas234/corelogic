@@ -82,6 +82,7 @@ class Preprocess:
         self._categorical_cols = categorical_cols or []
         self._meta_cols = meta_cols or []
         self._sale_date_col = sale_date_col
+        self._time_cols = []
         
         # protected attributes
         self.__share_non_null = share_non_null
