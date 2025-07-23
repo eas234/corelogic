@@ -138,6 +138,13 @@ for i in range(3,15):
 	# write pre-processed train and test sets
         for key, value in {'X_train': X_train, 'X_test': X_test, 'y_train': y_train, 'y_test': y_test, 'meta_train': meta_train, 'meta_test': meta_test}.items():
             value.to_csv(os.path.join(proc_data_dir, f'{key}.csv'))
+
+	# print data info before tuning
+        print('X_train, X_test, y_train, y_test info after preprocessing:')
+        print(X_train.info())
+        print(X_test.info())
+        print(y_train.info())
+        print(y_test.info())
 					  
 	# tune model hyperparams
         tune_model(X_train, 
