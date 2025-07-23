@@ -444,7 +444,7 @@ class Preprocess:
             processed_data = processed_data.reset_index(drop=True)
             return processed_data
         
-    def drop_repeat_sales(self, inplace: bool=True):
+    def drop_repeat_sales(self, timebound: bool=True, inplace: bool=True):
 
         """
         Drop repeat sales of the same property. Only the most recent sale is kept. 
@@ -458,15 +458,28 @@ class Preprocess:
         """
 
         before = len(self._data)
-        if inplace==True:
-            self._data.drop_duplicates(subset=['CLIP'], keep='last', inplace=True)
-            self._data = self._data.reset_index(drop=True)
-            self.logger.info(f"Dropped {before - len(self._data)} rows with duplicate sales out of {before} total rows.")
-        else:
-            processed_data = self._data.drop_duplicates(subset=['CLIP'], keep='last', inplace=False)
-            processed_data = processed_data.reset_index(drop=True)
-            self.logger.info(f"Dropped {before - len(processed_data)} rows with duplicate sales out of {before} total rows.")
-            return processed_data
+
+        if timebound:
+            if inplace==True:
+                self._data.drop_duplicates(subset=['CLIP', 'sale_year', 'sale_month'], keep='last', inplace=True)
+                self._data = self._data.reset_index(drop=True)
+                self.logger.info(f"Dropped {before - len(self._data)} rows with duplicate sales out of {before} total rows.")
+            else:
+                processed_data = self._data.drop_duplicates(subset=['CLIP', 'sale_year', 'sale_month'], keep='last', inplace=False)
+                processed_data = processed_data.reset_index(drop=True)
+                self.logger.info(f"Dropped {before - len(processed_data)} rows with duplicate sales out of {before} total rows.")
+                return processed_data
+
+        else: 
+            if inplace==True:
+                self._data.drop_duplicates(subset=['CLIP'], keep='last', inplace=True)
+                self._data = self._data.reset_index(drop=True)
+                self.logger.info(f"Dropped {before - len(self._data)} rows with duplicate sales out of {before} total rows.")
+            else:
+                processed_data = self._data.drop_duplicates(subset=['CLIP'], keep='last', inplace=False)
+                processed_data = processed_data.reset_index(drop=True)
+                self.logger.info(f"Dropped {before - len(processed_data)} rows with duplicate sales out of {before} total rows.")
+                return processed_data
 
     def one_hot(self, inplace: bool=True):
 
