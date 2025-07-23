@@ -37,6 +37,7 @@ class Preprocess:
                  binary_cols: list=None, # list of binary features
                  categorical_cols: list=None, # list of categorical features
                  meta_cols: list=None, # columns of metadata that methods should not modify
+                 sale_date_col: str=None, # string indicating sale date column
                  share_non_null: float=0.25, # minimum share of non-null values required in each column
                  random_state: int=42, # for reproducibility
                  wins_pctile: int=1, # percentile at which data are winsorized (symmetric)
@@ -80,7 +81,7 @@ class Preprocess:
         self._binary_cols = binary_cols or []
         self._categorical_cols = categorical_cols or []
         self._meta_cols = meta_cols or []
-        
+        self._sale_date_col = sale_date_col
         
         # protected attributes
         self.__share_non_null = share_non_null
@@ -236,6 +237,65 @@ class Preprocess:
             self.logger.error("mice_iters must be a positive integer")
             raise ValueError("mice_iters must be a positive integer")
     
+    def gen_time_vars(self, inplace: bool=True):
+        """
+        Generates time variables using sale_date_col.
+
+        Variables include:
+        - sale_year: year of sale (range is sample dependent)
+        - sale_month: month of sale (1-12)
+        - sale_day_of_month: day of month of sale, e.g. '31' if property sold on Jan 31. (1-31)
+        - sale_day_of_year: day of year of sale, e.g. '65' if property sold on Mar 6 (1-366)
+        - sale_day_of_week: day of week of sale (0-6)
+        - sale_day: date diff between sale date and Jan 1 2000
+        """
+
+        copy = self._data.copy()
+        sale_date = copy[self._sale_date_col]
+        
+        # confirm that sale date is an integer.
+        # if not, strip of non-numeric characters and convert.
+        if sale_date.dtype == 'O':
+            sale_date = sale_date.str.replace(r'\D+', '', regex=True).astype(int)
+
+        # to do - validate that date has 8 characters. All obs in redivis do already
+        # but good to have a check for future analyses.
+
+        # cast sale date as datetime object
+        sale_date = [pd.to_datetime(x, format='%Y%m%d', errors='coerce') for x in sale_date]
+
+        # gen sale year
+        sale_year = [x.year for x in sale_date]
+
+        # gen sale month
+        sale_month = [x.month for x in sale_date]
+
+        # gen sale day of month
+        sale_day_of_month = [x.day for x in sale_date]
+
+        # gen sale day of year
+        sale_day_of_year = [x.day_of_year for x in sale_date]
+
+        # gen sale day of week
+        sale_day_of_week = [x.dayofweek for x in sale_date]
+
+        # gen day of sale
+        sale_day = [(x - pd.to_datetime('2000101', format='%Y%m%d')).days for x in sale_date]
+
+        if inplace == True:
+            self._data['sale_year'] = sale_year
+            self._data['sale_month'] = sale_month
+            self._data['sale_day_of_month'] = sale_day_of_month
+            self._data['sale_day_of_year'] = sale_day_of_year
+            self._data['sale_day_of_week'] = sale_day_of_week
+            self._data['sale_day'] = sale_day
+            
+            self._time_cols = ['sale_year', 'sale_month', 'sale_day_of_month', 'sale_day_of_year', 'sale_day_of_week', 'sale_day']
+
+        else:
+            self.logger.warning("gen_time_vars() can only run if inplace==True")
+            raise ValueError("gen_time_vars() can only run if inplace==True")
+    
     def drop_null_labels(self, inplace: bool=True):
 
         """
@@ -251,7 +311,7 @@ class Preprocess:
         """
 
         before = len(self._data)
-        if inplace==True:
+        if inplace == True:
             self._data.dropna(subset=[self._label], axis=0, inplace=True)
             self._data = self._data.reset_index(drop=True)
             self.logger.info(f"Dropped {before - len(self._data)} rows with null labels out of {before} total rows.")
