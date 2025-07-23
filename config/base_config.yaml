@@ -54,7 +54,7 @@ features:
 
 paths:
 
-    raw_path: '/oak/stanford/groups/deho/proptax/raw/corelogic_census_2023.csv'
+    raw_path: '/oak/stanford/groups/deho/proptax/clean/corelogic_census_2018_2023.csv'
 
     study_dir: '/oak/stanford/groups/deho/proptax/models/cook_rf_3_features_log_label/hyperparams/studies/studies'
 
