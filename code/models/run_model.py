@@ -105,7 +105,7 @@ for i in range(3,15):
 	
 	# load raw data
         #df = pd.read_csv(raw_path)
-	df = pd.read_csv(raw_path,nrows=1000000)
+        df = pd.read_csv(raw_path,nrows=1000000)
         print('data loaded; ' + str(df.shape[0]) + ' rows and ' + str(df.shape[1]) + ' columns.')
         print('subsetting to county ' + str(fips))
 	
