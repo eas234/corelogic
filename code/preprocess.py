@@ -331,23 +331,40 @@ class Preprocess:
         copy = self._data.copy()
 
         if 'MARKET_TOTAL_VALUE' not in copy.columns.tolist() or 'SALE_AMOUNT' not in copy.columns.tolist():
-            self.logger.warning('MARKET_TOTAL_VALUE and SALE_AMOUNT must be present in data columns in order to apply drop_lowest_ratios()')
-            raise ValueError('MARKET_TOTAL_VALUE and SALE_AMOUNT must be present in data columns in order to apply drop_lowest_ratios()')
+            self.logger.warning('MARKET_TOTAL_VALUE and/or SALE_AMOUNT not in data; drop_lowest_ratios() not applied. ')
+            return copy
 
         # define sales ratios
         copy['ratio'] = copy['MARKET_TOTAL_VALUE']/copy['SALE_AMOUNT']
 
-        # generate percentile bins of sales ratios
-        copy['ratio_bins'] = pd.qcut(copy['ratio'], q=100, duplicates='drop', labels=False)
+        if 'sale_year' in copy.columns:
 
-        # flag lowest percentile bin for dropping
-        copy['drop'] = [1 if x < 1 else 0 for x in copy.ratio_bins]
+            # define helper function percentile_rank
+            def percentile_rank(group):
+                return group.rank(pct=True) * 100  
 
-        # drop da bin
-        copy = copy[copy['drop'] != 1]
+            # apply percentile rank to data grouped by sale year
+            copy['ratio_percentile'] = df.groupby('sale_year')['ratio'].transform(percentile_rank).round(0)
 
-        # remove the cols we generated for this function
-        copy.drop(['ratio', 'ratio_bins', 'drop'], axis=1, inplace=True)
+            # drop observations in the lowest percentile of ratios by sale year
+            copy = copy[copy.ratio_percentile >= 1]
+
+            # drop ratio and ratio percentile column from data
+            copy.drop(['ratio', 'ratio_percentile'], axis=1, inplace=True)
+            
+        else:
+            
+            # generate percentile bins of sales ratios
+            copy['ratio_bins'] = pd.qcut(copy['ratio'], q=100, duplicates='drop', labels=False)
+
+            # flag lowest percentile bin for dropping
+            copy['drop'] = [1 if x < 1 else 0 for x in copy.ratio_bins]
+
+            # drop da bin
+            copy = copy[copy['drop'] != 1]
+
+            # remove the cols we generated for this function
+            copy.drop(['ratio', 'ratio_bins', 'drop'], axis=1, inplace=True)
 
         if inplace==True:
             self._data = copy
