@@ -34,7 +34,7 @@ from preprocess import *
 fips = '17031'
 
 # load config -- change config file to run desired model
-for i in range(3,15):
+for i in range(4,15):
 
     gen_config = setup.Setup(fips=fips, 
              fips_county_crosswalk='../../config/county_dict.yaml', # location of crosswalk between fips code and county name
