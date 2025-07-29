@@ -296,7 +296,8 @@ def tune_model(X_train,
 	    n_jobs=4,
 	    cv_folds=5,
 	    subsample_train=True,
-	    timeout=3600 # stop tuning after one hour):
+	    timeout=3600 # stop tuning after one hour
+	):
 
     '''
     Model tuner
