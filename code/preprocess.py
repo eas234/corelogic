@@ -1004,7 +1004,7 @@ class Preprocess:
         
     def run(self, 
             inplace: bool=True,
-            one_hot: bool=False,
+            one_hot: bool=True,
             gen_time_vars: bool=True,
             drop_lowest_ratios: bool=True,
             drop_repeat_sales: bool=False,
