@@ -39,7 +39,7 @@ for i in range(3,15):
     gen_config = setup.Setup(fips=fips, 
              fips_county_crosswalk='../../config/county_dict.yaml', # location of crosswalk between fips code and county name
              model_type='lightGBM', # specifies type of model. examples: 'rf', 'lasso', 'lightGBM'
-             study_label=f'_{i}_features', # label for the type of study being run
+             study_label=f'_{i}_features_debug', # label for the type of study being run
              n_features=i, # specify number of model features (for ablation study). if -1 or None, include all specified.
              feature_list='../../config/full_feature_list.yaml', # config with full list of features of each type
              continuous=None, # list of continuous features to include. if None, defaults to list in feature_list
@@ -105,8 +105,8 @@ for i in range(3,15):
         create_directories_if_missing(dir_list)
 	
 	# load raw data
-        df = pd.read_csv(raw_path)
-        #df = pd.read_csv(raw_path,nrows=1000000)
+        #df = pd.read_csv(raw_path)
+        df = pd.read_csv(raw_path,nrows=1000000)
         print('data loaded; ' + str(df.shape[0]) + ' rows and ' + str(df.shape[1]) + ' columns.')
         print('subsetting to county ' + str(fips))
 	
