@@ -23,6 +23,8 @@ import optuna
 from optuna.samplers import TPESampler, RandomSampler
 from optuna.trial import TrialState
 
+import lightgbm as lgb
+
 def create_directories_if_missing(directories):
     """
     Takes a list of directory paths and ensures each exists.
@@ -218,31 +220,38 @@ def lightGBM_objective(trial,
     - cv_folds: how many folds you want in the test set for cross-validation
 
     outputs:
-    - min(cv_results['rmse_mean]): average performance of trial's parameters across cv_folds.
-    rmse is only loss function accepted by this model for now.
+    - min(cv_results['l1-mean']): average performance of trial's parameters across cv_folds.
+    l1 is MAE loss, which is the only loss function accepted by this model for now.
     '''
-    ## hyperparam space - following chicago CCAO
-    num_iterations = trial.suggest_int(name='num_iterations', low=100, high=2500, step=200)
+    ## hyperparam space 
+    # reducing num_iterations relative to ccao to speed up training time
+    num_iterations = trial.suggest_int(name='num_iterations', low=100, high=700, step=200)
 
     learning_rate = trial.suggest_float(name='learning_rate', low=0.001, high=0.398, log=True)
 
-    max_bin = trial.suggest_int(name='max_bin', low=50, high=512, step=66)
+    max_bin = trial.suggest_int(name='max_bin', low=100, high=562, step=66)
 
-    num_leaves = trial.suggest_int(name='num_leaves', low=32, high=2048, step=252)
+    num_leaves = trial.suggest_int('num_leaves', 31, 255, step=32)
 
-    max_depth = trial.suggest_int(name='max_depth', low=-1, high=14, step=5)
+    max_depth = trial.suggest_int('max_depth', 4, 12)
 
-    feature_fraction = trial.suggest_float(name='feature_fraction', low=0.3, high=0.7, step=0.1)
+    # high relative to ccao due to lower-dimensional feature space
+    feature_fraction = trial.suggest_float(name='feature_fraction', low=0.7, high=1.0, step=0.1)
 
-    min_gain_to_split = trial.suggest_float(name='min_gain_to_split', low=0.001, high=10000, log=True)
+    # when min_gain_to_split was too high, models with very few features never split. reduced here relative to ccao
+    min_gain_to_split = trial.suggest_float('min_gain_to_split', 0.0, 0.03, log=False)
 
-    min_data_in_leaf = trial.suggest_int(name='min_data_in_leaf', low=2, high=400, log=True)
+    # reduced relative to ccao because models with too high min_data_in_leaf never split
+    min_data_in_leaf = trial.suggest_int('min_data_in_leaf', 5, 35)
+    
+    min_sum_hessian_in_leaf = trial.suggest_float('min_sum_hessian_in_leaf', 1e-3, 0.1, log=True)
 
     lambda_l1 = trial.suggest_float(name='lambda_l1', low=0.001, high=100, log=True)
 
     lambda_l2 = trial.suggest_float(name='lambda_l2', low=0.001, high=100, log=True)
-    
-    params = {
+      
+    params = {'objective': "regression",
+        'metric': 'mae', # only loss function accepted for now
         'num_iterations': num_iterations,
         'learning_rate': learning_rate,
         'max_bin': max_bin,
@@ -251,8 +260,10 @@ def lightGBM_objective(trial,
         'feature_fraction': feature_fraction,
         'min_gain_to_split': min_gain_to_split,
         'min_data_in_leaf': min_data_in_leaf,
+        'min_sum_hessian_in_leaf': min_sum_hessian_in_leaf,
         'lambda_l1': lambda_l1,
-        'lambda_l2': lambda_l2
+        'lambda_l2': lambda_l2,
+        'early_stopping_rounds': 20 # set relatively low to help limit compute time
     }
     
     # build model and scorer      
@@ -261,28 +272,30 @@ def lightGBM_objective(trial,
     cv_results = lgb.cv(
         params,
         dtrain,
+        metrics='mae',
         nfold=cv_folds,
         stratified=False,
         shuffle=False,
         seed=random_state
     )
               
-    return min(cv_results['rmse-mean'])
+    return min(cv_results['valid l1-mean'])
 
 def tune_model(X_train, 
 	    y_train, 
 	    study_name="example-study",
 	    load_if_exists=True,
-	    sampler=TPESampler(seed=42),
+	    sampler=TPESampler(seed=42, n_startup_trials=20, multivariate=True),
 	    sampler_path='sampler.pkl', #.pkl file
             model: str='random_forest', # model to tune. current options are 'random_forest', 'lasso', 'lightGBM'
 	    params_path='best_params.pkl', #.pkl file
 	    trials_path='trials.csv', #.csv file
-	    n_trials=20,
+	    n_trials=50,
 	    random_state=42,
 	    loss_func=mse_loss,
 	    n_jobs=4,
-	    cv_folds=5):
+	    cv_folds=5,
+	    subsample_train=True):
 
     '''
     Model tuner
@@ -314,15 +327,21 @@ def tune_model(X_train,
         )
         prev_trials = 0
 
+    X_train_copy = X_train.copy()
+
+    # subsample from train set if train set is large to reduce runtime
+    if subsample_train == True:
+	X_train_copy = X_train_copy.sample(frac=0.25)
+	    
     # Run optimization
     y_train = np.ravel(y_train)
     if prev_trials < n_trials:
         if model == 'random_forest':
-            study.optimize(lambda trial: rf_reg_objective(trial, X_train, y_train, random_state=random_state, loss_func=loss_func, n_jobs=n_jobs, cv_folds=cv_folds), n_trials=(n_trials-prev_trials))
+            study.optimize(lambda trial: rf_reg_objective(trial, X_train_copy, y_train, random_state=random_state, loss_func=loss_func, n_jobs=n_jobs, cv_folds=cv_folds), n_trials=(n_trials-prev_trials))
         elif model == 'lasso':
-            study.optimize(lambda trial: lasso_objective(trial, X_train, y_train, random_state=random_state, loss_func=loss_func, n_jobs=n_jobs, cv_folds=cv_folds), n_trials=(n_trials-prev_trials))
+            study.optimize(lambda trial: lasso_objective(trial, X_train_copy, y_train, random_state=random_state, cv_folds=cv_folds), n_trials=(n_trials-prev_trials))
         elif model == 'lightGBM':
-            study.optimize(lambda trial: lightGBM_objective(trial, X_train, y_train, random_state=random_state, cv_folds=cv_folds))
+            study.optimize(lambda trial: lightGBM_objective(trial, X_train_copy, y_train, random_state=random_state, cv_folds=cv_folds), n_trials=(n_trials-prev_trials))
 	
     # Save the sampler
     with open(sampler_path, "wb") as fout:
@@ -338,6 +357,49 @@ def tune_model(X_train,
                 
     return df
 
+def lgb_train_test_write(X_train,
+			 X_test,
+			 y_train,
+			 y_test,
+			 meta_train,
+			 meta_test,
+			 params_path='params_path.pkl',
+			 model_dir='model',
+			 proc_data_dir='data',
+			 model_id='default',
+			 log_label=True):
+
+    with open(params_path, 'rb') as f:
+         hyperparams=pickle.load(f)
+
+    model = lgb.LGBMRegressor(**hyperparams)
+    model.fit(X_train, y_train)
+
+    # write model
+    joblib.dump(model, os.path.join(model_dir, 'model.pkl'))
+
+    # generate predictions
+    y_pred = model.predict(X_test)
+
+    # align indices
+    meta_test = meta_test.reset_index(drop=True)
+    y_test = y_test.reset_index(drop=True)
+
+    results_df = pd.DataFrame(meta_test)
+    if log_label == True:
+        results_df['y_true_' + model_id] = [math.exp(x) for x in y_test]
+        results_df['y_pred_' + model_id] = [math.exp(x) for x in y_pred]
+    else:
+        results_df['y_true_' + model_id] = y_test
+        results_df['y_pred_' + model_id] = y_pred
+    results_df['ratio_' + model_id] = results_df['y_pred_' + model_id]/results_df['y_true_' + model_id]
+    results_df['model_id'] = model_id
+
+    # write predictions and metadata
+    results_df.to_csv(os.path.join(proc_data_dir, model_id + '_preds.csv'), index=False)
+
+    return results_df
+    
 def rf_train_test_write(X_train, 
 			X_test, 
 			y_train, 
