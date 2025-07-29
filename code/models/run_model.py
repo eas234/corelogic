@@ -34,12 +34,12 @@ from preprocess import *
 fips = '17031'
 
 # load config -- change config file to run desired model
-for i in range(14,15):
+for i in range(3,15):
 
     gen_config = setup.Setup(fips=fips, 
              fips_county_crosswalk='../../config/county_dict.yaml', # location of crosswalk between fips code and county name
-             model_type='rf', # specifies type of model. examples: 'rf', 'lasso', 'lightGBM'
-             study_label=f'ablation_study_{i}_features_time', # label for the type of study being run
+             model_type='lightGBM', # specifies type of model. examples: 'rf', 'lasso', 'lightGBM'
+             study_label=f'_{i}_features', # label for the type of study being run
              n_features=i, # specify number of model features (for ablation study). if -1 or None, include all specified.
              feature_list='../../config/full_feature_list.yaml', # config with full list of features of each type
              continuous=None, # list of continuous features to include. if None, defaults to list in feature_list
