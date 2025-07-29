@@ -134,7 +134,7 @@ for i in range(14,15):
 			    encoding_path=encoding_path)
 	
 	# run preprocessor
-        X_train, X_test, y_train, y_test, meta_train, meta_test, continuous, binary, categorical = preproc.run(target_encode=True, drop_lowest_ratios=drop_lowest_ratios)
+        X_train, X_test, y_train, y_test, meta_train, meta_test, continuous, binary, categorical = preproc.run(target_encode=False, one_hot=True, drop_lowest_ratios=drop_lowest_ratios)
 	
 	# write pre-processed train and test sets
         for key, value in {'X_train': X_train, 'X_test': X_test, 'y_train': y_train, 'y_test': y_test, 'meta_train': meta_train, 'meta_test': meta_test}.items():
