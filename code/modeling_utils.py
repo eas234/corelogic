@@ -333,7 +333,7 @@ def tune_model(X_train,
 
     # subsample from train set if train set is large to reduce runtime
     if subsample_train == True:
-	X_train_copy = X_train_copy.sample(frac=0.25)
+        X_train_copy = X_train_copy.sample(frac=0.25)
 	    
     # Run optimization
     y_train = np.ravel(y_train)
