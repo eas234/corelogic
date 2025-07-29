@@ -178,7 +178,7 @@ for i in range(3,15):
 			    model_id=model_id,
 			    log_label=log_label)
 		
-	elif model_type == 'lightGBM':
+        elif model_type == 'lightGBM':
             lgb_train_test_write(X_train,
 			 X_test,
 			 y_train,
