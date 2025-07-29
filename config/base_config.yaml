@@ -22,7 +22,7 @@ model_params:
 
   max_iters: 1000
 
-  n_trials: 50
+  n_trials: 75
 
   n_jobs: 5
 
