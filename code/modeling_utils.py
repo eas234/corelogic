@@ -295,7 +295,8 @@ def tune_model(X_train,
 	    loss_func=mse_loss,
 	    n_jobs=4,
 	    cv_folds=5,
-	    subsample_train=True):
+	    subsample_train=True,
+	    timeout=3600 # stop tuning after one hour):
 
     '''
     Model tuner
@@ -337,11 +338,11 @@ def tune_model(X_train,
     y_train = np.ravel(y_train)
     if prev_trials < n_trials:
         if model == 'random_forest':
-            study.optimize(lambda trial: rf_reg_objective(trial, X_train_copy, y_train, random_state=random_state, loss_func=loss_func, n_jobs=n_jobs, cv_folds=cv_folds), n_trials=(n_trials-prev_trials))
+            study.optimize(lambda trial: rf_reg_objective(trial, X_train_copy, y_train, random_state=random_state, loss_func=loss_func, n_jobs=n_jobs, cv_folds=cv_folds), n_trials=(n_trials-prev_trials), timeout=timeout)
         elif model == 'lasso':
-            study.optimize(lambda trial: lasso_objective(trial, X_train_copy, y_train, random_state=random_state, cv_folds=cv_folds), n_trials=(n_trials-prev_trials))
+            study.optimize(lambda trial: lasso_objective(trial, X_train_copy, y_train, random_state=random_state, cv_folds=cv_folds), n_trials=(n_trials-prev_trials), timeout=timeout)
         elif model == 'lightGBM':
-            study.optimize(lambda trial: lightGBM_objective(trial, X_train_copy, y_train, random_state=random_state, cv_folds=cv_folds), n_trials=(n_trials-prev_trials))
+            study.optimize(lambda trial: lightGBM_objective(trial, X_train_copy, y_train, random_state=random_state, cv_folds=cv_folds), n_trials=(n_trials-prev_trials), timeout=timeout)
 	
     # Save the sampler
     with open(sampler_path, "wb") as fout:
