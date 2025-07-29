@@ -5,11 +5,13 @@ import miceforest as mf
 import numpy as np
 import os
 import pandas as pd
+import re
 import yaml
 
 from category_encoders import *
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import OneHotEncoder
 
 class Preprocess:
     """
@@ -502,22 +504,52 @@ class Preprocess:
         - returns processed_data
         
         """
+        
         # subset to categorical columns that are still present in data
         # after previous methods have been applied.
 
         categorical_cols = [x for x in self._categorical_cols if x in self._data.columns]
 
-        dummies = pd.get_dummies(self._data[categorical_cols], drop_first=False)
+        # generate copy of data
+        copy = self._data.copy()
+
+        # define helper function to help handle/normalize nonstandard dtypes within columns
+
+        def normalize_category(x):
+            if pd.isna(x):
+                return 'missing'
+            x_str = str(x).strip()
+
+            if re.fullmatch(r'\d+\.0+', x_str):
+                return str(int(float(x_str)))
+                
+        return x_str
+            
+        for col in categorical_cols:
+            copy[col] = copy[col].apply(normalize_category)
+
+        # define one-hot encoder
+        encoder = OneHotEncoder(handle_unknown = 'infrequent_if_exist',
+                                sparse_output = False,
+                                min_frequency = 0.05 # category must include 5% of data to be encoded
+                               )
+        # one-hot encode categoricals
+        encoded = encoder.fit_transform(copy[categorical_cols])
+        
+        # get clean column names of encoded variables
+        encoded_columns = encoder.get_feature_names_out(categorical_cols)
+
+        # turn encoded variables into dataframe with clean colnames
+        encoded_df = pd.DataFrame(encoded, columns=encoded_columns, index=copy.index())
+
+        encoded_copy = copy.drop(columns=categorical_cols).join(encoded_df)
     
         if inplace:
-            self._data.drop(columns=categorical_cols, inplace=True)
-            self._data[dummies.columns] = dummies
-            self._binary_cols += dummies.columns.tolist()
+            self._data = encoded_copy
+            self._binary_cols += encoded_columns.tolist()
             self._categorical_cols = []
         else:
-            processed_data = self._data.drop(columns=categorical_cols, inplace=False)
-            processed_data[dummies.columns] = dummies
-            return processed_data
+            return encoded_copy
         
     def train_test_split(self, return_items: bool=False, by_year=True):
 
