@@ -540,7 +540,7 @@ class Preprocess:
         encoded_columns = encoder.get_feature_names_out(categorical_cols)
 
         # turn encoded variables into dataframe with clean colnames
-        encoded_df = pd.DataFrame(encoded, columns=encoded_columns, index=copy.index())
+        encoded_df = pd.DataFrame(encoded, columns=encoded_columns, index=copy.index)
 
         encoded_copy = copy.drop(columns=categorical_cols).join(encoded_df)
     
