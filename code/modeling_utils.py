@@ -335,10 +335,10 @@ def tune_model(X_train,
     # subsample from train set if train set is large to reduce runtime
     if subsample_train == True:
         X_train_copy = X_train_copy.sample(frac=0.25)
-	y_train_copy = y_train[X_train_copy.index]
+        y_train_copy = y_train[X_train_copy.index]
 	    
     # Run optimization
-    y_train = np.ravel(y_train)
+    y_train_copy = np.ravel(y_train_copy)
     if prev_trials < n_trials:
         if model == 'random_forest':
             study.optimize(lambda trial: rf_reg_objective(trial, X_train_copy, y_train_copy, random_state=random_state, loss_func=loss_func, n_jobs=n_jobs, cv_folds=cv_folds), n_trials=(n_trials-prev_trials), timeout=timeout)
