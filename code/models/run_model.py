@@ -64,6 +64,7 @@ for i in range(14,15):
         test_size = out['test_size']
         cv_folds = out['cv_folds']
         mice_iters = out['mice_iters']
+        model_type = out['model_type']
         n_trials = out['n_trials']
         n_jobs = out['n_jobs']
         log_label = out['log_label']
@@ -149,7 +150,7 @@ for i in range(14,15):
 	# tune model hyperparams
         tune_model(X_train, 
 	           y_train,
-	            study_name=study_dir, # todo - need to update tune_model to reflect changes in config setup
+	            study_name=study_dir,
 	            load_if_exists=True,
 	            sampler=TPESampler(seed=random_state),
 	            sampler_path=sampler_path, #.pkl file
@@ -159,10 +160,13 @@ for i in range(14,15):
 		    random_state=random_state,
 		    loss_func=loss_func,
 	            n_jobs=n_jobs,
-		    cv_folds=cv_folds)
+		    cv_folds=cv_folds,
+		    subsample_train=True, # to do: add toggle in config
+		    model=model_type)
 	
         print('optimal params selected; training and testing model')
-        rf_train_test_write(X_train, 
+        if model_type = 'rf':
+            rf_train_test_write(X_train, 
 	                    X_test, 
 	                    y_train, 
 	                    y_test, 
@@ -173,3 +177,16 @@ for i in range(14,15):
 	                    proc_data_dir=proc_data_dir,
 			    model_id=model_id,
 			    log_label=log_label)
+		
+	elif model_type = 'lightGBM':
+            lgb_train_test_write(X_train,
+			 X_test,
+			 y_train,
+			 y_test,
+			 meta_train,
+			 meta_test,
+			 params_path=params_path,
+			 model_dir=model_dir,
+			 proc_data_dir=proc_data_dir,
+			 model_id=model_id,
+			 log_label=log_label)
