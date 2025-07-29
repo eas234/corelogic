@@ -523,7 +523,7 @@ class Preprocess:
             if re.fullmatch(r'\d+\.0+', x_str):
                 return str(int(float(x_str)))
                 
-        return x_str
+            return x_str
             
         for col in categorical_cols:
             copy[col] = copy[col].apply(normalize_category)
