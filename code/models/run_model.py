@@ -152,7 +152,7 @@ for i in range(3,15):
 	           y_train,
 	            study_name=study_dir,
 	            load_if_exists=True,
-	            sampler=TPESampler(seed=random_state),
+	            sampler=TPESampler(seed=42, n_startup_trials=20, multivariate=True),
 	            sampler_path=sampler_path, #.pkl file
 	            params_path=params_path, #.pkl file
 	            trials_path=trials_path, #.csv file
