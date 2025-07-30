@@ -1048,13 +1048,13 @@ class Preprocess:
         
         if drop_repeat_sales:
             self.drop_repeat_sales()
+
+        if one_hot:
+            self.one_hot()
         
         self.train_test_split()
         
         self._drop_problematic_cols_from_splits()
-        
-        if one_hot:
-            self.one_hot()
         
         if self.__wins_pctile > 0:
             self.winsorize_continuous()
