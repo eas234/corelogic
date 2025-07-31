@@ -324,7 +324,7 @@ def gini_ratio(assessed, sale):
     """
     Gini_sale > Gini_assessed means assessment ratios are higher for low-priced than high-priced properties, i.e., regressive
     """
-    return gini(sale) / gini(assessed)
+    return gini(assessed) / gini(sale)
 
 def gini(vector):
     """
