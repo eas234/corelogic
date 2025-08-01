@@ -228,24 +228,31 @@ def prd(assessed, sale, format=False):
     else:
         return prd
 
-def log_coef(assessed, sale, format=False):
+def log_coef(assessed, sale, format=False, ignore_errors=False):
     
     """
 
     """
-    X = [math.log(s) for s in sale]
-    X = sm.add_constant(X)
-    y = [math.log(a) - math.log(s) for a, s in zip(assessed,sale)]
-    
-    ols_model = sm.OLS(y, X)
-    results = ols_model.fit(cov_type='HC0')
 
-    beta = results.params[1]
+    try:
+        X = [math.log(s) for s in sale]
+        X = sm.add_constant(X)
+        y = [math.log(a) - math.log(s) for a, s in zip(assessed,sale)]
+        
+        ols_model = sm.OLS(y, X)
+        results = ols_model.fit(cov_type='HC0')
 
-    if format:
-        return f"{beta:,.4f}"
-    else:
-        return beta
+        beta = results.params[1]
+
+        if format:
+            return f"{beta:,.4f}"
+        else:
+            return beta
+    except Exception as e: 
+        if ignore_errors:
+            return np.nan
+        else:
+            raise(e)
 
 def mse(assessed, sale, format=False):
     """
@@ -477,6 +484,68 @@ def kde_test_pvalue(x, y, n_bootstrap, observed_stat):
     
     p_value = np.mean(np.array(bootstrap_stats) >= observed_stat)
     return p_value
+
+def create_cross_county_comparison(df):
+       '''
+       Expects a df with three columns: fips, assessed, sale
+       Expects no NA/missing values
+       Produces a table of accuracy and regressivity metrics by county, using actual assessed values vs. sales price
+       '''
+
+       mpe_out = df.groupby('fips').apply(lambda row: mpe(row['assessed'], row['sale']), include_groups=False).reset_index()
+       mpe_out.columns=['fips', 'mpe']
+
+       mse_out = df.groupby('fips').apply(lambda row: mse(row['assessed'], row['sale']), include_groups=False).reset_index()
+       mse_out.columns=['fips', 'mse']
+
+       rmse_out = df.groupby('fips').apply(lambda row: rmse(row['assessed'], row['sale']), include_groups=False).reset_index()
+       rmse_out.columns=['fips', 'rmse']
+
+       mae_out = df.groupby('fips').apply(lambda row: mae(row['assessed'], row['sale']), include_groups=False).reset_index()
+       mae_out.columns=['fips', 'mae']
+
+       mape_out = df.groupby('fips').apply(lambda row: mape(row['assessed'], row['sale']), include_groups=False).reset_index()
+       mape_out.columns=['fips', 'mape']
+
+       r_squared_out = df.groupby('fips').apply(lambda row: r_squared(row['assessed'], row['sale']), include_groups=False).reset_index()
+       r_squared_out.columns=['fips', 'r_squared']
+
+       mpe_log_out = df.groupby('fips').apply(lambda row: mpe(np.log(row['assessed']), np.log(row['sale'])), include_groups=False).reset_index()
+       mpe_log_out.columns=['fips', 'mpe_log']
+
+       mse_log_out = df.groupby('fips').apply(lambda row: mse(np.log(row['assessed']), np.log(row['sale'])), include_groups=False).reset_index()
+       mse_log_out.columns=['fips', 'mse_log']
+
+       rmse_log_out = df.groupby('fips').apply(lambda row: rmse(np.log(row['assessed']), np.log(row['sale'])), include_groups=False).reset_index()
+       rmse_log_out.columns=['fips', 'rmse_log']
+
+       mae_log_out = df.groupby('fips').apply(lambda row: mae(np.log(row['assessed']), np.log(row['sale'])), include_groups=False).reset_index()
+       mae_log_out.columns=['fips', 'mae_log']
+
+       mape_log_out = df.groupby('fips').apply(lambda row: mape(np.log(row['assessed']), np.log(row['sale'])), include_groups=False).reset_index()
+       mape_log_out.columns=['fips', 'mape_log']
+
+       r_squared_log_out = df.groupby('fips').apply(lambda row: r_squared(np.log(row['assessed']), np.log(row['sale'])), include_groups=False).reset_index()
+       r_squared_log_out.columns=['fips', 'r_squared_log']
+
+       prd_out = df.groupby('fips').apply(lambda row: prd(row['assessed'], row['sale']), include_groups=False).reset_index()
+       prd_out.columns=['fips', 'prd']
+
+       coef_out = df.groupby('fips').apply(lambda row: log_coef(row['assessed'], row['sale'], ignore_errors=True), include_groups=False).reset_index()
+       coef_out.columns=['fips', 'log_coef']
+
+       gini_out = df.groupby('fips').apply(lambda row: gini_ratio(row['assessed'], row['sale']), include_groups=False).reset_index()
+       gini_out.columns=['fips', 'gini_ratio']
+
+       suits_out = df.groupby('fips').apply(lambda row: suits_index(row['assessed'], row['sale']), include_groups=False).reset_index()
+       suits_out.columns=['fips', 'suits_index']
+
+       out = (mpe_out.merge(mse_out, on='fips').merge(rmse_out, on='fips').merge(mae_out, on='fips').merge(mape_out, on='fips').
+              merge(r_squared_out, on='fips').merge(mpe_log_out, on='fips').merge(mse_log_out, on='fips').merge(rmse_log_out, on='fips').
+              merge(mae_log_out, on='fips').merge(mape_log_out, on='fips').merge(r_squared_log_out, on='fips').merge(prd_out, on='fips').
+              merge(coef_out, on='fips')).merge(gini_out, on='fips').merge(suits_out, on='fips')
+       
+       return out
 
 def add_labels(x_positions, heights, offset=0.01, fontsize=10):
 
