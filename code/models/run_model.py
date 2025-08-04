@@ -31,7 +31,7 @@ from census import clean_val
 from modeling_utils import *
 from preprocess import *
 
-fips = '26163' # wayne
+fips = '37119' # Mecklenburg
 
 # load config -- change config file to run desired model
 for i in range(13,14):
