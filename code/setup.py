@@ -121,7 +121,7 @@ class Setup:
             else:
                 raise ValueError('census must equal "bg" or "tract", or be a list of strings indicating census features to include.')
         else:
-            self.census = None
+            self.census = []
 
         if label:
             if isinstance(label, str):
@@ -322,7 +322,7 @@ class Setup:
                   'time': self.base_config['features']['time'], 
                   'label': self.label,
                   'binary': self.base_config['features']['binary'],
-                  'continuous': continuous,
+                  'continuous': continuous + self.census,
                   'categorical': categorical}
 
         config_path = dir_list[7]
