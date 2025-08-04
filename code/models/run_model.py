@@ -31,20 +31,20 @@ from census import clean_val
 from modeling_utils import *
 from preprocess import *
 
-fips = '37119' # mecklenburg
+fips = '17031' # cook
 
 # load config -- change config file to run desired model
-for i in range(3,15):
+for i in range(14,15):
 
     gen_config = setup.Setup(fips=fips, 
              fips_county_crosswalk='../../config/county_dict.yaml', # location of crosswalk between fips code and county name
              model_type='lightGBM', # specifies type of model. examples: 'rf', 'lasso', 'lightGBM'
-             study_label=f'{i}_features', # label for the type of study being run
+             study_label=f'census_tract', # label for the type of study being run
              n_features=i, # specify number of model features (for ablation study). if -1 or None, include all specified.
              feature_list='../../config/full_feature_list.yaml', # config with full list of features of each type
              continuous=None, # list of continuous features to include. if None, defaults to list in feature_list
              categorical=None, # list of categorical features to include. if None, defaults to list in feature_list
-             census=None,  # valid options are 'bg', 'tract' or list. if None, no census features included.
+             census='tract',  # valid options are 'bg', 'tract' or list. if None, no census features included.
              label=None, # model label. if None, defaults to label specified in feature_list.
              drop_lowest_ratios=True,
              log_label=True, # toggle whether to apply log transformation to the label
