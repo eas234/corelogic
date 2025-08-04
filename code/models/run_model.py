@@ -31,15 +31,15 @@ from census import clean_val
 from modeling_utils import *
 from preprocess import *
 
-fips = '17031'
+fips = '04013' # maricopa
 
 # load config -- change config file to run desired model
-for i in range(11,15):
+for i in range(3,15):
 
     gen_config = setup.Setup(fips=fips, 
              fips_county_crosswalk='../../config/county_dict.yaml', # location of crosswalk between fips code and county name
              model_type='lightGBM', # specifies type of model. examples: 'rf', 'lasso', 'lightGBM'
-             study_label=f'_{i}_features', # label for the type of study being run
+             study_label=f'{i}_features', # label for the type of study being run
              n_features=i, # specify number of model features (for ablation study). if -1 or None, include all specified.
              feature_list='../../config/full_feature_list.yaml', # config with full list of features of each type
              continuous=None, # list of continuous features to include. if None, defaults to list in feature_list
