@@ -263,7 +263,7 @@ def lightGBM_objective(trial,
         'min_sum_hessian_in_leaf': min_sum_hessian_in_leaf,
         'lambda_l1': lambda_l1,
         'lambda_l2': lambda_l2,
-        'early_stopping_rounds': 20 # set relatively low to help limit compute time
+        'early_stopping_rounds': 30 # set relatively low to help limit compute time
     }
     
     # build model and scorer      
