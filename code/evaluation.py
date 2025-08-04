@@ -493,7 +493,7 @@ def lreg_err(group, error):
 
     group = group.dropna()
 
-    if group.shape[0] < 10:
+    if group.shape[0] < 100:
         result = np.nan
 
     else:
@@ -526,44 +526,44 @@ def lreg_err(group, error):
 
 def create_cross_county_comparison(df):
        '''
-       Expects a df with three columns: fips, assessed, sale
+       Expects a df with four columns: fips, year, assessed, sale
        Expects no NA/missing values
-       Produces a table of accuracy and regressivity metrics by county, using actual assessed values vs. sales price
+       Produces a table of accuracy and regressivity metrics by county by year, using actual assessed values vs. sales price
        '''
 
-       mpe_out = df.groupby('fips').apply(lambda group: lreg_err(group, 'mpe'), include_groups=False).reset_index()
-       mpe_out.columns=['fips', 'mpe']
+       mpe_out = df.groupby(['fips', 'year']).apply(lambda group: lreg_err(group, 'mpe'), include_groups=False).reset_index()
+       mpe_out.columns=['fips', 'year', 'mpe']
 
-       mse_out = df.groupby('fips').apply(lambda group: lreg_err(group, 'mse'), include_groups=False).reset_index()
-       mse_out.columns=['fips', 'mse']
+       mse_out = df.groupby(['fips', 'year']).apply(lambda group: lreg_err(group, 'mse'), include_groups=False).reset_index()
+       mse_out.columns=['fips', 'year', 'mse']
 
-       rmse_out = df.groupby('fips').apply(lambda group: lreg_err(group, 'rmse'), include_groups=False).reset_index()
-       rmse_out.columns=['fips', 'rmse']
+       rmse_out = df.groupby(['fips', 'year']).apply(lambda group: lreg_err(group, 'rmse'), include_groups=False).reset_index()
+       rmse_out.columns=['fips', 'year', 'rmse']
 
-       mae_out = df.groupby('fips').apply(lambda group: lreg_err(group, 'mae'), include_groups=False).reset_index()
-       mae_out.columns=['fips', 'mae']
+       mae_out = df.groupby(['fips', 'year']).apply(lambda group: lreg_err(group, 'mae'), include_groups=False).reset_index()
+       mae_out.columns=['fips', 'year', 'mae']
 
-       mape_out = df.groupby('fips').apply(lambda group: lreg_err(group, 'mape'), include_groups=False).reset_index()
-       mape_out.columns=['fips', 'mape']
+       mape_out = df.groupby(['fips', 'year']).apply(lambda group: lreg_err(group, 'mape'), include_groups=False).reset_index()
+       mape_out.columns=['fips', 'year', 'mape']
 
-       r_squared_out = df.groupby('fips').apply(lambda group: lreg_err(group, 'r_squared'), include_groups=False).reset_index()
-       r_squared_out.columns=['fips', 'r_squared']
+       r_squared_out = df.groupby(['fips', 'year']).apply(lambda group: lreg_err(group, 'r_squared'), include_groups=False).reset_index()
+       r_squared_out.columns=['fips', 'year', 'r_squared']
 
-       prd_out = df.groupby('fips').apply(lambda group: prd(group['assessed'], group['sale']), include_groups=False).reset_index()
-       prd_out.columns=['fips', 'prd']
+       prd_out = df.groupby(['fips', 'year']).apply(lambda group: prd(group['assessed'], group['sale']), include_groups=False).reset_index()
+       prd_out.columns=['fips', 'year', 'prd']
 
-       coef_out = df.groupby('fips').apply(lambda group: log_coef(group['assessed'], group['sale'], ignore_errors=True), include_groups=False).reset_index()
-       coef_out.columns=['fips', 'log_coef']
+       coef_out = df.groupby(['fips', 'year']).apply(lambda group: log_coef(group['assessed'], group['sale'], ignore_errors=True), include_groups=False).reset_index()
+       coef_out.columns=['fips', 'year', 'log_coef']
 
-       gini_out = df.groupby('fips').apply(lambda group: gini_ratio(group['assessed'], group['sale']), include_groups=False).reset_index()
-       gini_out.columns=['fips', 'gini_ratio']
+       gini_out = df.groupby(['fips', 'year']).apply(lambda group: gini_ratio(group['assessed'], group['sale']), include_groups=False).reset_index()
+       gini_out.columns=['fips', 'year', 'gini_ratio']
 
-       suits_out = df.groupby('fips').apply(lambda group: suits_index(group['assessed'], group['sale']), include_groups=False).reset_index()
-       suits_out.columns=['fips', 'suits_index']
+       suits_out = df.groupby(['fips', 'year']).apply(lambda group: suits_index(group['assessed'], group['sale']), include_groups=False).reset_index()
+       suits_out.columns=['fips', 'year', 'suits_index']
 
-       out = (mpe_out.merge(mse_out, on='fips').merge(rmse_out, on='fips').merge(mae_out, on='fips').merge(mape_out, on='fips').
-              merge(r_squared_out, on='fips').merge(prd_out, on='fips').merge(coef_out, on='fips').merge(gini_out, on='fips').
-              merge(suits_out, on='fips'))
+       out = (mpe_out.merge(mse_out, on=['fips', 'year']).merge(rmse_out, on=['fips', 'year']).merge(mae_out, on=['fips', 'year']).merge(mape_out, on=['fips', 'year']).
+              merge(r_squared_out, on=['fips', 'year']).merge(prd_out, on=['fips', 'year']).merge(coef_out, on=['fips', 'year']).merge(gini_out, on=['fips', 'year']).
+              merge(suits_out, on=['fips', 'year']))
        
        return out
 
