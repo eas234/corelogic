@@ -382,7 +382,20 @@ def merge_map_to_census(df,
 
     return merged
 
-def wrapper(df, tract, block_group, mapping_path='mapper.csv', chunk_size=1000):
+def wrapper(df, tract, block_group, mapping_path='mapper.csv', query=False, chunk_size=1000):
+
+    '''
+    inputs:
+    - df: dataframe, corelogic data
+    - tract: dataframe, census tract-level characteristics
+    - block_group: dataframe, census block-group level characteristics
+    - mapping_path: str, indicates where map between lat-long and census geographies is stored
+    - query: bool, indicates whether to query census website to reverse-geocode lat-longs with incorrect/missing census geos
+    - chunk_size: int, chunk size for census website query. parameter only relevant if query == True. 
+    
+    outputs:
+    - output: dataframe containing merged corelogic and census data
+    '''
     
     # split out unsuccessful matches from successful matches in df
     nulls, non_nulls = split_nulls(df)
@@ -401,16 +414,16 @@ def wrapper(df, tract, block_group, mapping_path='mapper.csv', chunk_size=1000):
     
     # filter out lat_longs that already have a mapping
     lat_long_list = filter_lat_long_overlap(lat_long_list, mapping_path)
-    
-    # establish chunk size
-    num_chunks = math.ceil(len(lat_long_list)/chunk_size)
-    lat_long_list.reset_index(inplace=True)
-    
-    # chunk lat long list and develop mapper for each chunk
-    for i in range(num_chunks):
-        print(f"Processing chunk {i+1} of {num_chunks}...")
-        chunk = lat_long_list.iloc[i * chunk_size:(i + 1) * chunk_size]
-        query_chunk(chunk, mapping_path)
+
+    if query == True:
+        # establish chunk size
+        num_chunks = math.ceil(len(lat_long_list)/chunk_size)
+        lat_long_list.reset_index(inplace=True)    
+        # chunk lat long list and develop mapper for each chunk
+        for i in range(num_chunks):
+            print(f"Processing chunk {i+1} of {num_chunks}...")
+            chunk = lat_long_list.iloc[i * chunk_size:(i + 1) * chunk_size]
+            query_chunk(chunk, mapping_path)
         
     # load completed mapper and merge in geographies
     remainder = merge_maps(remainder, mapping_path)
