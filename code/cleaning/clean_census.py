@@ -15,8 +15,6 @@ sys.path.append(os.getcwd())
 sys.path.append("..")
 from census import preproc_census_df, gen_varbs, merge_corelogic_census, wrapper
 
-reverse_geocode = False
-
 # load config
 with open('../../config/clean_data/census_config.yaml', 'r') as stream:
     out = yaml.safe_load(stream)
@@ -73,12 +71,12 @@ corelogic = pd.read_csv(out['corelogic']['filename'])
 #corelogic = table.to_pandas_dataframe()
 merged = merge_corelogic_census(corelogic, tract, block_group)
 
-if reverse_geocode:
-    # query census to reverse geocode observations where census merge failed
-    output = wrapper(merged, tract, block_group, mapping_path=out['mapping_path'], chunk_size=100)
+# query census to reverse geocode observations where census merge failed
+output = wrapper(merged, tract, block_group, mapping_path=out['mapping_path'], query=False, chunk_size=None)
+#output = wrapper(merged, tract, block_group, mapping_path=out['mapping_path'], query=True, chunk_size=1000)
 
-    print('writing fully geocoded data')
-    output.to_csv(os.path.join(out['outdir'], 'corelogic_census_2018_2023.csv'), index=False)
+print('writing fully geocoded data')
+output.to_csv(os.path.join(out['outdir'], 'corelogic_census_2018_2023.csv'), index=False)
 
 else:
     print('writing non-geocoded data')
