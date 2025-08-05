@@ -40,6 +40,7 @@ class Preprocess:
                  categorical_cols: list=None, # list of categorical features
                  meta_cols: list=None, # columns of metadata that methods should not modify
                  sale_date_col: str=None, # string indicating sale date column
+                 geography: str=None,
                  share_non_null: float=0.25, # minimum share of non-null values required in each column
                  random_state: int=42, # for reproducibility
                  wins_pctile: int=1, # percentile at which data are winsorized (symmetric)
@@ -85,6 +86,10 @@ class Preprocess:
         self._meta_cols = meta_cols or []
         self._sale_date_col = sale_date_col
         self._time_cols = []
+        if geography == 'bg':
+            self._geo_col = ['block_group']
+        else:
+            self._geo_col = []
         
         # protected attributes
         self.__share_non_null = share_non_null
@@ -583,8 +588,8 @@ class Preprocess:
             # check whether there are sufficient observations in last year of sales to use as test set.
             # if so, use last year of sales as test set.
             if copy[copy.sale_year == copy.sale_year.max()].shape[0]/copy.shape[0] > 0.1:
-                self.X_train = copy[copy.sale_year < copy.sale_year.max()][self._binary_cols + self._categorical_cols + self._continuous_cols + self._time_cols]
-                self.X_test = copy[copy.sale_year == copy.sale_year.max()][self._binary_cols + self._categorical_cols + self._continuous_cols + self._time_cols]
+                self.X_train = copy[copy.sale_year < copy.sale_year.max()][self._binary_cols + self._categorical_cols + self._continuous_cols + self._time_cols + self._geo_col]
+                self.X_test = copy[copy.sale_year == copy.sale_year.max()][self._binary_cols + self._categorical_cols + self._continuous_cols + self._time_cols + self._geo_col]
                 self.y_train = copy[copy.sale_year < copy.sale_year.max()][self._label]
                 self.y_test = copy[copy.sale_year == copy.sale_year.max()][self._label]
                 self.meta_train = copy[copy.sale_year < copy.sale_year.max()][self._meta_cols]
@@ -592,8 +597,8 @@ class Preprocess:
 
             # if there are not enough sales in the last year of data, use the last two years as the test set.
             else:
-                self.X_train = copy[copy.sale_year < (copy.sale_year.max()-1)][self._binary_cols + self._categorical_cols + self._continuous_cols + self._time_cols]
-                self.X_test = copy[copy.sale_year >= (copy.sale_year.max()-1)][self._binary_cols + self._categorical_cols + self._continuous_cols + self._time_cols]
+                self.X_train = copy[copy.sale_year < (copy.sale_year.max()-1)][self._binary_cols + self._categorical_cols + self._continuous_cols + self._time_cols + self.geo_col]
+                self.X_test = copy[copy.sale_year >= (copy.sale_year.max()-1)][self._binary_cols + self._categorical_cols + self._continuous_cols + self._time_cols + self.geo_col]
                 self.y_train = copy[copy.sale_year < (copy.sale_year.max()-1)][self._label]
                 self.y_test = copy[copy.sale_year >= (copy.sale_year.max()-1)][self._label]
                 self.meta_train = copy[copy.sale_year < (copy.sale_year.max()-1)][self._meta_cols]
@@ -601,7 +606,7 @@ class Preprocess:
 
                 self.logger.info("X_train, X_test, y_train, y_test, meta_train, meta_test now stored as attributes of preprocess() object. Split performed by year of sale.")
         else: 
-            self.X_train, self.X_test, self.y_train, self.y_test, self.meta_train, self.meta_test = train_test_split(self._data[self._binary_cols + self._categorical_cols + self._continuous_cols + self._time_cols], 
+            self.X_train, self.X_test, self.y_train, self.y_test, self.meta_train, self.meta_test = train_test_split(self._data[self._binary_cols + self._categorical_cols + self._continuous_cols + self._time_cols + self._geo_col], 
                                                                                                 self._data[self._label], 
                                                                                                 self._data[self._meta_cols], 
                                                                                                 test_size=self.__test_size, 
