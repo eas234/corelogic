@@ -270,7 +270,7 @@ def lightGBM_objective(trial,
     # build model and scorer      
 
     if geo == 'bg':
-        dtrain = lgb.Dataset(X_train, label=y_train, cagetorical_feature=['block_group'])
+        dtrain = lgb.Dataset(X_train, label=y_train, categorical_feature=['block_group'])
     else:
         dtrain = lgb.Dataset(X_train, label=y_train)
     cv_results = lgb.cv(
