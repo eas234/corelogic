@@ -45,6 +45,7 @@ for i in range(14,15):
              continuous=None, # list of continuous features to include. if None, defaults to list in feature_list
              categorical=None, # list of categorical features to include. if None, defaults to list in feature_list
              census='tract',  # valid options are 'bg', 'tract' or list. if None, no census features included.
+	     geography='bg', # set to None if you do not want fixed effects, otherwise 'bg' for block-group FEs
              label=None, # model label. if None, defaults to label specified in feature_list.
              drop_lowest_ratios=True,
              log_label=True, # toggle whether to apply log transformation to the label
@@ -100,6 +101,7 @@ for i in range(14,15):
         features = out['continuous'] + out['binary'] + out['categorical']
         meta = out['meta']
         sale_date_col = out['sale_date_col']
+        geography = out['geography']
 	
 	# create model dirs
         create_directories_if_missing(dir_list)
@@ -122,6 +124,7 @@ for i in range(14,15):
 			    categorical,
 			    meta,
                             sale_date_col,
+			    geography=geography,
 			    share_non_null=share_non_null,
 			    random_state=random_state,
 			    wins_pctile=1,
@@ -156,6 +159,7 @@ for i in range(14,15):
 	            sampler_path=sampler_path, #.pkl file
 	            params_path=params_path, #.pkl file
 	            trials_path=trials_path, #.csv file
+		    geography=geography,
 	            n_trials=n_trials,
 		    random_state=random_state,
 		    loss_func=loss_func,
