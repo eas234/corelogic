@@ -23,6 +23,7 @@ class Setup:
              continuous: list=None, # list of continuous features to include. if None, defaults to list in feature_list
              categorical: list=None, # list of categorical features to include. if None, defaults to list in feature_list
              census: Union[str,list]=None,  # valid options are 'bg', 'tract' or list. if None, no census features included.
+             geography: str=None, # valid option is 'bg'. If None, no geographic ``fixed effects" are included.
              label: str=None, # model label. if None, defaults to label specified in feature_list.
              drop_lowest_ratios: bool=True,
              log_label: bool=True, # toggle whether to apply log transformation to the label
@@ -123,6 +124,14 @@ class Setup:
         else:
             self.census = []
 
+        if geography:
+            if isinstance(geography, str) and geography == 'bg':
+                self.geography = geography
+            else:
+                raise ValueError("geography must equal 'bg' or None.")
+        else:
+            self.geography = None
+            
         if label:
             if isinstance(label, str):
                 self.label = label
@@ -323,7 +332,8 @@ class Setup:
                   'label': self.label,
                   'binary': self.base_config['features']['binary'],
                   'continuous': continuous + self.census,
-                  'categorical': categorical}
+                  'categorical': categorical,
+                  'geography': self.geography}
 
         config_path = dir_list[7]
 
