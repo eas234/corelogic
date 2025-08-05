@@ -31,10 +31,10 @@ from census import clean_val
 from modeling_utils import *
 from preprocess import *
 
-fips = '37119' # Mecklenburg
+fips = '17031' # cook
 
 # load config -- change config file to run desired model
-for i in range(13,14):
+for i in range(14,15):
 
     gen_config = setup.Setup(fips=fips, 
              fips_county_crosswalk='../../config/county_dict.yaml', # location of crosswalk between fips code and county name
