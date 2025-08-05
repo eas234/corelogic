@@ -206,6 +206,7 @@ def lightGBM_objective(trial,
               X_train, 
               y_train,
               random_state=42, 
+              geo='bg',
               cv_folds=5):
 
     '''
@@ -268,7 +269,10 @@ def lightGBM_objective(trial,
     
     # build model and scorer      
 
-    dtrain = lgb.Dataset(X_train, label=y_train)
+    if geo == 'bg':
+        dtrain = lgb.Dataset(X_train, label=y_train, cagetorical_feature=['block_group'])
+    else:
+        dtrain = lgb.Dataset(X_train, label=y_train)
     cv_results = lgb.cv(
         params,
         dtrain,
@@ -289,6 +293,7 @@ def tune_model(X_train,
 	    sampler_path='sampler.pkl', #.pkl file
             model: str='random_forest', # model to tune. current options are 'random_forest', 'lasso', 'lightGBM'
 	    params_path='best_params.pkl', #.pkl file
+	    geography='bg', # bg or None
 	    trials_path='trials.csv', #.csv file
 	    n_trials=50,
 	    random_state=42,
@@ -345,7 +350,7 @@ def tune_model(X_train,
         elif model == 'lasso':
             study.optimize(lambda trial: lasso_objective(trial, X_train_copy, y_train_copy, random_state=random_state, cv_folds=cv_folds), n_trials=(n_trials-prev_trials), timeout=timeout)
         elif model == 'lightGBM':
-            study.optimize(lambda trial: lightGBM_objective(trial, X_train_copy, y_train_copy, random_state=random_state, cv_folds=cv_folds), n_trials=(n_trials-prev_trials), timeout=timeout)
+            study.optimize(lambda trial: lightGBM_objective(trial, X_train_copy, y_train_copy, random_state=random_state, cv_folds=cv_folds, geo=geography), n_trials=(n_trials-prev_trials), timeout=timeout)
 	
     # Save the sampler
     with open(sampler_path, "wb") as fout:
