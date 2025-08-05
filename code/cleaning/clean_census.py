@@ -75,9 +75,5 @@ merged = merge_corelogic_census(corelogic, tract, block_group)
 output = wrapper(merged, tract, block_group, mapping_path=out['mapping_path'], query=False, chunk_size=None)
 #output = wrapper(merged, tract, block_group, mapping_path=out['mapping_path'], query=True, chunk_size=1000)
 
-print('writing fully geocoded data')
+print('writing data')
 output.to_csv(os.path.join(out['outdir'], 'corelogic_census_2018_2023.csv'), index=False)
-
-else:
-    print('writing non-geocoded data')
-    merged.to_csv(os.path.join(out['outdir'], 'corelogic_census_2018_2023.csv'), index=False)
