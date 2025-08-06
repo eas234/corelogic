@@ -571,7 +571,7 @@ class Preprocess:
             
         elif len(self._geo_col) > 0:
             # pull and sort unique values of geography column
-            unique_vals = self._data[self._geo_col[0]].unique().tolist()
+            unique_vals = self._data[self._geo_col[0]].astype(int).unique().tolist()
             unique_vals.sort()
 
             # create an ordered list the same length as the unique values of geography column
@@ -582,9 +582,9 @@ class Preprocess:
             
             if inplace == True:
                 # replace existing geography column in data with ordered values using mapper
-                self._data[self._geo_col[0]] = [mapper[str(x)] for x in self._data[self._geo_col[0]]]
+                self._data[self._geo_col[0]] = [mapper[int(x)] for x in self._data[self._geo_col[0]].astype(int)]
             else:
-                return [mapper[str(x)] for x in self._data[self._geo_col[0]]]
+                return [mapper[str(x)] for x in self._data[self._geo_col[0]].astype(int)]
         else:
             return None
     
