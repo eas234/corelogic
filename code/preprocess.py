@@ -555,7 +555,39 @@ class Preprocess:
             self._categorical_cols = []
         else:
             return encoded_copy
+
+    def renumber_geo_col(self, inplace=True):
         
+        """
+        Renumbers geography column to consecutive integers starting at zero
+        to help improve fit for tree-based models.
+
+        inputs:
+        - inplace: If True, geo column is modified inplace.
+        """
+        
+        if len(self._geo_col) > 1:
+            raise ValueError("more than one geography column specified; must specify unique column.")
+            
+        elif len(self._geo_col) > 0:
+            # pull and sort unique values of geography column
+            unique_vals = self._data[self._geo_col[0]].unique().tolist()
+            unique_vals.sort()
+
+            # create an ordered list the same length as the unique values of geography column
+            ordered_vals = list(range(len(unique_vals)))
+
+            # generate a mapping between unordered and ordered values
+            mapper = dict(zip(unique_vals, ordered_vals))
+            
+                if inplace == True:
+                    # replace existing geography column in data with ordered values using mapper
+                    self._data[self._geo_col[0]] = [mapper[str(x)] for x in self._data[self._geo_col[0]]]
+                else:
+                    return [mapper[str(x)] for x in self._data[self._geo_col[0]]]
+        else:
+            return None
+    
     def train_test_split(self, return_items: bool=False, by_year=True):
 
         """
@@ -1056,6 +1088,8 @@ class Preprocess:
 
         if one_hot:
             self.one_hot()
+
+        self.renumber_geo_col()
         
         self.train_test_split()
         
