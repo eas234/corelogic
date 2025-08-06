@@ -580,11 +580,11 @@ class Preprocess:
             # generate a mapping between unordered and ordered values
             mapper = dict(zip(unique_vals, ordered_vals))
             
-                if inplace == True:
-                    # replace existing geography column in data with ordered values using mapper
-                    self._data[self._geo_col[0]] = [mapper[str(x)] for x in self._data[self._geo_col[0]]]
-                else:
-                    return [mapper[str(x)] for x in self._data[self._geo_col[0]]]
+            if inplace == True:
+                # replace existing geography column in data with ordered values using mapper
+                self._data[self._geo_col[0]] = [mapper[str(x)] for x in self._data[self._geo_col[0]]]
+            else:
+                return [mapper[str(x)] for x in self._data[self._geo_col[0]]]
         else:
             return None
     
