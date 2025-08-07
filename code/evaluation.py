@@ -359,7 +359,7 @@ def suits_index(assessed, sale):
     suits_df = suits_df.sort_values('sale', ascending=True).reset_index(drop=True)
 
     ## Calculate cumulative amount of sale and tax
-    suits_df_cum = np.cumsum(suits_df)
+    suits_df_cum = np.cumsum(suits_df, axis=0)
 
     ## Rescale to be in 0-100 range
     scaler = MinMaxScaler(feature_range=(0, 100))
