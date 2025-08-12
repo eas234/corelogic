@@ -314,6 +314,7 @@ class Setup:
                   'smoothing' :  self.base_config['model_params']['smoothing'],
                   'write_encoding_dict' : self.base_config['model_params']['write_encoding_dict'],
                   'drop_lowest_ratios': self.drop_lowest_ratios,
+                  'krige_residuals': self.krige_residuals,
 
                   'log_label' : self.log_label, 
                   'loss_func': self.loss_func,
