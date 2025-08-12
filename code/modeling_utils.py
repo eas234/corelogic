@@ -1,6 +1,7 @@
 import joblib
 import logging
 import math
+import matplotlib.pyplot as plt
 import miceforest as mf
 import numpy as np
 import os
@@ -422,7 +423,11 @@ def lgb_train_test_write(X_train,
 							 kriging_train_sample['residual'].values, 
 							 variogram_model='gaussian',
 							 verbose=True,
+							 enable_plotting=True,
 							 nlags=12)
+		
+        plt.savefig('/oak/stanford/groups/deho/proptax/transfer/variogram_plot.png', dpi=300, bbox_inches='tight')
+        plt.close()
 
         print('predicting kriged residuals for test set')
 
