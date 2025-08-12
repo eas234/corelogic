@@ -423,13 +423,24 @@ def lgb_train_test_write(X_train,
 							 nlags=3)
 
         print('predicting kriged residuals for test set')
+
+        valid_mask = loc_test['latitude'].notna() & loc_test['longitude'].notna()
+
+        valid_lons = loc_test.loc[valid_mask, 'longitude'].values
+        valid_lats = loc_test.loc[valid_mask, 'latitude'].values
+		
         z_test, ss_test = OK.execute('points',
-									loc_test['longitude'].values,
-									loc_test['latitude'].values,
+									valid_lons,
+									valid_lats.values,
 									n_closest_points=20,
 									backend='loop')
 
-        y_pred_kriged = z_test + y_pred
+        z_full = np.full(shape=len(loc_test), fill_value=np.nan)
+        z_full[valid_mask] = z_valid
+
+        y_pred_kriged = y_pred.copy()
+        valid_idx = ~np.isnan(z_full)
+        y_pred_kriged[valid_idx] += z_full[valid_idx]
 
     # align indices
     meta_test = meta_test.reset_index(drop=True)
