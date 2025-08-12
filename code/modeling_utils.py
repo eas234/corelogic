@@ -431,7 +431,7 @@ def lgb_train_test_write(X_train,
 		
         z_test, ss_test = OK.execute('points',
 									valid_lons,
-									valid_lats.values,
+									valid_lats,
 									n_closest_points=20,
 									backend='loop')
 
