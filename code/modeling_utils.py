@@ -9,6 +9,8 @@ import pickle
 import random
 import sys
 
+from pykrige.ok import OrdinaryKriging
+
 from sklearn.ensemble import RandomForestRegressor
 from sklearn import linear_model
 from sklearn.model_selection import train_test_split
@@ -17,6 +19,7 @@ from sklearn.metrics import classification_report
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import make_scorer
+from sklearn.metrics import mean_absolute_error
 from sklearn.preprocessing import StandardScaler
 
 import optuna
@@ -394,7 +397,7 @@ def lgb_train_test_write(X_train,
     y_pred = model.predict(X_test)
 
     if krige_residuals == True:
-        if not loc_train or not loc_test:
+        if loc_train is None or loc_test is None:
             raise ValueError('Must specify latitude/longitude in loc_train, loc_test in order to krige residuals')
 			
         # krige residuals using pykrige
@@ -440,6 +443,8 @@ def lgb_train_test_write(X_train,
         results_df['y_pred'] = y_pred
         if krige_residuals == True:
             results_df['y_pred_kriged'] = y_pred_kriged
+			print(r'mae before kriging:', mean_absolute_error(y_pred, y_true))
+			print(r'mae after kriging:', mean_absolute_error(y_pred_kriged, y_true))
     
     results_df['ratio'] = results_df['y_pred']/results_df['y_true']
     results_df['model_id'] = model_id
