@@ -470,8 +470,8 @@ def lgb_train_test_write(X_train,
         results_df['y_pred'] = [math.exp(x) for x in y_pred]
         if krige_residuals == True:
             results_df['y_pred_kriged'] = [math.exp(x) for x in y_pred_kriged]
-            print(r'mae before kriging:', mean_absolute_error(y_pred, y_true))
-            print(r'mae after kriging:', mean_absolute_error(y_pred_kriged, y_true))
+            print(r'mae before kriging:', mean_absolute_error(results_df.y_pred, results_df.y_true))
+            print(r'mae after kriging:', mean_absolute_error(results_df.y_pred_kriged, results_df.y_true))
     else:
         results_df['y_true'] = y_test
         results_df['y_pred'] = y_pred
