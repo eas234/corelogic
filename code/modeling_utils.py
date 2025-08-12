@@ -422,7 +422,7 @@ def lgb_train_test_write(X_train,
 							 kriging_train_sample['residual'].values, 
 							 variogram_model='gaussian',
 							 verbose=True,
-							 nlags=3)
+							 nlags=10)
 
         print('predicting kriged residuals for test set')
 
