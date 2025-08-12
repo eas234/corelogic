@@ -431,9 +431,9 @@ def lgb_train_test_write(X_train,
         valid_lats = loc_test.loc[valid_mask, 'latitude'].values
 
         if np.isnan(valid_lons).any():
-            print('lons have nulls)
+            print('lons have nulls')
         if np.isnan(valid_lats).any():
-            print('lats have nulls)
+            print('lats have nulls')
 		
         z_test, ss_test = OK.execute('points',
 									valid_lons,
