@@ -150,7 +150,7 @@ class Setup:
             else:
                 raise ValueError('drop_lowest_ratios must be bool')
         else:
-            self.drop_lowest_ratios = False'
+            self.drop_lowest_ratios = False
 
         if krige_residuals:
             if isinstance(krige_residuals, bool):
