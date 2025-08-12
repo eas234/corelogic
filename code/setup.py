@@ -26,6 +26,7 @@ class Setup:
              geography: str=None, # valid option is 'bg'. If None, no geographic ``fixed effects" are included.
              label: str=None, # model label. if None, defaults to label specified in feature_list.
              drop_lowest_ratios: bool=True,
+             krige_residuals: bool=False,
              log_label: bool=True, # toggle whether to apply log transformation to the label
              loss_func: str=None, # loss function we want to include in the config.
              base_config: str='../config/base_config.yaml' # base config for use as input to build_config()
@@ -149,7 +150,15 @@ class Setup:
             else:
                 raise ValueError('drop_lowest_ratios must be bool')
         else:
-            self.drop_outliers = False
+            self.drop_lowest_ratios = False'
+
+        if krige_residuals:
+            if isinstance(krige_residuals, bool):
+                self.krige_residuals = krige_residuals
+            else:
+                raise ValueError('krige_residuals must be bool')
+        else:
+            self.krige_residuals = False
                 
         if log_label:
             if isinstance(log_label, bool):
