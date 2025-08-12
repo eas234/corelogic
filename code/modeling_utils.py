@@ -427,14 +427,24 @@ def lgb_train_test_write(X_train,
         valid_mask = loc_test['latitude'].notna() & loc_test['longitude'].notna()
         valid_mask &= np.isfinite(loc_test['longitude']) & np.isfinite(loc_test['latitude'])
 
-        valid_lons = loc_test.loc[valid_mask, 'longitude'].values
-        valid_lats = loc_test.loc[valid_mask, 'latitude'].values
+        valid_lons = loc_test.loc[valid_mask, 'longitude'].astype(float).values
+        valid_lats = loc_test.loc[valid_mask, 'latitude'].astype(float).values
 
         if np.isnan(valid_lons).any():
             print('lons have nulls')
         if np.isnan(valid_lats).any():
             print('lats have nulls')
-		
+
+        print("Length of loc_test:", len(loc_test))
+        print("Sum of valid_mask:", valid_mask.sum())
+
+
+        print("NaNs in longitude:", np.isnan(valid_lons).sum())
+        print("Infs in longitude:", np.isinf(valid_lons).sum())
+        print("NaNs in latitude:", np.isnan(valid_lats).sum())
+        print("Infs in latitude:", np.isinf(valid_lats).sum())
+        print("Shape longitude:", valid_lons.shape)
+        print("Shape latitude:", valid_lats.shape)
         z_test, ss_test = OK.execute('points',
 									valid_lons,
 									valid_lats,
