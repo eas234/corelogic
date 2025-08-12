@@ -443,8 +443,8 @@ def lgb_train_test_write(X_train,
         results_df['y_pred'] = y_pred
         if krige_residuals == True:
             results_df['y_pred_kriged'] = y_pred_kriged
-			print(r'mae before kriging:', mean_absolute_error(y_pred, y_true))
-			print(r'mae after kriging:', mean_absolute_error(y_pred_kriged, y_true))
+            print(r'mae before kriging:', mean_absolute_error(y_pred, y_true))
+            print(r'mae after kriging:', mean_absolute_error(y_pred_kriged, y_true))
     
     results_df['ratio'] = results_df['y_pred']/results_df['y_true']
     results_df['model_id'] = model_id
