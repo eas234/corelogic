@@ -408,9 +408,12 @@ def lgb_train_test_write(X_train,
 									 'latitude': loc_train['latitude'],
 									  'residual': y_train - y_pred_train})
 
-        kringing_train = kriging_train.dropna(how='any')
+        kriging_train = kriging_train[np.isfinite(kriging_train['longitude'])]
+        kriging_train = kriging_train[np.isfinite(kriging_train['latitude'])]
+        kriging_train = kriging_train[np.isfinite(kriging_train['residual'])]
+        kringing_train_clean = kriging_train.dropna(how='any')
 
-        kriging_train_sample = kriging_train.sample(n=20000, 
+        kriging_train_sample = kriging_train_clean.sample(n=20000, 
 												    random_state=42,
 												    replace=True)
 
@@ -419,7 +422,6 @@ def lgb_train_test_write(X_train,
 							 kriging_train_sample['residual'].values, 
 							 variogram_model='gaussian',
 							 verbose=True,
-							variogram_parameters=[10, 1, 0.1],
 							 nlags=3)
 
         print('predicting kriged residuals for test set')
