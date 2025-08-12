@@ -376,7 +376,10 @@ def lgb_train_test_write(X_train,
 			 model_dir='model',
 			 proc_data_dir='data',
 			 model_id='default',
-			 log_label=True):
+			 log_label=True,
+			 krige_residuals=False,
+             loc_train=None,
+             loc_test=None):
 
     with open(params_path, 'rb') as f:
          hyperparams=pickle.load(f)
@@ -390,19 +393,59 @@ def lgb_train_test_write(X_train,
     # generate predictions
     y_pred = model.predict(X_test)
 
+    if krige_residuals == True:
+        if loc_train == None or loc_test == None:
+            raise ValueError('Must specify latitude/longitude in loc_train, loc_test in order to krige residuals')
+			
+        # krige residuals using pykrige
+        y_pred_train = model.predict(X_train)
+
+        print('fitting ordinary kriging model on random subsample of train set residuals')
+        kriging_train = pd.DataFrame({'longitude': loc_train['longitude'],
+									 'latitude': loc_train['latitude'],
+									  'residual': y_train - y_pred_train})
+
+        kriging_train_sample = kriging_train.sample(n=20000, 
+												    random_state=42,
+												    replace=True)
+
+        OK = OrdinaryKriging(kriging_train_sample['longitude'].values, 
+							 kriging_train_sample['latitude'].values, 
+							 kriging_train_sample['residual'].values, 
+							 variogram_model='gaussian',
+							 verbose=True,
+							 nlags=20)
+
+        print('predicting kriged residuals for test set')
+        z_test, ss_test = OK.execute('points',
+									loc_test['longitude'].values,
+									loc_test['latitude'].values,
+									n_closest_points=20,
+									backend='loop')
+
+        y_pred_kriged = z_test + y_pred
+
     # align indices
     meta_test = meta_test.reset_index(drop=True)
     y_test = y_test.reset_index(drop=True)
 
     results_df = pd.DataFrame(meta_test)
     if log_label == True:
-        results_df['y_true_' + model_id] = [math.exp(x) for x in y_test]
-        results_df['y_pred_' + model_id] = [math.exp(x) for x in y_pred]
+        results_df['y_true'] = [math.exp(x) for x in y_test]
+        results_df['y_pred'] = [math.exp(x) for x in y_pred]
+        if krige_residuals == True:
+            results_df['y_pred_kriged'] = [math.exp(x) for x in y_pred_kriged]
     else:
-        results_df['y_true_' + model_id] = y_test
-        results_df['y_pred_' + model_id] = y_pred
-    results_df['ratio_' + model_id] = results_df['y_pred_' + model_id]/results_df['y_true_' + model_id]
+        results_df['y_true'] = y_test
+        results_df['y_pred'] = y_pred
+        if krige_residuals == True:
+            results_df['y_pred_kriged'] = y_pred_kriged
+    
+    results_df['ratio'] = results_df['y_pred']/results_df['y_true']
     results_df['model_id'] = model_id
+
+    if krige_residuals == True:
+        results_df['ratio_kriged'] = results_df['y_pred_kriged'] / results_df['y_true']
 
     # write predictions and metadata
     results_df.to_csv(os.path.join(proc_data_dir, model_id + '_preds.csv'), index=False)
