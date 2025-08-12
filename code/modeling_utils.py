@@ -411,7 +411,7 @@ def lgb_train_test_write(X_train,
         kriging_train = kriging_train[np.isfinite(kriging_train['longitude'])]
         kriging_train = kriging_train[np.isfinite(kriging_train['latitude'])]
         kriging_train = kriging_train[np.isfinite(kriging_train['residual'])]
-        kringing_train_clean = kriging_train.dropna(how='any')
+        kriging_train_clean = kriging_train.dropna(how='any')
 
         kriging_train_sample = kriging_train_clean.sample(n=20000, 
 												    random_state=42,
