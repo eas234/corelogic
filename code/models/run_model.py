@@ -31,7 +31,7 @@ from census import clean_val
 from modeling_utils import *
 from preprocess import *
 
-fips = '48201' 
+fips = '17031' 
 
 # load config -- change config file to run desired model
 for i in range(14,15):
@@ -39,15 +39,16 @@ for i in range(14,15):
     gen_config = setup.Setup(fips=fips, 
              fips_county_crosswalk='../../config/county_dict.yaml', # location of crosswalk between fips code and county name
              model_type='lightGBM', # specifies type of model. examples: 'rf', 'lasso', 'lightGBM'
-             study_label=f'bg_fe', # label for the type of study being run
+             study_label=f'kriged', # label for the type of study being run
              n_features=i, # specify number of model features (for ablation study). if -1 or None, include all specified.
              feature_list='../../config/full_feature_list.yaml', # config with full list of features of each type
              continuous=None, # list of continuous features to include. if None, defaults to list in feature_list
              categorical=None, # list of categorical features to include. if None, defaults to list in feature_list
              census='tract',  # valid options are 'bg', 'tract' or list. if None, no census features included.
-	     geography='bg', # set to None if you do not want fixed effects, otherwise 'bg' for block-group FEs
+	         geography=None, # set to None if you do not want fixed effects, otherwise 'bg' for block-group FEs
              label=None, # model label. if None, defaults to label specified in feature_list.
              drop_lowest_ratios=True,
+			 krige_residuals=True,
              log_label=True, # toggle whether to apply log transformation to the label
              loss_func='mae_loss', # loss function we want to include in the config.
              base_config='../../config/base_config.yaml' # base config for use as input to build_config())
@@ -75,6 +76,7 @@ for i in range(14,15):
         write_encoding_dict = out['write_encoding_dict']
         model_id = out['model_id']
         drop_lowest_ratios = out['drop_lowest_ratios']
+		krige_residuals = out['krige_residuals']
         if out['loss_func'] == 'mae_loss':
             loss_func = mae_loss
         elif out['loss_func'] == 'mse_loss':
@@ -193,4 +195,7 @@ for i in range(14,15):
 			 model_dir=model_dir,
 			 proc_data_dir=proc_data_dir,
 			 model_id=model_id,
-			 log_label=log_label)
+			 log_label=log_label,
+			 krige_residuals=krige_residuals,
+			 loc_train=meta_train[['latitude', 'longitude']],
+			 loc_test=meta_test[['latitude', 'longitude']]) 
