@@ -394,7 +394,7 @@ def lgb_train_test_write(X_train,
     y_pred = model.predict(X_test)
 
     if krige_residuals == True:
-        if loc_train == None or loc_test == None:
+        if not loc_train or not loc_test:
             raise ValueError('Must specify latitude/longitude in loc_train, loc_test in order to krige residuals')
 			
         # krige residuals using pykrige
