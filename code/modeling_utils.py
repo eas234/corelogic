@@ -408,6 +408,8 @@ def lgb_train_test_write(X_train,
 									 'latitude': loc_train['latitude'],
 									  'residual': y_train - y_pred_train})
 
+		kringing_train = kriging_train.dropna(how='any')
+
         kriging_train_sample = kriging_train.sample(n=20000, 
 												    random_state=42,
 												    replace=True)
