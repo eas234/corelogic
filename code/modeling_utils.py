@@ -413,16 +413,16 @@ def lgb_train_test_write(X_train,
         kriging_train = kriging_train[np.isfinite(kriging_train['residual'])]
         kriging_train_clean = kriging_train.dropna(how='any')
 
-        kriging_train_sample = kriging_train_clean.sample(n=20000, 
+        kriging_train_sample = kriging_train_clean.sample(n=40000, 
 												    random_state=42,
-												    replace=True)
+												    replace=False)
 
         OK = OrdinaryKriging(kriging_train_sample['longitude'].values, 
 							 kriging_train_sample['latitude'].values, 
 							 kriging_train_sample['residual'].values, 
 							 variogram_model='gaussian',
 							 verbose=True,
-							 nlags=10)
+							 nlags=12)
 
         print('predicting kriged residuals for test set')
 
@@ -450,7 +450,7 @@ def lgb_train_test_write(X_train,
         z_valid, ss_valid = OK.execute('points',
 									valid_lons,
 									valid_lats,
-									n_closest_points=20,
+									n_closest_points=30,
 									backend='loop')
 
         z_full = np.full(shape=len(loc_test), fill_value=np.nan)
