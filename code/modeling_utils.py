@@ -447,7 +447,7 @@ def lgb_train_test_write(X_train,
         print("Infs in latitude:", np.isinf(valid_lats).sum())
         print("Shape longitude:", valid_lons.shape)
         print("Shape latitude:", valid_lats.shape)
-        z_test, ss_test = OK.execute('points',
+        z_valid, ss_valid = OK.execute('points',
 									valid_lons,
 									valid_lats,
 									n_closest_points=20,
