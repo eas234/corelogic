@@ -629,8 +629,8 @@ class Preprocess:
 
             # if there are not enough sales in the last year of data, use the last two years as the test set.
             else:
-                self.X_train = copy[copy.sale_year < (copy.sale_year.max()-1)][self._binary_cols + self._categorical_cols + self._continuous_cols + self._time_cols + self.geo_col]
-                self.X_test = copy[copy.sale_year >= (copy.sale_year.max()-1)][self._binary_cols + self._categorical_cols + self._continuous_cols + self._time_cols + self.geo_col]
+                self.X_train = copy[copy.sale_year < (copy.sale_year.max()-1)][self._binary_cols + self._categorical_cols + self._continuous_cols + self._time_cols + self._geo_col]
+                self.X_test = copy[copy.sale_year >= (copy.sale_year.max()-1)][self._binary_cols + self._categorical_cols + self._continuous_cols + self._time_cols + self._geo_col]
                 self.y_train = copy[copy.sale_year < (copy.sale_year.max()-1)][self._label]
                 self.y_test = copy[copy.sale_year >= (copy.sale_year.max()-1)][self._label]
                 self.meta_train = copy[copy.sale_year < (copy.sale_year.max()-1)][self._meta_cols]
