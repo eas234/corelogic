@@ -76,7 +76,7 @@ for i in range(14,15):
         write_encoding_dict = out['write_encoding_dict']
         model_id = out['model_id']
         drop_lowest_ratios = out['drop_lowest_ratios']
-		krige_residuals = out['krige_residuals']
+        krige_residuals = out['krige_residuals']
         if out['loss_func'] == 'mae_loss':
             loss_func = mae_loss
         elif out['loss_func'] == 'mse_loss':
