@@ -425,9 +425,15 @@ def lgb_train_test_write(X_train,
         print('predicting kriged residuals for test set')
 
         valid_mask = loc_test['latitude'].notna() & loc_test['longitude'].notna()
+        valid_mask &= np.isfinite(loc_test['longitude']) & np.isfinite(loc_test['latitude'])
 
         valid_lons = loc_test.loc[valid_mask, 'longitude'].values
         valid_lats = loc_test.loc[valid_mask, 'latitude'].values
+
+		if np.isnan(valid_lons).any():
+            print('lons have nulls)
+        if np.isnan(valid_lats).any():
+            print('lats have nulls)
 		
         z_test, ss_test = OK.execute('points',
 									valid_lons,
