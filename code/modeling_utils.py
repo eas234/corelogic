@@ -414,17 +414,21 @@ def lgb_train_test_write(X_train,
         kriging_train = kriging_train[np.isfinite(kriging_train['residual'])]
         kriging_train_clean = kriging_train.dropna(how='any')
 
-        kriging_train_sample = kriging_train_clean.sample(n=40000, 
+        kriging_train_sample = kriging_train_clean.sample(n=50000, 
 												    random_state=42,
 												    replace=False)
 
+		kriging_train_sample.drop_duplicates(inplace=True)
+		
         OK = OrdinaryKriging(kriging_train_sample['longitude'].values, 
 							 kriging_train_sample['latitude'].values, 
 							 kriging_train_sample['residual'].values, 
-							 variogram_model='gaussian',
+							 variogram_model='exponential',
 							 verbose=True,
+							 weight=True,
 							 enable_plotting=True,
-							 nlags=12)
+							 nlags=20,
+							 coordinates_type='geographic')
 		
         plt.savefig('/oak/stanford/groups/deho/proptax/transfer/variogram_plot.png', dpi=300, bbox_inches='tight')
         plt.close()
