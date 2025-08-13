@@ -414,7 +414,7 @@ def lgb_train_test_write(X_train,
         kriging_train = kriging_train[np.isfinite(kriging_train['residual'])]
         kriging_train_clean = kriging_train.dropna(how='any')
 
-        kriging_train_sample = kriging_train_clean.sample(n=50000, 
+        kriging_train_sample = kriging_train_clean.sample(n=40000, 
 												    random_state=42,
 												    replace=False)
 
