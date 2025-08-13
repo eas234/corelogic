@@ -418,7 +418,7 @@ def lgb_train_test_write(X_train,
 												    random_state=42,
 												    replace=False)
 
-		kriging_train_sample.drop_duplicates(inplace=True)
+        kriging_train_sample.drop_duplicates(inplace=True)
 		
         OK = OrdinaryKriging(kriging_train_sample['longitude'].values, 
 							 kriging_train_sample['latitude'].values, 
