@@ -42,7 +42,7 @@ features:
 
   categorical: None
 
-  meta: ['meta_sfh', 'ASSESSED_YEAR', 'SALE_YEAR', 'CLIP', 'fips', 'tract', 'block_group', 'MARKET_TOTAL_VALUE', 'latitude', 'longitude']
+  meta: ['meta_sfh', 'ASSESSED_YEAR', 'SALE_YEAR', 'CLIP', 'fips', 'tract', 'block_group', 'MARKET_TOTAL_VALUE', 'ASSESSED_TOTAL_VALUE', 'APPRAISED_TOTAL_VALUE', 'CALCULATED_TOTAL_VALUE', 'CALCULATED_TOTAL_VALUE_SOURCE_CODE', 'TOTAL_TAX_AMOUNT', 'NET_TAX_AMOUNT', 'latitude', 'longitude']
 
   label: 'SALE_AMOUNT'
 
