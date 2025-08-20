@@ -103,11 +103,11 @@ for fips in fips_list:
     fips_features = fips_features[fips_features['availability'] >= share_non_null]['feature'].to_list()
 
     ## Order features that are present in the fips
-    feature_order = [x for x in features if x in fips_features]
+    feature_order_list = [x for x in features if x in fips_features]
 
     ## designate categorical and continuous
-    categorical = [x for x in feature_order if x in categorical_full]
-    continuous = [x for x in feature_order if x in continuous_full]
+    categorical = [x for x in feature_order_list if x in categorical_full]
+    continuous = [x for x in feature_order_list if x in continuous_full]
     binary = []
 
     ###
