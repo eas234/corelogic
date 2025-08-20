@@ -89,7 +89,7 @@ for fips in fips_list:
     print(f'starting fips {fips}')
 
     # clear paths
-    for temp_path in [sampler_path, params_path, trials_path, 'lasso_loop.db')]:
+    for temp_path in [sampler_path, params_path, trials_path, 'lasso_loop.db']:
         if os.path.exists(temp_path):
             os.remove(temp_path)
 	
@@ -170,7 +170,7 @@ for fips in fips_list:
     results.to_csv(results_path)
 
     # delete temporary paths created during model tuning
-    for temp_path in [sampler_path, params_path, trials_path, 'lasso_loop.db')]:
+    for temp_path in [sampler_path, params_path, trials_path, 'lasso_loop.db']:
         if os.path.exists(temp_path):
             os.remove(temp_path)
          
@@ -214,7 +214,7 @@ for fips in fips_list:
     results.to_csv(results_path)
 
     # delete temporary paths created during model tuning
-    for temp_path in [sampler_path, params_path, trials_path, "sqlite:///{}.db".format('lasso_loop')]:
+    for temp_path in [sampler_path, params_path, trials_path, 'lasso_loop.db']:
         if os.path.exists(temp_path):
             os.remove(temp_path)
 
