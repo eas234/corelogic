@@ -82,7 +82,7 @@ for fips in fips_list:
     # subset to sales from fips
     data = df[df.fips == fips].copy()
 
-	print(data.columns)
+    print(data.columns)
 
     ## Select only features present in specified fips
     fips_features = feature_order[feature_order['fips'] == int(fips)].drop(columns=['fips']).reset_index(drop=True).T.reset_index().rename(columns={ 'index' : 'feature', 0 : 'availability'})
