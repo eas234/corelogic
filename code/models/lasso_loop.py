@@ -51,8 +51,8 @@ sale_date_col = out['features']['sale_date']
 
 ## load in full data
 print('loading data')
-#df = pd.read_csv(data_path)
-df = pd.read_csv(data_path, nrows=1000000) # subsample for testing
+df = pd.read_csv(data_path)
+#df = pd.read_csv(data_path, nrows=1000000) # subsample for testing
 
 print('data loaded')
 
@@ -95,8 +95,6 @@ for fips in fips_list:
 	
     # subset to sales from fips
     data = df[df.fips == fips].copy()
-
-    print(data[sale_date_col])
 
     ## Select only features present in specified fips
     fips_features = feature_order[feature_order['fips'] == int(fips)].drop(columns=['fips']).reset_index(drop=True).T.reset_index().rename(columns={ 'index' : 'feature', 0 : 'availability'})
