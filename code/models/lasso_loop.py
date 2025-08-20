@@ -80,7 +80,7 @@ features = (feature_order.drop(columns=['fips']) >= share_non_null).sum().reset_
 features = features.sort_values('availability', ascending=False)['feature'].to_list()
 
 for fips in fips_list:
-	print(f'starting fips {fips}')
+    print(f'starting fips {fips}')
 
     # subset to sales from fips
     data = df[df.fips == fips].copy()
