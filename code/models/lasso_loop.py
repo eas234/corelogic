@@ -48,6 +48,7 @@ continuous_full = out['features']['continuous']
 meta = out['features']['meta']
 label = out['features']['label']
 sale_date_col = out['features']['sale_date']
+time_cols = out['features']['time']
 
 ## load in full data
 print('loading data')
@@ -180,8 +181,15 @@ for fips in fips_list:
          
     ## tune, train, and write output for 3-feature model
 
-    X_train = X_train[X_train.columns.tolist()[:3]]
-    X_test = X_test[X_train.columns.tolist()[:3]]
+    X_train = X_train[list(set(X_train.columns.tolist()) - set(time_cols))[:3] + time_cols]
+    X_test = X_test[list(set(X_train.columns.tolist()) - set(time_cols))[:3] + time cols]
+
+	# print data info before tuning
+    print('X_train, X_test, y_train, y_test info after dropping all but 3 house characteristics:')
+    print(X_train.info())
+    print(X_test.info())
+    print(y_train.info())
+    print(y_test.info())
 
     # tune
     tune_model(X_train, 
