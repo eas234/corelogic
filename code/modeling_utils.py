@@ -612,6 +612,8 @@ def lasso_train_test_write(X_train,
     model = linear_model.Lasso(**hyperparams)
     model.fit(X_train, y_train)
 
+    print(X_test.isna())
+    print(X_test.isna().sum())
     # gen preds
     y_pred = model.predict(X_test)
 
