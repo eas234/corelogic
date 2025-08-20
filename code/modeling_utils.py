@@ -358,18 +358,18 @@ def tune_model(X_train,
             study.optimize(lambda trial: lightGBM_objective(trial, X_train_copy, y_train_copy, random_state=random_state, cv_folds=cv_folds, geo=geography), n_trials=(n_trials-prev_trials), timeout=timeout)
 
 
-	if write_output == True:
+    if write_output == True:
 	    # Save the sampler
-	    with open(sampler_path, "wb") as fout:
-	        pickle.dump(study.sampler, fout)
+        with open(sampler_path, "wb") as fout:
+            pickle.dump(study.sampler, fout)
 	
 	    # Save the best parameters
-	    with open(params_path, 'wb') as fout:
+        with open(params_path, 'wb') as fout:
 	        pickle.dump(study.best_params, fout)
 	
 	    # Output trials DataFrame
-	    df = study.trials_dataframe(attrs=("number", "value", "params", "state"))
-	    df.to_csv(trials_path)
+        df = study.trials_dataframe(attrs=("number", "value", "params", "state"))
+        df.to_csv(trials_path)
                 
     return df
 
