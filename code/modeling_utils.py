@@ -13,6 +13,7 @@ import sys
 from pykrige.ok import OrdinaryKriging
 
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.impute import SimpleImputer
 from sklearn import linear_model
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
@@ -610,10 +611,14 @@ def lasso_train_test_write(X_train,
          hyperparams=pickle.load(f)
 
     model = linear_model.Lasso(**hyperparams)
+
+	# get rid of all missings remaining after preprocessing
+    imputer = SimpleImputer(strategy="mean")
+    X_train = imputer.fit_transform(X_train)
+    X_test = imputer.transform(X_test)
+
     model.fit(X_train, y_train)
 
-    print(X_test.isna())
-    print(X_test.isna().sum())
     # gen preds
     y_pred = model.predict(X_test)
 
