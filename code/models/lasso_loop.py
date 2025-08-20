@@ -155,8 +155,7 @@ for fips in fips_list:
 			y_train, 
 			y_test, 
 			meta_test, 
-			params_path='params_path.pkl',
-			proc_data_dir='data',
+			params_path=params_path,
             model_id='max_features',
             log_label=True,
             write_output=False)
@@ -202,8 +201,7 @@ for fips in fips_list:
 			y_train, 
 			y_test, 
 			meta_test, 
-			params_path='params_path.pkl',
-			proc_data_dir='data',
+			params_path=params_path,
             model_id='3_features',
             log_label=True,
             write_output=False)
