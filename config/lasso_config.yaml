@@ -1,20 +1,20 @@
 paths:
   
-  data_path: 'oak/stanford/groups/deho/proptax/clean/corelogic_census_2018_2023.csv'
+  data_path: '/oak/stanford/groups/deho/proptax/clean/corelogic_census_2018_2023.csv'
   
   feature_order_path: '../../config/feature_order_2023.csv'
   
-  fips_path: 'oak/stanford/groups/deho/proptax/clean/shuffled_fips.csv'
+  fips_path: '/oak/stanford/groups/deho/proptax/clean/shuffled_fips.csv'
   
-  results_path: 'oak/stanford/groups/deho/proptax/models/lasso_loop/results/lasso_results.csv'
+  results_path: '/oak/stanford/groups/deho/proptax/models/lasso_loop/results/lasso_results.csv'
 
-  log_path: 'oak/stanford/groups/deho/proptax/models/lasso_loop/logs'
+  log_path: '/oak/stanford/groups/deho/proptax/models/lasso_loop/logs'
 
-  sampler_path: 'oak/stanford/groups/deho/proptax/models/lasso_loop/hyperparams/sampler.pkl'
+  sampler_path: '/oak/stanford/groups/deho/proptax/models/lasso_loop/hyperparams/sampler.pkl'
 
-  params_path: 'oak/stanford/groups/deho/proptax/models/lasso_loop/hyperparams/best_params.pkl'
+  params_path: '/oak/stanford/groups/deho/proptax/models/lasso_loop/hyperparams/best_params.pkl'
 
-  trials_path: 'oak/stanford/groups/deho/proptax/models/lasso_loop/hyperparams/trials.csv'
+  trials_path: '/oak/stanford/groups/deho/proptax/models/lasso_loop/hyperparams/trials.csv'
 
 model_params:
 
@@ -77,3 +77,4 @@ features:
 
 
   binary : []
+
