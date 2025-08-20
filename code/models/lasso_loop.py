@@ -51,8 +51,8 @@ sale_date_col = out['features']['sale_date']
 
 ## load in full data
 print('loading data')
-df = pd.read_csv(data_path)
-#df = pd.read_csv(data_path, nrows=10000000) # subsample for testing
+#df = pd.read_csv(data_path)
+df = pd.read_csv(data_path, nrows=1000000) # subsample for testing
 
 print('data loaded')
 
