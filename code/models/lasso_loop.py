@@ -7,7 +7,7 @@ import yaml
 
 sys.path.insert(0, '..')
 from preprocess import Preprocess
-from modeling_utils import mae_loss, lasso_objective, tune_model
+from modeling_utils import mae_loss, lasso_objective, tune_model, lasso_train_test_write
 
 import optuna
 from optuna.samplers import TPESampler
