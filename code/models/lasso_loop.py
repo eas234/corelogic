@@ -51,8 +51,8 @@ sale_date_col = out['features']['sale_date']
 
 ## load in full data
 print('loading data')
-#df = pd.read_csv(data_path)
-df = pd.read_csv(data_path, nrows=100000) # subsample for testing
+df = pd.read_csv(data_path)
+#df = pd.read_csv(data_path, nrows=10000000) # subsample for testing
 df = df[df.MULTI_OR_SPLIT_PARCEL_CODE.isnull()]
 df[sale_date_col] = pd.to_datetime(df[sale_date_col], errors='coerce')
 df[sale_date_col] = df[sale_date_col].dt.strftime("%Y%m%d").astype(int)
