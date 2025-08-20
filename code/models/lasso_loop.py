@@ -167,7 +167,7 @@ for fips in fips_list:
     
     # write
     results = pd.concat([results, output])
-    results.to_csv(results_path)
+    results.to_csv(results_path, index=False)
 
     # delete temporary paths created during model tuning
     for temp_path in [sampler_path, params_path, trials_path, 'lasso_loop.db']:
@@ -211,7 +211,7 @@ for fips in fips_list:
     
     # write
     results = pd.concat([results, output])
-    results.to_csv(results_path)
+    results.to_csv(results_path, index=False)
 
     # delete temporary paths created during model tuning
     for temp_path in [sampler_path, params_path, trials_path, 'lasso_loop.db']:
