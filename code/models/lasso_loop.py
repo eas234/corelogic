@@ -182,7 +182,7 @@ for fips in fips_list:
     ## tune, train, and write output for 3-feature model
 
     X_train = X_train[list(set(X_train.columns.tolist()) - set(time_cols))[:3] + time_cols]
-    X_test = X_test[list(set(X_train.columns.tolist()) - set(time_cols))[:3] + time cols]
+    X_test = X_test[list(set(X_train.columns.tolist()) - set(time_cols))[:3] + time_cols]
 
 	# print data info before tuning
     print('X_train, X_test, y_train, y_test info after dropping all but 3 house characteristics:')
