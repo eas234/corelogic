@@ -295,7 +295,7 @@ def tune_model(X_train,
 	    load_if_exists=True,
 	    sampler=TPESampler(seed=42, n_startup_trials=20, multivariate=True),
 	    sampler_path='sampler.pkl', #.pkl file
-            model: str='random_forest', # model to tune. current options are 'random_forest', 'lasso', 'lightGBM'
+        model: str='random_forest', # model to tune. current options are 'random_forest', 'lasso', 'lightGBM'
 	    params_path='best_params.pkl', #.pkl file
 	    geography='bg', # bg or None
 	    trials_path='trials.csv', #.csv file
@@ -305,6 +305,7 @@ def tune_model(X_train,
 	    n_jobs=4,
 	    cv_folds=5,
 	    subsample_train=True,
+		write_output=True,
 	    timeout=3600 # stop tuning after one hour
 	):
 
@@ -355,18 +356,20 @@ def tune_model(X_train,
             study.optimize(lambda trial: lasso_objective(trial, X_train_copy, y_train_copy, random_state=random_state, cv_folds=cv_folds), n_trials=(n_trials-prev_trials), timeout=timeout)
         elif model == 'lightGBM':
             study.optimize(lambda trial: lightGBM_objective(trial, X_train_copy, y_train_copy, random_state=random_state, cv_folds=cv_folds, geo=geography), n_trials=(n_trials-prev_trials), timeout=timeout)
+
+
+	if write_output == True:
+	    # Save the sampler
+	    with open(sampler_path, "wb") as fout:
+	        pickle.dump(study.sampler, fout)
 	
-    # Save the sampler
-    with open(sampler_path, "wb") as fout:
-        pickle.dump(study.sampler, fout)
-
-    # Save the best parameters
-    with open(params_path, 'wb') as fout:
-        pickle.dump(study.best_params, fout)
-
-    # Output trials DataFrame
-    df = study.trials_dataframe(attrs=("number", "value", "params", "state"))
-    df.to_csv(trials_path)
+	    # Save the best parameters
+	    with open(params_path, 'wb') as fout:
+	        pickle.dump(study.best_params, fout)
+	
+	    # Output trials DataFrame
+	    df = study.trials_dataframe(attrs=("number", "value", "params", "state"))
+	    df.to_csv(trials_path)
                 
     return df
 
