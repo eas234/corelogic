@@ -53,11 +53,17 @@ sale_date_col = out['features']['sale_date']
 print('loading data')
 df = pd.read_csv(data_path)
 #df = pd.read_csv(data_path, nrows=10000000) # subsample for testing
+
+print('data loaded')
+
+# data cleaning
 df = df[df.MULTI_OR_SPLIT_PARCEL_CODE.isnull()]
+df = df[~df.fips.isnull()]
 df[sale_date_col] = pd.to_datetime(df[sale_date_col], errors='coerce')
 df[sale_date_col] = df[sale_date_col].dt.strftime("%Y%m%d").astype(int)
 df.fips = [int(x) for x in df.fips]
-print('data loaded')
+
+print('data cleaned')
 
 ## get list of fips to loop through; determine how many fips have already been processed
 fips = pd.read_csv(fips_path)
