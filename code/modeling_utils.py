@@ -569,3 +569,68 @@ def rf_train_test_write(X_train,
     results_df.to_csv(os.path.join(proc_data_dir, model_id + '_preds.csv'), index=False)
 
     return results_df
+
+def lasso_train_test_write(X_train, 
+			X_test, 
+			y_train, 
+			y_test, 
+			meta_test, 
+			params_path='params_path.pkl',
+			proc_data_dir='data',
+            model_id='default',
+            log_label=True,
+            write_output=True
+    ):
+
+    """
+    Train lasso model using optimal hyperparams
+    Write out predictions along with ground truth and metadata to specified directory
+
+    inputs:
+    -X_train: dataframe of training data features
+    -X_test: dataframe of test data features
+    -y_train: dataframe of training data labels
+    -y_test: dataframe of test data labels
+    -meta_train: metadata from training set
+    -meta_test: metatdata from test set
+    -params_path: .pkl file where the model's hyperparameters live
+    -proc_data_dir: directory where the output should live
+    -model_id: string indicating the model being run
+    -log_label: indicates whether label was log-transformed for training, and therefore
+        labels and predictions should be exponentiated before writing results to memory. 
+
+    outputs:
+    -results_df: dataframe, written to proc_data_dir, which contains
+    sale price, predicted value, sales ratio, model_id, and desired metadata
+    for each observation in the test set.
+    also contains exponentiated labels and predictions if log_label == True.
+    """
+
+    with open(params_path, 'rb') as f:
+         hyperparams=pickle.load(f)
+
+    model = linear_model.Lasso(**hyperparams)
+    model.fit(X_train, y_train)
+
+    # gen preds
+    y_pred = model.predict(X_test)
+
+    # align indices
+    meta_test = meta_test.reset_index(drop=True)
+    y_test = y_test.reset_index(drop=True)
+
+    results_df = pd.DataFrame(meta_test)
+    if log_label == True:
+        results_df['y_true'] = [math.exp(x) for x in y_test]
+        results_df['y_pred'] = [math.exp(x) for x in y_pred]
+    else:
+        results_df['y_true'] = y_test
+        results_df['y_pred'] = y_pred
+    results_df['ratio'] = results_df['y_pred']/results_df['y_true']
+    results_df['model_id'] = model_id
+
+    if write_output==True:
+        # write predictions and metadata
+        results_df.to_csv(os.path.join(proc_data_dir, model_id + '_preds.csv'), index=False)
+
+    return results_df
