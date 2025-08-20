@@ -59,8 +59,8 @@ print('data loaded')
 # data cleaning
 df = df[df.MULTI_OR_SPLIT_PARCEL_CODE.isnull()]
 df = df[~df.fips.isnull()]
-df[sale_date_col] = pd.to_datetime(df[sale_date_col], errors='coerce')
-df[sale_date_col] = df[sale_date_col].dt.strftime("%Y%m%d").astype(int)
+#df[sale_date_col] = pd.to_datetime(df[sale_date_col], errors='coerce')
+#df[sale_date_col] = df[sale_date_col].dt.strftime("%Y%m%d").astype(int)
 df.fips = [int(x) for x in df.fips]
 
 print('data cleaned')
