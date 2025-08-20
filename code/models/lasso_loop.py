@@ -129,6 +129,12 @@ for fips in fips_list:
                                                                                                            drop_lowest_ratios=True,
 																										   gen_time_vars=True
                                                                                                            )
+    # print data info before tuning
+    print('X_train, X_test, y_train, y_test info after preprocessing:')
+    print(X_train.info())
+    print(X_test.info())
+    print(y_train.info())
+    print(y_test.info())
 
     ## tune, train, and write output from full-feature model
 
