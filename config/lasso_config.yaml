@@ -67,6 +67,13 @@ features:
    'char_water_cat',
    'char_elec_cat']
 
+   time: ['sale_year',
+          'sale_month',
+          'sale_day_of_month',
+          'sale_day_of_year',
+          'sale_day_of_week',
+          'sale_day']
+
   meta: ['meta_sfh', 'ASSESSED_YEAR', 'SALE_YEAR', 'CLIP', 'fips', 'tract', 'block_group', 'MARKET_TOTAL_VALUE', 'ASSESSED_TOTAL_VALUE', 'APPRAISED_TOTAL_VALUE', 'CALCULATED_TOTAL_VALUE', 'CALCULATED_TOTAL_VALUE_SOURCE_CODE', 'TOTAL_TAX_AMOUNT', 'NET_TAX_AMOUNT', 'latitude', 'longitude']
 
   label: 'SALE_AMOUNT'
@@ -77,4 +84,5 @@ features:
 
 
   binary : []
+
 
