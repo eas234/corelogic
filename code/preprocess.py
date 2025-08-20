@@ -259,18 +259,16 @@ class Preprocess:
         """
 
         copy = self._data.copy()
-        sale_date = copy[self._sale_date_col]
-        
-        # confirm that sale date is an integer.
+        sale_date = copy[self._sale_date_col].astype(str).str.zfill(8)
+
+        '''
         # if not, strip of non-numeric characters and convert.
         if sale_date.dtype == 'O':
             sale_date = sale_date.str.replace(r'\D+', '', regex=True).astype(int)
-
-        # to do - validate that date has 8 characters. All obs in redivis do already
-        # but good to have a check for future analyses.
+        '''
 
         # cast sale date as datetime object
-        sale_date = [pd.to_datetime(x, format='%Y%m%d', errors='coerce') for x in sale_date]
+        sale_date = pd.to_datetime(sale_date, format='%Y%m%d', errors='coerce')
 
         # gen sale year
         sale_year = [x.year for x in sale_date]
