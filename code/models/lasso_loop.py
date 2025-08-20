@@ -207,7 +207,7 @@ for fips in fips_list:
             write_output=False)
     
     # write
-    results = pd.concat(results, output)
+    results = pd.concat([results, output])
     results.to_csv(results_path)
 
     # delete temporary paths created during model tuning
