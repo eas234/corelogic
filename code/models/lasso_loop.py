@@ -133,7 +133,7 @@ for fips in fips_list:
     tune_model(X_train, 
 	            y_train,
  	            study_name='lasso_loop',
-                load_if_exists=False,
+                load_if_exists=True,
                 sampler=TPESampler(seed=42, n_startup_trials=20, multivariate=True),
                 sampler_path=sampler_path, #.pkl file
                 params_path=params_path, #.pkl file
