@@ -198,7 +198,7 @@ def lasso_objective(trial,
     }
 
     # build model and scorer
-    model = linear_model.lasso(random_state=random_state, **params)
+    model = linear_model.Lasso(random_state=random_state, **params)
     scorer = make_scorer(loss_func)
     cv_score = cross_val_score(model, X_train, y_train, scoring=scorer, n_jobs=n_jobs, cv=cv_folds)
 
