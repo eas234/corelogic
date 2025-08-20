@@ -112,7 +112,7 @@ for fips in fips_list:
     
     X_train, X_test, y_train, y_test, meta_train, meta_test, continuous, binary, categorical = preproc.run(target_encode=False, 
                                                                                                            one_hot=True, 
-                                                                                                           drop_lowest_ratios=drop_lowest_ratios
+                                                                                                           drop_lowest_ratios=True
                                                                                                            )
 
     ## tune, train, and write output from full-feature model
