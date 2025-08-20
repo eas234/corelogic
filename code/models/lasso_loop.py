@@ -171,10 +171,8 @@ for fips in fips_list:
          
     ## tune, train, and write output for 3-feature model
 
-    three_features = feature_order[:3]
-
-    X_train = X_train[three_features]
-    X_test = X_test[three_features]
+    X_train = X_train[X_train.columns.tolist()[:3]]
+    X_test = X_test[X_train.columns.tolist()[:3]]
 
     # tune
     tune_model(X_train, 
