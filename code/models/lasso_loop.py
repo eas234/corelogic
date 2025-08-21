@@ -113,6 +113,7 @@ for fips in fips_list:
 
     ###
 
+	
     preproc = Preprocess(data.copy(),
 			    label,
 			    continuous,
@@ -126,12 +127,16 @@ for fips in fips_list:
 			    log_label=log_label,
                 log_dir=log_path
                 )
-    
-    X_train, X_test, y_train, y_test, meta_train, meta_test, continuous, binary, categorical = preproc.run(target_encode=False, 
+
+    try:
+        X_train, X_test, y_train, y_test, meta_train, meta_test, continuous, binary, categorical = preproc.run(target_encode=False, 
                                                                                                            one_hot=True, 
                                                                                                            drop_lowest_ratios=True,
 																										   gen_time_vars=True
                                                                                                            )
+	except LightGBMError:
+		continue
+		
     # print data info before tuning
     print('X_train, X_test, y_train, y_test info after preprocessing:')
     print(X_train.info())
