@@ -105,7 +105,7 @@ for fips in list(remaining_fips):
     
     if 'availability' in fips_features.columns:
         fips_features = fips_features[fips_features['availability'] >= share_non_null]['feature'].to_list()
-	else:
+    else:
         continue
 
     ## Order features that are present in the fips
