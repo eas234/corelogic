@@ -103,7 +103,7 @@ for fips in fips_list:
 
     ## Order features that are present in the fips
     feature_order_list = [x for x in features if x in fips_features]
-	if len(feature_order_list) == 0
+    if len(feature_order_list) == 0
         continue
 
     ## designate categorical and continuous
@@ -184,6 +184,9 @@ for fips in fips_list:
     ## tune, train, and write output for 3-feature model
     all_features = X_train.columns.tolist()
     non_cat_features = [x for x in all_features if 'cat' not in x]
+
+    if len(list(set(non_cat_features) - set(time_cols))) < 3:
+        continue
 	
     X_train = X_train[list(set(non_cat_features) - set(time_cols))[:3] + time_cols]
     X_test = X_test[list(set(non_cat_features) - set(time_cols))[:3] + time_cols]
