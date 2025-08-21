@@ -633,8 +633,8 @@ def lasso_train_test_write(X_train,
         results_df = results_df.dropna(subset=['y_true', 'y_pred'])
         results_df = results_df[results_df.y_true < 700]
         results_df = results_df[results_df.y_pred < 700]
-        results_df.y_true = [math.exp(x) for x in results.y_true]
-        results_df.y_pred = [math.exp(x) for x in results.y_pred]
+        results_df.y_true = [math.exp(x) for x in results_df.y_true]
+        results_df.y_pred = [math.exp(x) for x in results_df.y_pred]
 		
     else:
         results_df['y_true'] = y_test
