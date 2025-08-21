@@ -78,11 +78,9 @@ features:
 
   label: 'SALE_AMOUNT'
 
-  time: ['ASSESSED_YEAR', 'SALE_YEAR']
-
   sale_date : 'sale_date'
 
-
   binary : []
+
 
 
