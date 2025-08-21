@@ -407,6 +407,7 @@ class Preprocess:
             self._continuous_cols = [x for x in self._continuous_cols if x in self._data.columns]
             self._binary_cols = [x for x in self._binary_cols if x in self._data.columns]
             self._categorical_cols = [x for x in self._categorical_cols if x in self._data.columns]
+            self._time_cols = [x for x in self._time_cols if x in self._data.columns]
             
         else:
             processed_data = self._data.copy()
@@ -442,6 +443,7 @@ class Preprocess:
             self._continuous_cols = [x for x in self._continuous_cols if x in self._data.columns]
             self._binary_cols = [x for x in self._binary_cols if x in self._data.columns]
             self._categorical_cols = [x for x in self._categorical_cols if x in self._data.columns]
+            self._time_cols = [x for x in self._time_cols if x in self._data.columns]
 
         else:
             processed_data = self._data.copy()
