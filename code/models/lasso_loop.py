@@ -87,7 +87,7 @@ feature_order = pd.read_csv(feature_order_path)
 features = (feature_order.drop(columns=['fips']) >= share_non_null).sum().reset_index().rename(columns={'index' : 'feature', 0 : 'availability'})
 features = features.sort_values('availability', ascending=False)['feature'].to_list()
 
-for fips in fips_list:
+for fips in list(remaining_fips):
     print(f'starting fips {fips}')
 
     # clear paths
@@ -111,9 +111,6 @@ for fips in fips_list:
     categorical = [x for x in feature_order_list if x in categorical_full]
     continuous = [x for x in feature_order_list if x in continuous_full]
     binary = []
-
-    ###
-
 	
     preproc = Preprocess(data.copy(),
 			    label,
