@@ -181,7 +181,7 @@ for fips in fips_list:
          
     ## tune, train, and write output for 3-feature model
     all_features = X_train.columns.tolist()
-	non_cat_features = [x for x in all_features if 'cat' not in x]
+    non_cat_features = [x for x in all_features if 'cat' not in x]
 	
     X_train = X_train[list(set(non_cat_features) - set(time_cols))[:3] + time_cols]
     X_test = X_test[list(set(non_cat_features) - set(time_cols))[:3] + time_cols]
