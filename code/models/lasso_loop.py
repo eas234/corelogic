@@ -180,9 +180,11 @@ for fips in fips_list:
             os.remove(temp_path)
          
     ## tune, train, and write output for 3-feature model
-
-    X_train = X_train[list(set(X_train.columns.tolist()) - set(time_cols))[:3] + time_cols]
-    X_test = X_test[list(set(X_train.columns.tolist()) - set(time_cols))[:3] + time_cols]
+    all_features = X_train.columns.tolist()
+	non_cat_features = [x for x in all_features if 'cat' not in x]
+	
+    X_train = X_train[list(set(non_cat_features) - set(time_cols))[:3] + time_cols]
+    X_test = X_test[list(set(non_cat_features) - set(time_cols))[:3] + time_cols]
 
 	# print data info before tuning
     print('X_train, X_test, y_train, y_test info after dropping all but 3 house characteristics:')
