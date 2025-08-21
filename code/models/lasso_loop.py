@@ -1,4 +1,5 @@
 
+import lightgbm
 import numpy as np
 import os
 import pandas as pd
@@ -134,7 +135,7 @@ for fips in fips_list:
                                                                                                            drop_lowest_ratios=True,
 																										   gen_time_vars=True
                                                                                                            )
-    except LightGBMError:
+    except lightgbm.basic.LightGBMError:
         continue
 		
     # print data info before tuning
