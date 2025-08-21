@@ -103,6 +103,8 @@ for fips in fips_list:
 
     ## Order features that are present in the fips
     feature_order_list = [x for x in features if x in fips_features]
+	if len(feature_order_list) == 0
+        continue
 
     ## designate categorical and continuous
     categorical = [x for x in feature_order_list if x in categorical_full]
