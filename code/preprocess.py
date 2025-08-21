@@ -682,6 +682,7 @@ class Preprocess:
         self._continuous_cols = [col for col in self._continuous_cols if col in remaining_cols]
         self._binary_cols = [col for col in self._binary_cols if col in remaining_cols]
         self._categorical_cols = [col for col in self._categorical_cols if col in remaining_cols]
+        self._time_cols = [col for col in self._time_cols if col in remaining_cols]
 
     def winsorize_continuous(self, inplace: bool=True):
 
@@ -1093,8 +1094,6 @@ class Preprocess:
         
         self.train_test_split()
         
-        self._drop_problematic_cols_from_splits()
-        
         if self.__wins_pctile > 0:
             self.winsorize_continuous()
             self.winsorize_label()
@@ -1103,6 +1102,8 @@ class Preprocess:
         
         if target_encode:
             self.target_encode()
+            
+        self._drop_problematic_cols_from_splits()
         
         self.impute_missings_with_mice()
         
@@ -1114,86 +1115,3 @@ class Preprocess:
         self.logger.info("Preprocessing complete, returning self.X_train, self.X_test, self.y_train, self.y_test, self.meta_train, self.meta_test, self._continuous_cols, self._binary_cols, and self._categorical_cols")
 
         return self.X_train, self.X_test, self.y_train, self.y_test, self.meta_train, self.meta_test, self._continuous_cols, self._binary_cols, self._categorical_cols
-
-'''
-old code. flag_outliers() ended up tossing too much good data. 
-    def flag_outliers(self, 
-                     inplace: bool=True):
-
-        copy = self._data.copy()
-
-        # Create deciles of variables in home_char
-        for var in self._outlier_grouping_cols:
-            copy[var + '_decile'] = pd.qcut(
-                copy[var],
-                10,
-                labels=False,
-                duplicates='drop')
-        decile_char = [x + '_decile' for x in self._outlier_grouping_cols]
-    
-        # MAD-based outlier detection function
-        def identify_mad_outliers(group):
-            if len(group) < self.__outlier_min_group_size:
-                return pd.Series(False, index=group.index)
-    
-            median = group[self._label].median()
-            mad = np.median(np.abs(group[self._label] - median))
-    
-            if mad == 0:
-                return pd.Series(False, index=group.index)
-    
-            threshold = 2 * 1.4826 * mad  # Approximate to ~2 std dev for normal dist
-            #threshold = 2*mad
-            return np.abs(group[self._label] - median) > threshold
-    
-        # Initialize flag
-        copy['label_is_outlier'] = False
-    
-        
-        # generate sets of group keys
-        group_keys = []
-        
-        for i in range(len(decile_char)):
-            group_keys.append(decile_char[:(i+1)])
-            
-        if self._outlier_geo_col:
-            group_keys = [[self._outlier_geo_col] + x for x in group_keys]
-    
-        for keys in group_keys:
-            mask = copy['label_is_outlier'] == False
-            sub_df = copy[mask]
-    
-            valid_mask = sub_df[keys].notna().all(axis=1)
-            valid_rows = sub_df[valid_mask]
-    
-            if valid_rows.empty:
-                continue
-    
-            # Group and apply outlier function
-            grouped = valid_rows.groupby(keys, group_keys=False)
-            outlier_flags = grouped.apply(identify_mad_outliers)
-    
-            # Make sure indices match
-            outlier_flags.index = outlier_flags.index.droplevel(0) if isinstance(outlier_flags.index, pd.MultiIndex) else outlier_flags.index
-    
-            copy.loc[outlier_flags.index, 'label_is_outlier'] = outlier_flags
-            
-
-        if inplace:
-            self._data = copy
-            self._meta_cols += ['label_is_outlier']
-        return copy
-
-    def drop_outliers(self, 
-                     inplace: bool=True):
-
-        copy = self._data.copy()
-
-        # drop outlier columns
-        copy = copy[copy.label_is_outlier == False].reset_index(drop=True)
-
-        if inplace:
-            self._data = copy
-            
-        return copy
-'''
