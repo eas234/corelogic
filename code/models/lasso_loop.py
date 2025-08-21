@@ -97,10 +97,16 @@ for fips in list(remaining_fips):
 	
     # subset to sales from fips
     data = df[df.fips == fips].copy()
+    if len(data) < 100:
+        continue
 
     ## Select only features present in specified fips
     fips_features = feature_order[feature_order['fips'] == int(fips)].drop(columns=['fips']).reset_index(drop=True).T.reset_index().rename(columns={ 'index' : 'feature', 0 : 'availability'})
-    fips_features = fips_features[fips_features['availability'] >= share_non_null]['feature'].to_list()
+    
+    if 'availability' in fips_features.columns:
+        fips_features = fips_features[fips_features['availability'] >= share_non_null]['feature'].to_list()
+	else:
+        continue
 
     ## Order features that are present in the fips
     feature_order_list = [x for x in features if x in fips_features]
