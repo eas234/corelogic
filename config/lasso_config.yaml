@@ -67,8 +67,7 @@ features:
    'char_water_cat',
    'char_elec_cat']
 
-  time: ['sale_year',
-    'sale_month',
+  time: ['sale_month',
     'sale_day_of_month',
     'sale_day_of_year',
     'sale_day_of_week',
@@ -81,6 +80,7 @@ features:
   sale_date : 'sale_date'
 
   binary : []
+
 
 
 
