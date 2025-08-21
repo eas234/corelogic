@@ -134,8 +134,8 @@ for fips in fips_list:
                                                                                                            drop_lowest_ratios=True,
 																										   gen_time_vars=True
                                                                                                            )
-	except LightGBMError:
-		continue
+    except LightGBMError:
+        continue
 		
     # print data info before tuning
     print('X_train, X_test, y_train, y_test info after preprocessing:')
