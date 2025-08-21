@@ -103,7 +103,7 @@ for fips in fips_list:
 
     ## Order features that are present in the fips
     feature_order_list = [x for x in features if x in fips_features]
-    if len(feature_order_list) == 0
+    if len(feature_order_list) == 0:
         continue
 
     ## designate categorical and continuous
