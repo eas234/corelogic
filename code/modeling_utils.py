@@ -628,6 +628,8 @@ def lasso_train_test_write(X_train,
 
     results_df = pd.DataFrame(meta_test)
     if log_label == True:
+		results_df = results_df[results_df.y_true > 0]
+		results_df = results_df[results_df.y_pred > 0]
         results_df['y_true'] = [math.exp(x) for x in y_test]
         results_df['y_pred'] = [math.exp(x) for x in y_pred]
     else:
