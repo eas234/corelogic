@@ -923,10 +923,6 @@ class Preprocess:
             else:
                 test[col] = test[col].astype(train[col].dtype)
 
-        print("Train dtypes:\n", train.dtypes.reset_index(drop=True))
-        print("Test dtypes:\n", test.dtypes.reset_index(drop=True))
-        print("Equal?", np.all(train.dtypes.values == test.dtypes.values))
-
         if all(train[col].isnull().sum() == 0 for col in train.columns):
             self.logger.info("There are no missing values for impute_missings_with_mice() to impute. Skipping imputation.")
             return
