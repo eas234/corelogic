@@ -8,7 +8,7 @@ dname = os.path.dirname(abspath)
 os.chdir(dname)
 
 ## Read data and remove bad rows
-df = pd.read_csv('/oak/stanford/groups/deho/proptax/clean/corelogic_census_2018_2023.csv', usecols=['fips', 'SALE_YEAR', 'MULTI_OR_SPLIT_PARCEL_CODE', 'CALCULATED_TOTAL_VALUE', 'CALCULATED_TOTAL_VALUE_SOURCE_CODE', 'SALE_AMOUNT'])
+df = pd.read_csv('/oak/stanford/groups/deho/proptax/clean/corelogic_census_2018_2023.csv', usecols=['fips', 'APPRAISED_TOTAL_VALUE', 'ASSESSED_TOTAL_VALUE', 'MARKET_TOTAL_VALUE', 'SALE_AMOUNT', 'SALE_YEAR', 'MULTI_OR_SPLIT_PARCEL_CODE', 'CALCULATED_TOTAL_VALUE'])
 print('Original Shape:', df.shape)
 df = df[df['MULTI_OR_SPLIT_PARCEL_CODE'].isnull()]
 print('Drop Multi-Parcel Shape:', df.shape)
