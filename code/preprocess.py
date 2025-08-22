@@ -916,6 +916,12 @@ class Preprocess:
         train = self.X_train[features_to_process].copy()
         test = self.X_test[features_to_process].copy()
 
+        for col in train.columns:
+            if pd.api.types.is_categorical_dtype(train[col]):
+                test[col] = pd.Categorical(test[col], categories=train[col].cat.categories)
+        else:
+            test[col] = test[col].astype(train[col].dtype)
+
         if all(train[col].isnull().sum() == 0 for col in train.columns):
             self.logger.info("There are no missing values for impute_missings_with_mice() to impute. Skipping imputation.")
             return
