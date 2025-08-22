@@ -1101,6 +1101,10 @@ class Preprocess:
         self.renumber_geo_col()
         
         self.train_test_split()
+
+        if self.X_train.shape[0] == 0 or self.X_test.shape[0] == 0:
+            self.logger.info("Either test or train set is completely empty after train-test split; returning and ending run()")
+            return self.X_train, self.X_test, self.y_train, self.y_test, self.meta_train, self.meta_test, self._continuous_cols, self._binary_cols, self._categorical_cols
         
         if self.__wins_pctile > 0:
             self.winsorize_continuous()
