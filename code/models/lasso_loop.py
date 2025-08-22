@@ -142,7 +142,7 @@ for fips in list(remaining_fips):
         continue
 		
     if X_train.shape[0] == 0 or X_test.shape[0] == 0:
-		print(f'train or test set empty after train-test split. Skipping {fips}.')
+        print(f'train or test set empty after train-test split. Skipping {fips}.')
         continue
 	
     # print data info before tuning
