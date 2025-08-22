@@ -700,8 +700,12 @@ class Preprocess:
         """
 
         self.logger.info(f"Winsorizing continuous columns at {self.__wins_pctile} and {100-self.__wins_pctile} percentiles")
-        lower = np.percentile(self.X_train[self._continuous_cols], self.__wins_pctile, axis=0)
-        upper = np.percentile(self.X_train[self._continuous_cols], 100-self.__wins_pctile, axis=0)
+        if len(self._continuous_cols) > 0:
+            lower = np.percentile(self.X_train[self._continuous_cols], self.__wins_pctile, axis=0)
+            upper = np.percentile(self.X_train[self._continuous_cols], 100 - self.__wins_pctile, axis=0)
+        else:
+            self.logger.warning("No continuous columns found for winsorization — skipping.")
+            return
 
         if inplace==True:
             self.X_train[self._continuous_cols] = np.clip(self.X_train[self._continuous_cols], lower, upper)
