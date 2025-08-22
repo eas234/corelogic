@@ -703,21 +703,21 @@ class Preprocess:
         valid_continuous = [col for col in self._continuous_cols if col in self.X_train.columns]
         
         if len(valid_continuous) > 0:
-            lower = np.percentile(self.X_train[self._continuous_cols], self.__wins_pctile, axis=0)
-            upper = np.percentile(self.X_train[self._continuous_cols], 100 - self.__wins_pctile, axis=0)
+            lower = np.percentile(self.X_train[valid_continuous], self.__wins_pctile, axis=0)
+            upper = np.percentile(self.X_train[valid_continuous], 100 - self.__wins_pctile, axis=0)
         else:
             self.logger.warning("No continuous columns found for winsorization — skipping.")
             return
 
         if inplace==True:
-            self.X_train[self._continuous_cols] = np.clip(self.X_train[self._continuous_cols], lower, upper)
-            self.X_test[self._continuous_cols] = np.clip(self.X_test[self._continuous_cols], lower, upper)
+            self.X_train[valid_continuous] = np.clip(self.X_train[valid_continuous], lower, upper)
+            self.X_test[valid_continuous] = np.clip(self.X_test[valid_continuous], lower, upper)
 
         else:
-            processed_train = self.X_train[self._continuous_cols].copy()
+            processed_train = self.X_train[valid_continuous].copy()
             processed_train = np.clip(processed_train, lower, upper)
 
-            processed_test = self.X_test[self._continuous_cols].copy()
+            processed_test = self.X_test[valid_continuous].copy()
             processed_test = np.clip(processed_test, lower, upper)
             
             return processed_train, processed_test
