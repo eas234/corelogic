@@ -698,9 +698,11 @@ class Preprocess:
         Otherwise, method returns a winsorized copy of the continuous
         features in the dataframe.
         """
-
+        
         self.logger.info(f"Winsorizing continuous columns at {self.__wins_pctile} and {100-self.__wins_pctile} percentiles")
-        if len(self._continuous_cols) > 0:
+        valid_continuous = [col for col in self._continuous_cols if col in self.X_train.columns]
+        
+        if len(valid_continuous) > 0:
             lower = np.percentile(self.X_train[self._continuous_cols], self.__wins_pctile, axis=0)
             upper = np.percentile(self.X_train[self._continuous_cols], 100 - self.__wins_pctile, axis=0)
         else:
