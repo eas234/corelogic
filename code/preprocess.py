@@ -920,8 +920,8 @@ class Preprocess:
         for col in train.columns:
             if pd.api.types.is_categorical_dtype(train[col]):
                 test[col] = pd.Categorical(test[col], categories=train[col].cat.categories)
-        else:
-            test[col] = test[col].astype(train[col].dtype)
+            else:
+                test[col] = test[col].astype(train[col].dtype)
 
         print("Train dtypes:\n", train.dtypes.reset_index(drop=True))
         print("Test dtypes:\n", test.dtypes.reset_index(drop=True))
