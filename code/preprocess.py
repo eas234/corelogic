@@ -911,7 +911,7 @@ class Preprocess:
         
         # subset to binary and continuous columns that are still 
         # present in the dataframe after drops from other methods.
-        features_to_process = [x for x in self._data.columns if x in self._continuous_cols or x in self._binary_cols]
+        features_to_process = [x for x in self.X_train.columns if x in self._continuous_cols or x in self._binary_cols]
 
         train = self.X_train[features_to_process].copy()
         test = self.X_test[features_to_process].copy()
@@ -933,11 +933,6 @@ class Preprocess:
             
             # Perform imputation on train set using kernel
             kernel.mice(self.__mice_iters)
-
-            #
-            print('test/train column info before imputation:')
-            print(test.info())
-            print(train.info())
 
             # Extract the imputed train set
             imputed_train = kernel.complete_data(0)
