@@ -138,7 +138,7 @@ for fips in list(remaining_fips):
                                                                                                            drop_lowest_ratios=True,
 																										   gen_time_vars=True
                                                                                                            )
-    except lightgbm.basic.LightGBMError:
+    except lightgbm.basic.LightGBMError or ValueError:
         continue
 		
     if X_train.shape[0] == 0 or X_test.shape[0] == 0:
