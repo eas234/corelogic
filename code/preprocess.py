@@ -609,11 +609,7 @@ class Preprocess:
         self.X_train, self.X_test, self.y_train, self.y_test, self.meta_train, self.meta_test
         as attributes of Preprocess() object.
         """
-        if by_year:
-            
-            if 'sale_year' not in self._data.columns:
-                self.logger.warning("'sale_year' not in columns; cannot perform train-test split by year.")
-                raise ValueError("'sale_year' not in columns; cannot perform train-test split by year.")
+        if by_year and 'sale_year' in self._data.columns:
             
             copy = self._data.copy()
 
@@ -637,7 +633,11 @@ class Preprocess:
                 self.meta_test = copy[copy.sale_year >= (copy.sale_year.max()-1)][self._meta_cols]
 
                 self.logger.info("X_train, X_test, y_train, y_test, meta_train, meta_test now stored as attributes of preprocess() object. Split performed by year of sale.")
-        else: 
+        else:
+            
+            if by_year and 'sale_year' not in self._data.columns:
+                self.logger.warning("'sale_year' not in columns; cannot perform train-test split by year. Splitting by random shuffle instead.")
+            
             self.X_train, self.X_test, self.y_train, self.y_test, self.meta_train, self.meta_test = train_test_split(self._data[self._binary_cols + self._categorical_cols + self._continuous_cols + self._time_cols + self._geo_col], 
                                                                                                 self._data[self._label], 
                                                                                                 self._data[self._meta_cols], 
@@ -1099,7 +1099,7 @@ class Preprocess:
             self.one_hot()
 
         self.renumber_geo_col()
-        
+
         self.train_test_split()
 
         if self.X_train.shape[0] == 0 or self.X_test.shape[0] == 0:
