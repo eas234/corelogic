@@ -672,7 +672,7 @@ class Preprocess:
         return [
             col for col in df.columns
             if (df[col].nunique(dropna=True) <= 1) or  # Single-value columns
-               (df[col].notnull().sum() < max(1, int(np.floor(self.__share_non_null*df.shape[0]))))  # Mostly null columns
+               (df[col].notnull().sum() < int(np.floor(self.__share_non_null*df.shape[0])))  # Mostly null columns
         ]
     
     def _update_column_attributes(self):
@@ -877,7 +877,7 @@ class Preprocess:
         if any(self.X_train[col].nunique(dropna=True) <= 1 for col in check_cols):
             self.logger.error("X_train contains single-value columns. Apply drop_single_value_cols() before impute_missings_with_mice().")
             raise ValueError("X_train contains single-value columns. Apply drop_single_value_cols() before impute_missings_with_mice().")
-        if any(self.X_train[col].notnull().sum() <= int(np.floor(self.__share_non_null*self.X_train.shape[0])) for col in check_cols):
+        if any(self.X_train[col].notnull().sum() < int(np.floor(self.__share_non_null*self.X_train.shape[0])) for col in check_cols):
             self.logger.error("X_train contains mostly null columns. Apply drop_mostly_null_cols() before impute_missings_with_mice().")
             raise ValueError("X_train contains mostly null columns. Apply drop_mostly_null_cols() before impute_missings_with_mice().")
         if self.y_train.isnull().sum() > 0 or self.y_test.isnull().sum() > 0:
@@ -1116,6 +1116,9 @@ class Preprocess:
             self.target_encode()
             
         self._drop_problematic_cols_from_splits()
+
+        print(self.X_train.info())
+        print(self.X_test.info())
         
         self.impute_missings_with_mice()
         
